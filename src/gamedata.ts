@@ -82,7 +82,7 @@ export const MASKS: Group[] = [
 ];
 
 export const DUNGEONS: Group[] = [
-  { label: "Child", items: ["Inside the Deku Tree", "Dodongo's Cavern", "Inside Jabu-Jabu's Belly", "Bottom of the Well"] },
+  { label: "Child", items: ["Inside the Deku Tree", "Dodongo's Cavern", "Inside Jabu-Jabu's Belly"] },
   {
     label: "Adult",
     items: [
@@ -91,7 +91,6 @@ export const DUNGEONS: Group[] = [
       "Water Temple",
       "Shadow Temple",
       "Spirit Temple",
-      "Ice Cavern",
       "Gerudo Training Ground",
       "Ganon's Castle",
     ],
@@ -117,8 +116,6 @@ export const DUNGEON_STEPS: Record<string, string[]> = {
   "Inside the Deku Tree": MAP_COMPASS,
   "Dodongo's Cavern": MAP_COMPASS,
   "Inside Jabu-Jabu's Belly": MAP_COMPASS,
-  "Bottom of the Well": MAP_COMPASS,
-  "Ice Cavern": MAP_COMPASS,
   "Forest Temple": WITH_BOSS_KEY,
   "Fire Temple": WITH_BOSS_KEY,
   "Water Temple": WITH_BOSS_KEY,
@@ -302,13 +299,11 @@ export const DUNGEON_ICON: Record<string, string> = {
   "Inside the Deku Tree": "tree",
   "Dodongo's Cavern": "cave",
   "Inside Jabu-Jabu's Belly": "fish",
-  "Bottom of the Well": "well",
   "Forest Temple": "leaf",
   "Fire Temple": "flame",
   "Water Temple": "drop",
   "Shadow Temple": "moon",
   "Spirit Temple": "sun",
-  "Ice Cavern": "snowflake",
   "Gerudo Training Ground": "swords",
   "Ganon's Castle": "tower",
 };
