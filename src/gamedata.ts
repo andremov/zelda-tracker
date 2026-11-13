@@ -47,9 +47,9 @@ export const ITEMS: Group[] = [
 ];
 
 export const UPGRADES: Group[] = [
-  { label: "Slingshot ammo", items: ["Bullet Bag (30)", "Bullet Bag (40)", "Bullet Bag (50)"] },
-  { label: "Arrows", items: ["Quiver (30)", "Quiver (40)", "Quiver (50)"] },
-  { label: "Bombs", items: ["Bomb Bag (20)", "Big Bomb Bag (30)", "Biggest Bomb Bag (40)"] },
+  { label: "Slingshot ammo", items: ["Bullet Bag (40)", "Bullet Bag (50)"] },
+  { label: "Arrows", items: ["Quiver (40)", "Quiver (50)"] },
+  { label: "Bombs", items: ["Big Bomb Bag (30)", "Biggest Bomb Bag (40)"] },
   { label: "Rupees", items: ["Adult's Wallet", "Giant's Wallet"] },
   { label: "Deku capacity", items: ["Deku Sticks (20)", "Deku Sticks (30)", "Deku Nuts (30)", "Deku Nuts (40)"] },
   { label: "Strength", items: ["Goron's Bracelet", "Silver Gauntlets", "Golden Gauntlets"] },
