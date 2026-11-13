@@ -172,7 +172,7 @@ function Tracker({ player, onChangePlayer, onToggleTheme }: { player: string; on
             </button>
             <button className="me" onClick={onChangePlayer} title="Switch save">
               <Crest name={player} size={22} />
-              <span>{player}</span>
+              <span className="me-name">{player}</span>
             </button>
             <button className="btn primary hide-mobile" onClick={() => setDialog({ mode: "add", initial: EMPTY })}>
               <Icon name="quill" size={18} /> Log a step
@@ -337,7 +337,7 @@ function SaveCard({
   const lastActive = progress.filter((p) => p.player === name).reduce((m, p) => Math.max(m, p._creationTime), 0);
 
   return (
-    <section className={`frame save-card ${isMe ? "me" : ""}`}>
+    <section className={`frame save-card ${isMe ? "is-me" : ""}`}>
       <header className="save-head">
         <Crest name={name} size={38} />
         <div className="save-name">
@@ -392,14 +392,14 @@ function SaveCard({
       ) : (
         <div className="save-status">
           {status?.lastSeen || status?.note ? (
-            <>
+            <div className="save-status-text">
               {status.lastSeen && (
                 <p>
                   <Icon name="pin" size={15} /> {status.lastSeen}
                 </p>
               )}
               {status.note && <p className="save-note">“{status.note}”</p>}
-            </>
+            </div>
           ) : (
             <p className="muted small">{isMe ? "Say where you left off." : "No note yet."}</p>
           )}
