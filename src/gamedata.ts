@@ -347,5 +347,5 @@ export const TOTALS: Record<string, number> = {
   "Heart Piece": 36,
   "Gold Skulltula": 100,
   "Big Poe": 10,
-  Bottle: 4,
+  Bottle: 5, // the remake has five
 };
