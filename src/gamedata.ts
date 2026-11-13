@@ -189,6 +189,8 @@ export const MASK_DELIVERY: Record<string, string> = {
  */
 export const ACQUIRED: Record<string, { place?: string; age?: string }> = {
   // Items
+  "Deku Sticks": { place: "Kokiri Forest", age: "Child" },
+  "Deku Nuts": { place: "Kokiri Forest", age: "Child" },
   Bombs: { place: "Dodongo's Cavern", age: "Child" },
   "Fairy Slingshot": { place: "Inside the Deku Tree", age: "Child" },
   "Fairy Ocarina": { place: "Lost Woods Bridge", age: "Child" },
@@ -231,7 +233,7 @@ export const ACQUIRED: Record<string, { place?: string; age?: string }> = {
   "Master Sword": { place: "Temple of Time", age: "Child" },
   "Giant's Knife": { place: "Goron City", age: "Adult" },
   "Biggoron's Sword": { place: "Death Mountain Summit", age: "Adult" },
-  "Deku Shield": { age: "Child" },
+  "Deku Shield": { place: "Kokiri Shop", age: "Child" },
   "Mirror Shield": { place: "Spirit Temple", age: "Adult" },
   "Goron Tunic": { place: "Goron City", age: "Adult" },
   "Zora Tunic": { place: "Zora's Domain", age: "Adult" },
