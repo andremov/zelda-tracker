@@ -795,6 +795,9 @@ function StepDialog({
     state.mode === "edit" && f.action && !freeAction && !baseActions.includes(f.action) ? [...baseActions, f.action] : baseActions;
   const showActionInput = freeAction && (customAction || (!!f.action && !actionOptions.includes(f.action)));
   const askAction = actionOptions.length > 1 || freeAction;
+  // Questions appear in order, each only once the answers above it are in, so nothing shows up and then vanishes.
+  const subjectChosen = !!f.subject.trim();
+  const ready = subjectChosen && (!askAction || !!f.action.trim());
   const canSave = f.category.trim() && f.subject.trim() && f.action.trim();
   // Some answers are known from the kind and step alone; those questions aren't asked.
   const subjectKnown = !!info.options?.some((g) => g.items.includes(f.subject));
@@ -962,7 +965,7 @@ function StepDialog({
                   />
                 )}
 
-                {askAction && (
+                {askAction && subjectChosen && (
                 <fieldset>
                   <legend>Which step?</legend>
                   <div className="quick">
@@ -999,42 +1002,48 @@ function StepDialog({
                 </fieldset>
                 )}
 
-                {!lockedLocation && (
-                  <ListField key={`loc-${f.category}`} label="Where?" value={f.location} onChange={(v) => set("location", v)} groups={PLACE_GROUPS} groupNoun="Region" />
-                )}
-
-                <label className="field">
-                  <span>How?</span>
-                  <textarea rows={3} value={f.how} onChange={(e) => set("how", e.target.value)} placeholder={info.howPlaceholder ?? "What you did"} />
-                </label>
-
-                {(lockedLocation || lockedAge) && (
-                  <p className="locked">
-                    {lockedLocation && (
-                      <span>
-                        <Icon name="pin" size={15} /> {lockedLocation}
-                        {regionOf(lockedLocation) && <span className="muted"> · {regionOf(lockedLocation)}</span>}
-                      </span>
+                {ready ? (
+                  <>
+                    {(lockedLocation || lockedAge) && (
+                      <p className="locked">
+                        {lockedLocation && (
+                          <span>
+                            <Icon name="pin" size={15} /> {lockedLocation}
+                            {regionOf(lockedLocation) && <span className="muted"> · {regionOf(lockedLocation)}</span>}
+                          </span>
+                        )}
+                        {lockedAge && (
+                          <span>
+                            <Icon name="user" size={15} /> {lockedAge}
+                          </span>
+                        )}
+                      </p>
                     )}
-                    {lockedAge && (
-                      <span>
-                        <Icon name="user" size={15} /> {lockedAge}
-                      </span>
-                    )}
-                  </p>
-                )}
 
-                {!lockedAge && (
-                <fieldset>
-                  <legend>As which age?</legend>
-                  <div className="segmented">
-                    {["", "Child", "Adult", "Either"].map((a) => (
-                      <button type="button" key={a || "none"} className={f.age === a ? "active" : ""} onClick={() => set("age", a)}>
-                        {a || "-"}
-                      </button>
-                    ))}
-                  </div>
-                </fieldset>
+                    {!lockedLocation && (
+                      <ListField key={`loc-${f.category}`} label="Where?" value={f.location} onChange={(v) => set("location", v)} groups={PLACE_GROUPS} groupNoun="Region" />
+                    )}
+
+                    {!lockedAge && (
+                      <fieldset>
+                        <legend>As which age?</legend>
+                        <div className="segmented">
+                          {["", "Child", "Adult", "Either"].map((a) => (
+                            <button type="button" key={a || "none"} className={f.age === a ? "active" : ""} onClick={() => set("age", a)}>
+                              {a || "-"}
+                            </button>
+                          ))}
+                        </div>
+                      </fieldset>
+                    )}
+
+                    <label className="field">
+                      <span>How?</span>
+                      <textarea rows={3} value={f.how} onChange={(e) => set("how", e.target.value)} placeholder={info.howPlaceholder ?? "What you did"} />
+                    </label>
+                  </>
+                ) : (
+                  <p className="hint">{subjectChosen ? "Pick the step to continue." : "Pick which one to continue."}</p>
                 )}
               </div>
             )}
