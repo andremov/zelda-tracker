@@ -112,7 +112,7 @@ export const BOSS_DUNGEONS = [
   "Spirit Temple",
 ];
 
-/** The age each dungeon is played at. The Spirit Temple is played at both, so it isn't listed. */
+/** The age each dungeon counts as. */
 export const DUNGEON_AGE: Record<string, string> = {
   "Inside the Deku Tree": "Child",
   "Dodongo's Cavern": "Child",
@@ -122,6 +122,7 @@ export const DUNGEON_AGE: Record<string, string> = {
   "Fire Temple": "Adult",
   "Water Temple": "Adult",
   "Shadow Temple": "Adult",
+  "Spirit Temple": "Adult",
   "Ice Cavern": "Adult",
   "Gerudo Training Ground": "Adult",
   "Ganon's Castle": "Adult",
