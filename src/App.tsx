@@ -309,10 +309,7 @@ function Track({
   const all = rows.flat();
   const columns = Math.max(...rows.map((r) => r.length));
   return (
-    <div className="track">
-      <span className="track-label">
-        {label} <b>{all.filter((x) => have.has(x)).length}</b>/{all.length}
-      </span>
+    <div className="track" role="group" aria-label={`${label}: ${all.filter((x) => have.has(x)).length} of ${all.length}`}>
       {rows.map((row, i) => (
         <div key={i} className="track-icons" style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}>
           {row.map((x) => (
