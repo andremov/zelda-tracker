@@ -22,6 +22,9 @@ export const ITEMS: Group[] = [
       "Fire Arrow",
       "Ice Arrow",
       "Light Arrow",
+      "Din's Fire",
+      "Farore's Wind",
+      "Nayru's Love",
     ],
   },
   { label: "Quest items", items: ["Light Medallion", "Stone of Agony", "Gerudo's Card"] },
@@ -53,6 +56,7 @@ export const UPGRADES: Group[] = [
   { label: "Deku capacity", items: ["Deku Sticks (20)", "Deku Sticks (30)", "Deku Nuts (30)", "Deku Nuts (40)"] },
   { label: "Strength", items: ["Goron's Bracelet", "Silver Gauntlets", "Golden Gauntlets"] },
   { label: "Diving", items: ["Silver Scale", "Golden Scale"] },
+  { label: "Magic & defense", items: ["Magic Meter", "Double Magic", "Double Defense"] },
 ];
 
 export const EQUIPMENT: Group[] = [
@@ -124,8 +128,6 @@ export const DUNGEON_STEPS: Record<string, string[]> = {
   "Ganon's Castle": ["Entered", "Got the boss key", "Completed"],
 };
 
-/** You can't complete a dungeon without these, so ticking Completed ticks them too. Map and compass are optional. */
-export const COMPLETION_IMPLIES = ["Entered", "Got the boss key"];
 
 /** The age each dungeon counts as, read off the groups above. */
 export const DUNGEON_AGE: Record<string, string> = Object.fromEntries(DUNGEONS.flatMap((g) => g.items.map((d) => [d, g.label])));
@@ -205,6 +207,9 @@ export const ACQUIRED: Record<string, { place?: string; age?: string }> = {
   "Fire Arrow": { place: "Lake Hylia", age: "Adult" },
   "Ice Arrow": { place: "Gerudo Training Ground", age: "Adult" },
   "Light Arrow": { place: "Temple of Time", age: "Adult" },
+  "Din's Fire": { place: "Hyrule Castle Great Fairy Fountain", age: "Child" },
+  "Farore's Wind": { place: "Zora's Fountain Great Fairy Fountain", age: "Child" },
+  "Nayru's Love": { place: "Colossus Great Fairy Fountain", age: "Child" },
   Epona: { place: "Lon Lon Ranch", age: "Adult" },
   // Quest items
   "Light Medallion": { place: "Temple of Time", age: "Adult" },
@@ -254,6 +259,9 @@ export const ACQUIRED: Record<string, { place?: string; age?: string }> = {
   "Golden Gauntlets": { place: "Ganon's Castle", age: "Adult" },
   "Silver Scale": { place: "Zora's Domain", age: "Child" },
   "Golden Scale": { place: "Fishing Pond", age: "Adult" },
+  "Magic Meter": { place: "Death Mountain Great Fairy Fountain", age: "Child" },
+  "Double Magic": { place: "Crater Great Fairy Fountain", age: "Adult" },
+  "Double Defense": { place: "Ganon's Castle Great Fairy Fountain", age: "Adult" },
 };
 
 export const ACQUIRED_PLACE: Record<string, string> = Object.fromEntries(
@@ -263,7 +271,7 @@ export const ACQUIRED_AGE: Record<string, string> = Object.fromEntries(
   Object.entries(ACQUIRED).flatMap(([k, v]) => (v.age ? [[k, v.age]] : [])),
 );
 
-/** The Great Fairy fountains. Visiting one is getting its gift, so that's a single step. */
+/** The Great Fairy fountains. Visiting one counts as getting her gift, and the other way around (see convex/links.ts). */
 export const GREAT_FAIRIES: Group[] = [
   {
     label: "Child",

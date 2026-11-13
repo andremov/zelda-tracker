@@ -1,5 +1,6 @@
 import { mutation, query, type MutationCtx } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
+import { impliedBy, impliersOf, type StepKey } from "./links";
 import { v } from "convex/values";
 
 const fields = {
@@ -13,20 +14,19 @@ const fields = {
 
 const clean = (s: string) => s.trim().slice(0, 500);
 
-// You can't complete a dungeon without entering it or (where it has one) its boss key.
-// Keep in sync with COMPLETION_IMPLIES in src/gamedata.ts.
-const COMPLETION_IMPLIES = ["Entered", "Got the boss key"];
+async function findSteps(ctx: MutationCtx, k: StepKey) {
+  return (
+    await ctx.db
+      .query("steps")
+      .withIndex("by_subject", (q) => q.eq("category", k.category).eq("subject", k.subject))
+      .collect()
+  ).filter((s) => s.action === k.action);
+}
 
 /** Give a player progress on a step, plus whatever that step implies. Only ticks entries that already exist. */
 async function giveProgress(ctx: MutationCtx, step: Doc<"steps">, player: string) {
   const targets = [step];
-  if (step.category === "Dungeon" && step.action === "Completed") {
-    const siblings = await ctx.db
-      .query("steps")
-      .withIndex("by_subject", (q) => q.eq("category", step.category).eq("subject", step.subject))
-      .collect();
-    targets.push(...siblings.filter((s) => COMPLETION_IMPLIES.includes(s.action)));
-  }
+  for (const k of impliedBy(step)) targets.push(...(await findSteps(ctx, k)));
   for (const t of targets) {
     const has = await ctx.db
       .query("progress")
@@ -61,7 +61,18 @@ export const add = mutation({
       how: clean(f.how),
       age: clean(f.age),
     });
-    await giveProgress(ctx, (await ctx.db.get(stepId))!, p);
+    const step = (await ctx.db.get(stepId))!;
+    await giveProgress(ctx, step, p);
+    // Anyone who already did something that counts as this step gets it too.
+    for (const k of impliersOf(step)) {
+      for (const source of await findSteps(ctx, k)) {
+        const rows = await ctx.db
+          .query("progress")
+          .withIndex("by_step", (q) => q.eq("stepId", source._id))
+          .collect();
+        for (const r of rows) await giveProgress(ctx, step, r.player);
+      }
+    }
     return stepId;
   },
 });

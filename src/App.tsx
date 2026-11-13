@@ -6,6 +6,7 @@ import { useLocal } from "./storage";
 import { CATEGORIES, Icon, categoryIcon, categoryInfo } from "./icons";
 import { REGIONS } from "./locations";
 import { BOSS_DUNGEONS, type Group } from "./gamedata";
+import { sameMomentAs } from "../convex/links";
 
 type Step = Doc<"steps">;
 type Progress = Doc<"progress">;
@@ -795,6 +796,7 @@ function StepDialog({
   // Questions appear in order, each only once the answers above it are in, so nothing shows up and then vanishes.
   const subjectChosen = !!f.subject.trim();
   const ready = subjectChosen && (!askAction || !!f.action.trim());
+  const twin = ready ? sameMomentAs(f) : undefined;
   const canSave = f.category.trim() && f.subject.trim() && f.action.trim();
   // Some answers are known from the kind and step alone; those questions aren't asked.
   const subjectKnown = !!info.options?.some((g) => g.items.includes(f.subject));
@@ -985,6 +987,11 @@ function StepDialog({
 
                 {ready ? (
                   <>
+                    {twin && (
+                      <p className="hint">
+                        Also counts as {twin.category === "Great Fairy" ? <>visiting the {twin.subject}</> : <>getting {twin.subject}</>}.
+                      </p>
+                    )}
                     {(lockedLocation || lockedAge) && (
                       <p className="locked">
                         {lockedLocation && (
