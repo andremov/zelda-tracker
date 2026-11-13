@@ -5,7 +5,7 @@ import type { Doc, Id } from "../convex/_generated/dataModel";
 import { useLocal } from "./storage";
 import { CATEGORIES, Icon, categoryIcon, categoryInfo } from "./icons";
 import { REGIONS } from "./locations";
-import { BOSS_DUNGEONS, DUNGEON_ICON, DUNGEONS, GREAT_FAIRIES, HEART_PIECES, SONGS, type Group } from "./gamedata";
+import { BOSS_DUNGEONS, DUNGEON_ICON, DUNGEONS, GREAT_FAIRIES, HEART_PIECES, SET_COLOR, SONGS, type Group } from "./gamedata";
 import { sameMomentAs } from "../convex/links";
 
 type Step = Doc<"steps">;
@@ -313,7 +313,12 @@ function Track({
       {rows.map((row, i) => (
         <div key={i} className="track-icons" style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}>
           {row.map((x) => (
-            <span key={x} className={`track-icon ${have.has(x) ? "lit" : ""}`} title={x}>
+            <span
+              key={x}
+              className={`track-icon ${have.has(x) ? "lit" : ""}`}
+              style={have.has(x) && SET_COLOR[x] ? { background: SET_COLOR[x] } : undefined}
+              title={x}
+            >
               <Icon name={typeof icon === "string" ? icon : icon(x)} size={15} />
             </span>
           ))}
@@ -322,9 +327,6 @@ function Track({
     </div>
   );
 }
-
-// Shown as a set on the save card, or not at all; everything else is a plain count.
-const TRACKED = ["Heart Piece", "Dungeon", "Great Fairy", "Song", "Item", "Mask", "Gold Skulltula"];
 
 function SaveCard({ name, isMe, steps, doneBy }: { name: string; isMe: boolean; steps: Step[]; doneBy: Map<string, string[]> }) {
   const done = steps.filter((s) => doneBy.get(s._id)?.includes(name));
@@ -335,15 +337,6 @@ function SaveCard({ name, isMe, steps, doneBy }: { name: string; isMe: boolean; 
   const hearts = BASE_HEARTS + containers + Math.floor(pieces / 4);
   const fairies = new Set(done.filter((s) => s.category === "Great Fairy").map((s) => s.subject));
   const songs = new Set(done.filter((s) => s.category === "Song").map((s) => s.subject));
-
-  // Fixed kinds count every entry; named kinds count distinct things.
-  const tallies = new Map<string, Set<string>>();
-  for (const s of done) {
-    if (TRACKED.includes(s.category)) continue;
-    const set = tallies.get(s.category) ?? new Set<string>();
-    set.add(categoryInfo(s.category).fixed ? s._id : norm(s.subject));
-    tallies.set(s.category, set);
-  }
 
   return (
     <section className={`frame save-card ${isMe ? "is-me" : ""}`}>
@@ -356,20 +349,8 @@ function SaveCard({ name, isMe, steps, doneBy }: { name: string; isMe: boolean; 
       </header>
       <Hearts full={hearts} quarters={pieces % 4} />
       <Track label="Dungeons" icon={(d) => DUNGEON_ICON[d] ?? "door"} rows={[DUNGEONS.flatMap((g) => g.items)]} have={completed} />
-      <Track label="Songs" icon="note" rows={SONGS.map((g) => g.items)} have={songs} />
       <Track label="Great Fairies" icon="fairy" rows={[GREAT_FAIRIES.flatMap((g) => g.items)]} have={fairies} />
-      {tallies.size > 0 && (
-        <div className="save-tallies">
-          {[...tallies.entries()]
-            .sort(([a], [b]) => a.localeCompare(b))
-            .map(([c, set]) => (
-              <span key={c} className="tally-tile" title={c}>
-                <Icon name={categoryIcon(c)} size={18} />
-                <b>{set.size}</b>
-              </span>
-            ))}
-        </div>
-      )}
+      <Track label="Songs" icon="note" rows={SONGS.map((g) => g.items)} have={songs} />
     </section>
   );
 }

@@ -306,3 +306,38 @@ export const DUNGEON_ICON: Record<string, string> = {
   "Gerudo Training Ground": "swords",
   "Ganon's Castle": "tower",
 };
+
+/** Fill colour for each thing on the save card once it's collected. Muted to sit on parchment. */
+export const SET_COLOR: Record<string, string> = {
+  // Dungeons
+  "Inside the Deku Tree": "#4f7a32",
+  "Dodongo's Cavern": "#8a5a32",
+  "Inside Jabu-Jabu's Belly": "#3f7f9a",
+  "Forest Temple": "#2f6b3a",
+  "Fire Temple": "#a8392a",
+  "Water Temple": "#2f5f9e",
+  "Shadow Temple": "#5a3f7a",
+  "Spirit Temple": "#c07a23",
+  "Gerudo Training Ground": "#b4924a",
+  "Ganon's Castle": "#3b2a4a",
+  // Songs
+  "Zelda's Lullaby": "#7a6aa8",
+  "Epona's Song": "#9a5f35",
+  "Saria's Song": "#4f8a3a",
+  "Sun's Song": "#c9a227",
+  "Song of Time": "#3f6fa8",
+  "Song of Storms": "#5f6b78",
+  "Minuet of Forest": "#2f7a3f",
+  "Bolero of Fire": "#b23a2a",
+  "Serenade of Water": "#2f6fae",
+  "Requiem of Spirit": "#c9762a",
+  "Nocturne of Shadow": "#6a3f8a",
+  "Prelude of Light": "#c8a43a",
+  // Great Fairies, by their gift
+  "Hyrule Castle Great Fairy Fountain": "#b8432f",
+  "Zora's Fountain Great Fairy Fountain": "#3f8a4f",
+  "Colossus Great Fairy Fountain": "#3f6fb0",
+  "Death Mountain Great Fairy Fountain": "#5a9a3f",
+  "Crater Great Fairy Fountain": "#2f7a3a",
+  "Ganon's Castle Great Fairy Fountain": "#a8304a",
+};

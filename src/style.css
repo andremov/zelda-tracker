@@ -230,7 +230,6 @@ input::placeholder, textarea::placeholder { color: var(--muted); opacity: 0.75; 
 .heart.missing path.dark { fill: #4a3f30; stroke: #2e261b; opacity: 0.35; }
 .heart.missing path.piece { fill: #c43b2c; stroke: none; }
 
-.save-tallies { display: flex; flex-wrap: wrap; gap: 8px; }
 .tally-tile { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border: 1px solid var(--line-soft); border-radius: 99px; background: var(--paper); color: var(--green); }
 .tally-tile b { font-family: var(--font-display); color: var(--ink); }
 
@@ -398,4 +397,4 @@ legend, .field > span {
 .track { display: grid; gap: 4px; }
 .track-icons { display: grid; gap: 3px; }
 .track-icon { display: grid; place-items: center; width: 100%; max-width: 30px; aspect-ratio: 1; border-radius: 50%; background: rgba(60, 45, 20, 0.12); color: rgba(60, 45, 20, 0.35); }
-.track-icon.lit { background: var(--green); color: var(--green-ink); box-shadow: 0 0 0 1.5px var(--gold); }
+.track-icon.lit { background: var(--green); color: #f6efd9; box-shadow: 0 0 0 1.5px var(--gold), inset 0 -2px 3px rgba(0, 0, 0, 0.25), inset 0 2px 2px rgba(255, 255, 255, 0.18); }
