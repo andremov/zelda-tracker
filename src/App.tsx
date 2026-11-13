@@ -900,9 +900,11 @@ function StepDialog({
   const save = async (force = false) => {
     setError("");
     if (state.mode === "add" && !force) {
-      // Fixed kinds (heart pieces…) are told apart by place, so they only match on the same place.
+      // Named things never get a second entry: the backend just ticks the existing one.
+      // Countable kinds (heart pieces…) can repeat, so ask when one in the same place is already logged.
       const matches = steps.filter(
         (s) =>
+          !!info.fixed &&
           !isMine(s) &&
           norm(s.category) === norm(f.category) &&
           norm(s.subject) === norm(f.subject) &&

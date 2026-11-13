@@ -1,6 +1,6 @@
 import { mutation, query, type MutationCtx } from "./_generated/server";
 import type { Doc, Id } from "./_generated/dataModel";
-import { impliedBy, impliersOf, type StepKey } from "./links";
+import { COUNTABLE, impliedBy, impliersOf, type StepKey } from "./links";
 import { v } from "convex/values";
 
 const fields = {
@@ -66,6 +66,14 @@ export const add = mutation({
     const p = clean(player);
     if (!p || !clean(f.category) || !clean(f.subject) || !clean(f.action)) {
       throw new Error("Player, category, subject and step are required");
+    }
+    // Named things have one entry per step: if it's already logged, this just ticks it.
+    if (!COUNTABLE.includes(clean(f.category))) {
+      const [existing] = await findSteps(ctx, { category: clean(f.category), subject: clean(f.subject), action: clean(f.action) });
+      if (existing) {
+        await giveProgress(ctx, existing, p);
+        return existing._id;
+      }
     }
     const stepId = await ctx.db.insert("steps", {
       createdBy: p,

@@ -3,6 +3,12 @@
 
 export type StepKey = { category: string; subject: string; action: string };
 
+/**
+ * Kinds there are many of (told apart by place and how), so two entries can look alike and both be real.
+ * Every other kind names one specific thing, so there is only ever one entry per thing and step.
+ */
+export const COUNTABLE = ["Heart Piece", "Gold Skulltula", "Big Poe", "Bottle"];
+
 /** You can't complete a dungeon without entering it or (where it has one) its boss key. Map and compass are optional. */
 export const COMPLETION_IMPLIES = ["Entered", "Got the boss key"];
 
