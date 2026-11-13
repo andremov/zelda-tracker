@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { BOSSES, DUNGEONS, EQUIPMENT, ITEMS, MASKS, QUEST_ITEMS, SONGS, UPGRADES, type Group } from "./gamedata";
 
 // Simple original line icons, 24x24, stroke-based.
 const paths: Record<string, ReactNode> = {
@@ -158,6 +159,8 @@ export type Category = {
   subjectPlaceholder?: string;
   actions: string[];
   freeAction?: boolean;
+  /** Known things of this kind, offered as a dropdown. */
+  options?: Group[];
   howPlaceholder?: string;
 };
 
@@ -165,15 +168,15 @@ export const CATEGORIES: Category[] = [
   { name: "Heart Piece", icon: "heartPiece", fixed: "Heart Piece", actions: ["Got it"], howPlaceholder: "What you did to get it" },
   { name: "Heart Container", icon: "heart", fixed: "Heart Container", actions: ["Got it"] },
   { name: "Gold Skulltula", icon: "spider", fixed: "Gold Skulltula", actions: ["Got the token"], howPlaceholder: "How you found or reached it" },
-  { name: "Mask", icon: "mask", subjectLabel: "Which mask?", subjectPlaceholder: "Mask name", actions: ["Got it", "Delivered", "Paid"] },
-  { name: "Item", icon: "bag", subjectLabel: "Which item?", subjectPlaceholder: "Item name", actions: ["Got it", "Bought", "Upgraded"] },
-  { name: "Equipment", icon: "shield", subjectLabel: "Which equipment?", subjectPlaceholder: "Sword, shield, tunic, boots…", actions: ["Got it", "Bought"] },
-  { name: "Upgrade", icon: "upgrade", subjectLabel: "What got upgraded?", subjectPlaceholder: "Quiver, wallet, bomb bag…", actions: ["Got it", "Bought"] },
+  { name: "Mask", icon: "mask", subjectLabel: "Which mask?", subjectPlaceholder: "Mask name", actions: ["Got it", "Delivered", "Paid"], options: MASKS },
+  { name: "Item", icon: "bag", subjectLabel: "Which item?", subjectPlaceholder: "Item name", actions: ["Got it", "Bought", "Upgraded"], options: ITEMS },
+  { name: "Equipment", icon: "shield", subjectLabel: "Which equipment?", subjectPlaceholder: "Sword, shield, tunic, boots…", actions: ["Got it", "Bought"], options: EQUIPMENT },
+  { name: "Upgrade", icon: "upgrade", subjectLabel: "What got upgraded?", subjectPlaceholder: "Quiver, wallet, bomb bag…", actions: ["Got it", "Bought"], options: UPGRADES },
   { name: "Bottle", icon: "bottle", fixed: "Bottle", actions: ["Got it"] },
-  { name: "Song", icon: "note", subjectLabel: "Which song?", subjectPlaceholder: "Song name", actions: ["Learned"] },
-  { name: "Quest Item", icon: "gem", subjectLabel: "Which one?", subjectPlaceholder: "Stone, medallion…", actions: ["Got it"] },
-  { name: "Dungeon", icon: "door", subjectLabel: "Which dungeon?", subjectPlaceholder: "Dungeon name", actions: ["Entered", "Got the map", "Got the compass", "Got the boss key", "Completed"] },
-  { name: "Boss", icon: "skull", subjectLabel: "Which boss?", subjectPlaceholder: "Boss name", actions: ["Reached", "Defeated"] },
+  { name: "Song", icon: "note", subjectLabel: "Which song?", subjectPlaceholder: "Song name", actions: ["Learned"], options: SONGS },
+  { name: "Quest Item", icon: "gem", subjectLabel: "Which one?", subjectPlaceholder: "Stone, medallion…", actions: ["Got it"], options: QUEST_ITEMS },
+  { name: "Dungeon", icon: "door", subjectLabel: "Which dungeon?", subjectPlaceholder: "Dungeon name", actions: ["Entered", "Got the map", "Got the compass", "Got the boss key", "Completed"], options: DUNGEONS },
+  { name: "Boss", icon: "skull", subjectLabel: "Which boss?", subjectPlaceholder: "Boss name", actions: ["Reached", "Defeated"], options: BOSSES },
   { name: "Side Quest", icon: "scroll", subjectLabel: "Which quest?", subjectPlaceholder: "Quest name", actions: ["Started", "Progressed", "Completed"] },
   { name: "Other", icon: "star", subjectLabel: "What is it?", subjectPlaceholder: "Name it", actions: ["Got it", "Found", "Talked to", "Unlocked", "Completed"], freeAction: true },
 ];

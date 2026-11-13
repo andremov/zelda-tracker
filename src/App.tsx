@@ -4,6 +4,8 @@ import { api } from "../convex/_generated/api";
 import type { Doc, Id } from "../convex/_generated/dataModel";
 import { useLocal } from "./storage";
 import { CATEGORIES, Icon, categoryIcon, categoryInfo } from "./icons";
+import { PLACE_GROUPS } from "./locations";
+import type { Group } from "./gamedata";
 
 type Step = Doc<"steps">;
 type Progress = Doc<"progress">;
@@ -581,6 +583,75 @@ function Activity({ progress, steps, isVisible }: { progress: Progress[]; steps:
 
 const NEW = "__new__";
 
+/** A dropdown of the game's known names, grouped, with an escape hatch for anything missing from the list. */
+function ListField({
+  label,
+  value,
+  onChange,
+  groups,
+  choose,
+  required,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  groups: Group[];
+  choose: string;
+  required?: boolean;
+}) {
+  const known = groups.some((g) => g.items.includes(value));
+  const [typing, setTyping] = useState(() => !!value && !known);
+  return (
+    <label className="field">
+      <span>{label}</span>
+      {typing ? (
+        <div className="combo">
+          <input required={required} autoFocus value={value} onChange={(e) => onChange(e.target.value)} placeholder="Type the name" />
+          <button
+            type="button"
+            className="text-btn"
+            onClick={() => {
+              setTyping(false);
+              onChange("");
+            }}
+          >
+            pick from the list
+          </button>
+        </div>
+      ) : (
+        <select
+          required={required}
+          value={value}
+          onChange={(e) => {
+            if (e.target.value === NEW) {
+              setTyping(true);
+              onChange("");
+            } else onChange(e.target.value);
+          }}
+        >
+          <option value="">{choose}</option>
+          {groups.length === 1
+            ? groups[0].items.map((o) => (
+                <option key={o} value={o}>
+                  {o}
+                </option>
+              ))
+            : groups.map((g) => (
+                <optgroup key={g.label} label={g.label}>
+                  {g.items.map((o) => (
+                    <option key={o} value={o}>
+                      {o}
+                    </option>
+                  ))}
+                </optgroup>
+              ))}
+          <option value={NEW}>Not listed…</option>
+        </select>
+      )}
+    </label>
+  );
+}
+
 /** A dropdown of known values, with a "New…" option that switches to free text. */
 function ComboField({
   label,
@@ -700,7 +771,6 @@ function StepDialog({
 
   // Dropdown options only come from steps you can already see, so choosing never spoils anything.
   const subjects = uniq(visible.filter((s) => norm(s.category) === norm(f.category)).map((s) => s.subject));
-  const locations = uniq(visible.map((s) => s.location));
   const customCats = uniq(steps.map((s) => s.category)).filter((c) => !CATEGORIES.some((k) => k.name === c));
   // Steps are a fixed list per kind. Free text only for "Other" and kinds people add themselves.
   const freeAction = !!info.freeAction;
@@ -841,7 +911,18 @@ function StepDialog({
 
             {f.category && (
               <div className="form-rest" key={customCat ? "custom" : f.category}>
-                {!info.fixed && (
+                {!info.fixed && info.options && (
+                  <ListField
+                    key={`subj-${f.category}`}
+                    label={info.subjectLabel ?? "What is it?"}
+                    value={f.subject}
+                    onChange={(v) => set("subject", v)}
+                    groups={info.options}
+                    choose="Choose…"
+                    required
+                  />
+                )}
+                {!info.fixed && !info.options && (
                   <ComboField
                     key={`subj-${f.category}`}
                     label={info.subjectLabel ?? "What is it?"}
@@ -889,7 +970,7 @@ function StepDialog({
                 </fieldset>
                 )}
 
-                <ComboField label="Where?" value={f.location} onChange={(v) => set("location", v)} options={locations} placeholder="Where it happened" />
+                <ListField label="Where?" value={f.location} onChange={(v) => set("location", v)} groups={PLACE_GROUPS} choose="Choose a place…" />
 
                 <label className="field">
                   <span>How?</span>
