@@ -60,8 +60,8 @@ export const UPGRADES: Group[] = [
 export const EQUIPMENT: Group[] = [
   { label: "Swords", items: ["Kokiri Sword", "Master Sword", "Giant's Knife", "Biggoron's Sword"] },
   { label: "Shields", items: ["Deku Shield", "Hylian Shield", "Mirror Shield"] },
-  { label: "Tunics", items: ["Kokiri Tunic", "Goron Tunic", "Zora Tunic"] },
-  { label: "Boots", items: ["Kokiri Boots", "Iron Boots", "Hover Boots"] },
+  { label: "Tunics", items: ["Goron Tunic", "Zora Tunic"] },
+  { label: "Boots", items: ["Iron Boots", "Hover Boots"] },
 ];
 
 export const SONGS: Group[] = [
