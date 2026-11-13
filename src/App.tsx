@@ -589,140 +589,79 @@ const NEW = "__new__";
 
 const regionOf = (place: string) => REGIONS.find((r) => r.places.includes(place))?.region ?? "";
 
-/** Region first, then a place in it. Only the place is stored; place names are unique. */
-function LocationField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-  const [region, setRegion] = useState(() => regionOf(value));
-  const [typing, setTyping] = useState(() => !!value && !regionOf(value));
-  const places = REGIONS.find((r) => r.region === region)?.places ?? [];
+const PLACE_GROUPS: Group[] = REGIONS.map((r) => ({ label: r.region, items: r.places }));
 
-  if (typing) {
-    return (
-      <label className="field">
-        <span>Where?</span>
-        <div className="combo">
-          <input autoFocus value={value} onChange={(e) => onChange(e.target.value)} placeholder="Name the place" />
-          <button
-            type="button"
-            className="text-btn"
-            onClick={() => {
-              setTyping(false);
-              setRegion("");
-              onChange("");
-            }}
-          >
-            pick from the map
-          </button>
-        </div>
-      </label>
-    );
-  }
-
-  return (
-    <fieldset>
-      <legend>Where?</legend>
-      <div className="where">
-        <select
-          aria-label="Region"
-          value={region}
-          onChange={(e) => {
-            if (e.target.value === NEW) {
-              setTyping(true);
-              onChange("");
-              return;
-            }
-            const next = REGIONS.find((r) => r.region === e.target.value);
-            setRegion(e.target.value);
-            // A region with a single place needs no second choice.
-            onChange(next && next.places.length === 1 ? next.places[0] : "");
-          }}
-        >
-          <option value="">Region…</option>
-          {REGIONS.map((r) => (
-            <option key={r.region} value={r.region}>
-              {r.region}
-            </option>
-          ))}
-          <option value={NEW}>Not listed…</option>
-        </select>
-        <select aria-label="Place" value={value} disabled={!region} onChange={(e) => onChange(e.target.value)}>
-          <option value="">{region ? "Place…" : "Pick a region first"}</option>
-          {places.map((pl) => (
-            <option key={pl} value={pl}>
-              {pl}
-            </option>
-          ))}
-        </select>
-      </div>
-    </fieldset>
-  );
-}
-
-/** A dropdown of the game's known names, grouped, with an escape hatch for anything missing from the list. */
+/**
+ * A pick from the game's complete lists. Grouped lists are two dropdowns (group, then the thing);
+ * a single list is one. Only the thing is stored; names are unique across groups.
+ */
 function ListField({
   label,
   value,
   onChange,
   groups,
-  choose,
+  groupNoun = "Type",
   required,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   groups: Group[];
-  choose: string;
+  groupNoun?: string;
   required?: boolean;
 }) {
-  const known = groups.some((g) => g.items.includes(value));
-  const [typing, setTyping] = useState(() => !!value && !known);
+  const groupOf = (v: string) => groups.find((g) => g.items.includes(v))?.label ?? "";
+  const split = groups.length > 1;
+  // An older entry may hold a name that isn't on the list. Keep offering it so editing doesn't lose it.
+  const legacy = value && !groupOf(value) ? value : "";
+  const [group, setGroup] = useState(() => (split ? groupOf(value) : ""));
+  const items = split ? (groups.find((g) => g.label === group)?.items ?? []) : (groups[0]?.items ?? []);
+  const options = legacy && !items.includes(legacy) ? [legacy, ...items] : items;
+
+  const itemSelect = (
+    <select aria-label={label} required={required} value={value} disabled={split && !group && !legacy} onChange={(e) => onChange(e.target.value)}>
+      <option value="">{split && !group && !legacy ? `Pick a ${groupNoun.toLowerCase()} first` : "Choose…"}</option>
+      {options.map((o) => (
+        <option key={o} value={o}>
+          {o}
+        </option>
+      ))}
+    </select>
+  );
+
+  if (!split) {
+    return (
+      <label className="field">
+        <span>{label}</span>
+        {itemSelect}
+      </label>
+    );
+  }
+
   return (
-    <label className="field">
-      <span>{label}</span>
-      {typing ? (
-        <div className="combo">
-          <input required={required} autoFocus value={value} onChange={(e) => onChange(e.target.value)} placeholder="Type the name" />
-          <button
-            type="button"
-            className="text-btn"
-            onClick={() => {
-              setTyping(false);
-              onChange("");
-            }}
-          >
-            pick from the list
-          </button>
-        </div>
-      ) : (
+    <fieldset>
+      <legend>{label}</legend>
+      <div className="where">
         <select
-          required={required}
-          value={value}
+          aria-label={groupNoun}
+          value={group}
           onChange={(e) => {
-            if (e.target.value === NEW) {
-              setTyping(true);
-              onChange("");
-            } else onChange(e.target.value);
+            const next = groups.find((g) => g.label === e.target.value);
+            setGroup(e.target.value);
+            // A group with a single entry needs no second choice.
+            onChange(next && next.items.length === 1 ? next.items[0] : "");
           }}
         >
-          <option value="">{choose}</option>
-          {groups.length === 1
-            ? groups[0].items.map((o) => (
-                <option key={o} value={o}>
-                  {o}
-                </option>
-              ))
-            : groups.map((g) => (
-                <optgroup key={g.label} label={g.label}>
-                  {g.items.map((o) => (
-                    <option key={o} value={o}>
-                      {o}
-                    </option>
-                  ))}
-                </optgroup>
-              ))}
-          <option value={NEW}>Not listed…</option>
+          <option value="">{groupNoun}…</option>
+          {groups.map((g) => (
+            <option key={g.label} value={g.label}>
+              {g.label}
+            </option>
+          ))}
         </select>
-      )}
-    </label>
+        {itemSelect}
+      </div>
+    </fieldset>
   );
 }
 
@@ -1000,7 +939,6 @@ function StepDialog({
                     value={f.subject}
                     onChange={(v) => set("subject", v)}
                     groups={info.options}
-                    choose="Choose…"
                     required
                   />
                 )}
@@ -1053,7 +991,9 @@ function StepDialog({
                 </fieldset>
                 )}
 
-                {!lockedLocation && <LocationField key={`loc-${f.category}`} value={f.location} onChange={(v) => set("location", v)} />}
+                {!lockedLocation && (
+                  <ListField key={`loc-${f.category}`} label="Where?" value={f.location} onChange={(v) => set("location", v)} groups={PLACE_GROUPS} groupNoun="Region" />
+                )}
 
                 <label className="field">
                   <span>How?</span>
