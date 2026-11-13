@@ -294,20 +294,34 @@ function Hearts({ full, quarters }: { full: number; quarters: number }) {
   );
 }
 
-/** One icon per thing in a complete set: lit when collected, dark when not. */
-function Track({ label, icon, items, have }: { label: string; icon: string | ((item: string) => string); items: string[]; have: Set<string> }) {
+/** One icon per thing in a complete set, one row per group: lit when collected, dark when not. */
+function Track({
+  label,
+  icon,
+  rows,
+  have,
+}: {
+  label: string;
+  icon: string | ((item: string) => string);
+  rows: string[][];
+  have: Set<string>;
+}) {
+  const all = rows.flat();
+  const columns = Math.max(...rows.map((r) => r.length));
   return (
     <div className="track">
       <span className="track-label">
-        {label} <b>{items.filter((x) => have.has(x)).length}</b>/{items.length}
+        {label} <b>{all.filter((x) => have.has(x)).length}</b>/{all.length}
       </span>
-      <div className="track-icons">
-        {items.map((x) => (
-          <span key={x} className={`track-icon ${have.has(x) ? "lit" : ""}`} title={x}>
-            <Icon name={typeof icon === "string" ? icon : icon(x)} size={16} />
-          </span>
-        ))}
-      </div>
+      {rows.map((row, i) => (
+        <div key={i} className="track-icons" style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}>
+          {row.map((x) => (
+            <span key={x} className={`track-icon ${have.has(x) ? "lit" : ""}`} title={x}>
+              <Icon name={typeof icon === "string" ? icon : icon(x)} size={15} />
+            </span>
+          ))}
+        </div>
+      ))}
     </div>
   );
 }
@@ -344,9 +358,9 @@ function SaveCard({ name, isMe, steps, doneBy }: { name: string; isMe: boolean; 
         </span>
       </header>
       <Hearts full={hearts} quarters={pieces % 4} />
-      <Track label="Dungeons" icon={(d) => DUNGEON_ICON[d] ?? "door"} items={DUNGEONS.flatMap((g) => g.items)} have={completed} />
-      <Track label="Songs" icon="note" items={SONGS.flatMap((g) => g.items)} have={songs} />
-      <Track label="Great Fairies" icon="fairy" items={GREAT_FAIRIES.flatMap((g) => g.items)} have={fairies} />
+      <Track label="Dungeons" icon={(d) => DUNGEON_ICON[d] ?? "door"} rows={[DUNGEONS.flatMap((g) => g.items)]} have={completed} />
+      <Track label="Songs" icon="note" rows={SONGS.map((g) => g.items)} have={songs} />
+      <Track label="Great Fairies" icon="fairy" rows={[GREAT_FAIRIES.flatMap((g) => g.items)]} have={fairies} />
       {tallies.size > 0 && (
         <div className="save-tallies">
           {[...tallies.entries()]

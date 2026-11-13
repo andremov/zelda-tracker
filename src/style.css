@@ -398,6 +398,6 @@ legend, .field > span {
 .track { display: grid; gap: 4px; }
 .track-label { font-family: var(--font-display); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
 .track-label b { color: var(--green); }
-.track-icons { display: flex; flex-wrap: wrap; gap: 4px; }
-.track-icon { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: rgba(60, 45, 20, 0.12); color: rgba(60, 45, 20, 0.35); }
+.track-icons { display: grid; gap: 3px; }
+.track-icon { display: grid; place-items: center; width: 100%; max-width: 30px; aspect-ratio: 1; border-radius: 50%; background: rgba(60, 45, 20, 0.12); color: rgba(60, 45, 20, 0.35); }
 .track-icon.lit { background: var(--green); color: var(--green-ink); box-shadow: 0 0 0 1.5px var(--gold); }

@@ -69,7 +69,7 @@ export const EQUIPMENT: Group[] = [
 export const SONGS: Group[] = [
   {
     label: "Songs",
-    items: ["Zelda's Lullaby", "Epona's Song", "Saria's Song", "Sun's Song", "Song of Time", "Song of Storms", "Scarecrow's Song"],
+    items: ["Zelda's Lullaby", "Epona's Song", "Saria's Song", "Sun's Song", "Song of Time", "Song of Storms"],
   },
   {
     label: "Warp songs",
@@ -137,7 +137,6 @@ export const SONG_PLACE: Record<string, string> = {
   "Sun's Song": "Kakariko Graveyard",
   "Song of Time": "Hyrule Field",
   "Song of Storms": "Windmill",
-  "Scarecrow's Song": "Lake Hylia",
   "Minuet of Forest": "Sacred Forest Meadow",
   "Bolero of Fire": "Death Mountain Crater",
   "Serenade of Water": "Ice Cavern",
@@ -146,7 +145,7 @@ export const SONG_PLACE: Record<string, string> = {
   "Prelude of Light": "Temple of Time",
 };
 
-/** The age each song is learned at. Scarecrow's Song spans both ages, so it isn't listed. */
+/** The age each song is learned at. */
 export const SONG_AGE: Record<string, string> = {
   "Zelda's Lullaby": "Child",
   "Epona's Song": "Child",
