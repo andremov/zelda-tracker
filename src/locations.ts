@@ -34,7 +34,7 @@ export const REGIONS: { region: string; places: string[] }[] = [
       "Temple of Time",
     ],
   },
-  { region: "Hyrule Castle", places: ["Hyrule Castle", "Castle Courtyard", "Hyrule Castle Great Fairy Fountain", "Outside Ganon's Castle"] },
+  { region: "Hyrule Castle", places: ["Hyrule Castle", "Castle Courtyard", "Hyrule Castle Great Fairy Fountain", "Outside Ganon's Castle", "Ganon's Castle Great Fairy Fountain"] },
   {
     region: "Kakariko",
     places: [

@@ -433,7 +433,8 @@ function StepRow({ step, fixed, player, who, onEdit }: { step: Step; fixed: bool
   const [confirm, setConfirm] = useState(false);
   const mine = who.includes(player);
   // For fixed kinds (heart pieces…) the place is what tells entries apart, so it leads.
-  const title = fixed ? step.location || step.action : step.action;
+  const samePlace = !!categoryInfo(step.category).place;
+  const title = fixed && !samePlace ? step.location || step.action : step.action;
   return (
     <li className={`step ${mine ? "done" : ""}`}>
       <button
@@ -801,6 +802,7 @@ function StepDialog({
     info.stepPlaceBySubject?.[f.action]?.[f.subject] ??
     info.stepLocations?.[f.action] ??
     info.subjectPlace?.[f.subject] ??
+    info.place ??
     (info.subjectIsPlace && subjectKnown ? f.subject : undefined);
   const lockedAge = info.age ?? info.subjectAge?.[f.subject];
   const final: Fields = { ...f, location: lockedLocation ?? f.location, age: lockedAge ?? f.age };
@@ -815,7 +817,7 @@ function StepDialog({
           norm(s.category) === norm(f.category) &&
           norm(s.subject) === norm(f.subject) &&
           norm(s.action) === norm(f.action) &&
-          (!info.fixed || (!!final.location.trim() && norm(s.location) === norm(final.location))),
+          (!info.fixed || (!info.place && !!final.location.trim() && norm(s.location) === norm(final.location))),
       );
       if (matches.length) {
         setDupes(matches);

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { ACQUIRED_AGE, ACQUIRED_PLACE, DUNGEON_AGE, DUNGEON_STEPS, DUNGEONS, EQUIPMENT, ITEMS, MASK_DELIVERY, MASK_STEPS, MASKS, SONG_AGE, SONG_PLACE, SONGS, UPGRADES, type Group } from "./gamedata";
+import { ACQUIRED_AGE, ACQUIRED_PLACE, FROGS, GREAT_FAIRIES, GREAT_FAIRY_AGE, DUNGEON_AGE, DUNGEON_STEPS, DUNGEONS, EQUIPMENT, ITEMS, MASK_DELIVERY, MASK_STEPS, MASKS, SONG_AGE, SONG_PLACE, SONGS, UPGRADES, type Group } from "./gamedata";
 
 // Simple original line icons, 24x24, stroke-based.
 const paths: Record<string, ReactNode> = {
@@ -124,6 +124,29 @@ const paths: Record<string, ReactNode> = {
       <path d="M8 4v5h7V4M8 20v-6h8v6" />
     </>
   ),
+  poe: (
+    <>
+      <path d="M7 20V11a5 5 0 0 1 10 0v9l-2-1.5-1.5 1.5-1.5-1.5-1.5 1.5L9 18.5 7 20z" />
+      <circle cx="10" cy="11" r="1" />
+      <circle cx="14" cy="11" r="1" />
+      <path d="M12 6V3.5M10.5 4.5h3" />
+    </>
+  ),
+  frog: (
+    <>
+      <path d="M4 15c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5c0 2-1.8 3.5-4 3.5H8c-2.2 0-4-1.5-4-3.5z" />
+      <circle cx="8.5" cy="8" r="2" />
+      <circle cx="15.5" cy="8" r="2" />
+      <path d="M9 14.5c1.8 1 4.2 1 6 0" />
+    </>
+  ),
+  fairy: (
+    <>
+      <circle cx="12" cy="12" r="2.2" />
+      <path d="M10.2 11C7 6 3.5 7 4 10s4 3.5 6.2 2.4M13.8 11C17 6 20.5 7 20 10s-4 3.5-6.2 2.4" />
+      <path d="M10.6 13.6C8 17 9 19.5 11 18.5M13.4 13.6C16 17 15 19.5 13 18.5" />
+    </>
+  ),
   quill: <path d="M20 4c-6 1-11 6-13 13l-2 3 3-2c7-2 12-7 13-13l-1-1zM7 17l5-5" />,
 };
 
@@ -163,6 +186,8 @@ export type Category = {
   options?: Group[];
   /** What the groups in `options` are, shown on the first dropdown. */
   groupNoun?: string;
+  /** Always happens in this place, so the form doesn't ask. */
+  place?: string;
   /** Always done at this age, so the form doesn't ask. */
   age?: string;
   /** Steps that always happen in the same place, so the form doesn't ask where. */
@@ -187,6 +212,7 @@ export type Category = {
 export const CATEGORIES: Category[] = [
   { name: "Heart Piece", icon: "heartPiece", fixed: "Heart Piece", actions: ["Got it"], howPlaceholder: "What you did to get it" },
   { name: "Gold Skulltula", icon: "spider", fixed: "Gold Skulltula", actions: ["Got the token"], howPlaceholder: "How you found or reached it" },
+  { name: "Big Poe", icon: "poe", fixed: "Big Poe", actions: ["Caught"], place: "Hyrule Field", age: "Adult", howPlaceholder: "Where in the field, and how you caught it" },
   { name: "Mask", icon: "mask", subjectLabel: "Which mask?", subjectPlaceholder: "Mask name", actions: ["Got it", "Delivered", "Paid"], options: MASKS, subjectActions: MASK_STEPS, age: "Child", stepLocations: { "Got it": "Happy Mask Shop", Paid: "Happy Mask Shop" }, stepPlaceBySubject: { Delivered: MASK_DELIVERY }, noHow: true },
   { name: "Item", icon: "bag", subjectLabel: "Which item?", subjectPlaceholder: "Item name", actions: ["Got it"], options: ITEMS, subjectPlace: ACQUIRED_PLACE, subjectAge: ACQUIRED_AGE },
   { name: "Equipment", icon: "shield", subjectLabel: "Which equipment?", subjectPlaceholder: "Sword, shield, tunic, boots…", actions: ["Got it"], options: EQUIPMENT, subjectPlace: ACQUIRED_PLACE, subjectAge: ACQUIRED_AGE },
@@ -194,7 +220,8 @@ export const CATEGORIES: Category[] = [
   { name: "Bottle", icon: "bottle", fixed: "Bottle", actions: ["Got it"] },
   { name: "Song", icon: "note", subjectLabel: "Which song?", subjectPlaceholder: "Song name", actions: ["Learned"], options: SONGS, subjectPlace: SONG_PLACE, subjectAge: SONG_AGE, noHow: true },
   { name: "Dungeon", icon: "door", subjectLabel: "Which dungeon?", subjectPlaceholder: "Dungeon name", actions: ["Entered", "Got the map", "Got the compass", "Got the boss key", "Completed"], options: DUNGEONS, subjectActions: DUNGEON_STEPS, groupNoun: "Age", subjectAge: DUNGEON_AGE, subjectIsPlace: true, note: "Completed means you beat the boss and got what it leaves behind: the heart container and the stone or medallion. That's one step. It also ticks your Entered and boss key, if someone has logged those.", noHow: true },
-  { name: "Side Quest", icon: "scroll", subjectLabel: "Which quest?", subjectPlaceholder: "Quest name", actions: ["Started", "Progressed", "Completed"] },
+  { name: "Great Fairy", icon: "fairy", subjectLabel: "Which fountain?", actions: ["Got the gift"], options: GREAT_FAIRIES, groupNoun: "Age", subjectAge: GREAT_FAIRY_AGE, subjectIsPlace: true, noHow: true, note: "Visiting a fountain and getting its gift (a spell, magic or defense) is one step, so those gifts aren't listed under Items or Upgrades." },
+  { name: "Frogs", icon: "frog", subjectLabel: "Which song?", actions: ["Played it"], options: FROGS, place: "Zora's River", age: "Child", noHow: true, note: "Heart pieces from the frogs go under Heart Piece." },
 ];
 
 const FALLBACK: Category = { name: "", icon: "star", subjectLabel: "What is it?", subjectPlaceholder: "Name it", actions: ["Got it", "Found", "Completed"], freeAction: true };

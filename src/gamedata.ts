@@ -22,12 +22,10 @@ export const ITEMS: Group[] = [
       "Fire Arrow",
       "Ice Arrow",
       "Light Arrow",
-      "Din's Fire",
-      "Farore's Wind",
-      "Nayru's Love",
     ],
   },
   { label: "Quest items", items: ["Light Medallion", "Stone of Agony", "Gerudo's Card"] },
+  { label: "Other", items: ["Epona"] },
   { label: "Child trading items", items: ["Weird Egg", "Chicken", "Zelda's Letter"] },
   {
     label: "Adult trading items",
@@ -55,7 +53,6 @@ export const UPGRADES: Group[] = [
   { label: "Deku capacity", items: ["Deku Sticks (20)", "Deku Sticks (30)", "Deku Nuts (30)", "Deku Nuts (40)"] },
   { label: "Strength", items: ["Goron's Bracelet", "Silver Gauntlets", "Golden Gauntlets"] },
   { label: "Diving", items: ["Silver Scale", "Golden Scale"] },
-  { label: "Magic & defense", items: ["Magic Meter", "Double Magic", "Double Defense"] },
 ];
 
 export const EQUIPMENT: Group[] = [
@@ -208,9 +205,7 @@ export const ACQUIRED: Record<string, { place?: string; age?: string }> = {
   "Fire Arrow": { place: "Lake Hylia", age: "Adult" },
   "Ice Arrow": { place: "Gerudo Training Ground", age: "Adult" },
   "Light Arrow": { place: "Temple of Time", age: "Adult" },
-  "Din's Fire": { place: "Hyrule Castle Great Fairy Fountain", age: "Child" },
-  "Farore's Wind": { place: "Zora's Fountain Great Fairy Fountain", age: "Child" },
-  "Nayru's Love": { place: "Colossus Great Fairy Fountain", age: "Child" },
+  Epona: { place: "Lon Lon Ranch", age: "Adult" },
   // Quest items
   "Light Medallion": { place: "Temple of Time", age: "Adult" },
   "Stone of Agony": { place: "House of Skulltula", age: "Either" },
@@ -259,9 +254,6 @@ export const ACQUIRED: Record<string, { place?: string; age?: string }> = {
   "Golden Gauntlets": { place: "Ganon's Castle", age: "Adult" },
   "Silver Scale": { place: "Zora's Domain", age: "Child" },
   "Golden Scale": { place: "Fishing Pond", age: "Adult" },
-  "Magic Meter": { place: "Death Mountain Great Fairy Fountain", age: "Child" },
-  "Double Magic": { place: "Crater Great Fairy Fountain", age: "Adult" },
-  "Double Defense": { place: "Outside Ganon's Castle", age: "Adult" },
 };
 
 export const ACQUIRED_PLACE: Record<string, string> = Object.fromEntries(
@@ -270,3 +262,26 @@ export const ACQUIRED_PLACE: Record<string, string> = Object.fromEntries(
 export const ACQUIRED_AGE: Record<string, string> = Object.fromEntries(
   Object.entries(ACQUIRED).flatMap(([k, v]) => (v.age ? [[k, v.age]] : [])),
 );
+
+/** The Great Fairy fountains. Visiting one is getting its gift, so that's a single step. */
+export const GREAT_FAIRIES: Group[] = [
+  {
+    label: "Child",
+    items: [
+      "Hyrule Castle Great Fairy Fountain",
+      "Zora's Fountain Great Fairy Fountain",
+      "Colossus Great Fairy Fountain",
+      "Death Mountain Great Fairy Fountain",
+    ],
+  },
+  { label: "Adult", items: ["Crater Great Fairy Fountain", "Ganon's Castle Great Fairy Fountain"] },
+];
+export const GREAT_FAIRY_AGE: Record<string, string> = Object.fromEntries(GREAT_FAIRIES.flatMap((g) => g.items.map((f) => [f, g.label])));
+
+/** Songs the frogs in Zora's River respond to, plus their minigame. */
+export const FROGS: Group[] = [
+  {
+    label: "Frogs",
+    items: ["Zelda's Lullaby", "Epona's Song", "Saria's Song", "Sun's Song", "Song of Time", "Song of Storms", "Frog minigame"],
+  },
+];
