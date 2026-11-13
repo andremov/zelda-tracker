@@ -89,4 +89,3 @@ export const REGIONS: { region: string; places: string[] }[] = [
   { region: "Anywhere", places: ["A grotto", "Overworld (anywhere)"] },
 ];
 
-export const PLACE_GROUPS = REGIONS.map((r) => ({ label: r.region, items: r.places }));

@@ -4,7 +4,7 @@ import { api } from "../convex/_generated/api";
 import type { Doc, Id } from "../convex/_generated/dataModel";
 import { useLocal } from "./storage";
 import { CATEGORIES, Icon, categoryIcon, categoryInfo } from "./icons";
-import { PLACE_GROUPS } from "./locations";
+import { REGIONS } from "./locations";
 import type { Group } from "./gamedata";
 
 type Step = Doc<"steps">;
@@ -583,6 +583,75 @@ function Activity({ progress, steps, isVisible }: { progress: Progress[]; steps:
 
 const NEW = "__new__";
 
+/** Region first, then a place in it. Only the place is stored; place names are unique. */
+function LocationField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const regionOf = (place: string) => REGIONS.find((r) => r.places.includes(place))?.region ?? "";
+  const [region, setRegion] = useState(() => regionOf(value));
+  const [typing, setTyping] = useState(() => !!value && !regionOf(value));
+  const places = REGIONS.find((r) => r.region === region)?.places ?? [];
+
+  if (typing) {
+    return (
+      <label className="field">
+        <span>Where?</span>
+        <div className="combo">
+          <input autoFocus value={value} onChange={(e) => onChange(e.target.value)} placeholder="Name the place" />
+          <button
+            type="button"
+            className="text-btn"
+            onClick={() => {
+              setTyping(false);
+              setRegion("");
+              onChange("");
+            }}
+          >
+            pick from the map
+          </button>
+        </div>
+      </label>
+    );
+  }
+
+  return (
+    <fieldset>
+      <legend>Where?</legend>
+      <div className="where">
+        <select
+          aria-label="Region"
+          value={region}
+          onChange={(e) => {
+            if (e.target.value === NEW) {
+              setTyping(true);
+              onChange("");
+              return;
+            }
+            const next = REGIONS.find((r) => r.region === e.target.value);
+            setRegion(e.target.value);
+            // A region with a single place needs no second choice.
+            onChange(next && next.places.length === 1 ? next.places[0] : "");
+          }}
+        >
+          <option value="">Region…</option>
+          {REGIONS.map((r) => (
+            <option key={r.region} value={r.region}>
+              {r.region}
+            </option>
+          ))}
+          <option value={NEW}>Not listed…</option>
+        </select>
+        <select aria-label="Place" value={value} disabled={!region} onChange={(e) => onChange(e.target.value)}>
+          <option value="">{region ? "Place…" : "Pick a region first"}</option>
+          {places.map((pl) => (
+            <option key={pl} value={pl}>
+              {pl}
+            </option>
+          ))}
+        </select>
+      </div>
+    </fieldset>
+  );
+}
+
 /** A dropdown of the game's known names, grouped, with an escape hatch for anything missing from the list. */
 function ListField({
   label,
@@ -970,7 +1039,7 @@ function StepDialog({
                 </fieldset>
                 )}
 
-                <ListField label="Where?" value={f.location} onChange={(v) => set("location", v)} groups={PLACE_GROUPS} choose="Choose a place…" />
+                <LocationField value={f.location} onChange={(v) => set("location", v)} />
 
                 <label className="field">
                   <span>How?</span>
