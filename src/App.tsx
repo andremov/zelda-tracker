@@ -848,6 +848,10 @@ function StepDialog({
   const showActionInput = freeAction && (customAction || (!!f.action && !actionOptions.includes(f.action)));
   const askAction = actionOptions.length > 1 || freeAction;
   const canSave = f.category.trim() && f.subject.trim() && f.action.trim();
+  // Some answers are known from the kind and step alone; those questions aren't asked.
+  const lockedLocation = info.stepLocations?.[f.action];
+  const lockedAge = info.age;
+  const final: Fields = { ...f, location: lockedLocation ?? f.location, age: lockedAge ?? f.age };
 
   const save = async (force = false) => {
     setError("");
@@ -859,7 +863,7 @@ function StepDialog({
           norm(s.category) === norm(f.category) &&
           norm(s.subject) === norm(f.subject) &&
           norm(s.action) === norm(f.action) &&
-          (!info.fixed || (!!f.location.trim() && norm(s.location) === norm(f.location))),
+          (!info.fixed || (!!final.location.trim() && norm(s.location) === norm(final.location))),
       );
       if (matches.length) {
         setDupes(matches);
@@ -868,8 +872,8 @@ function StepDialog({
     }
     setBusy(true);
     try {
-      if (state.mode === "edit") await update({ id: state.step._id as Id<"steps">, ...f });
-      else await add({ player, ...f });
+      if (state.mode === "edit") await update({ id: state.step._id as Id<"steps">, ...final });
+      else await add({ player, ...final });
       onClose();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong");
@@ -1039,13 +1043,23 @@ function StepDialog({
                 </fieldset>
                 )}
 
-                <LocationField value={f.location} onChange={(v) => set("location", v)} />
+                {!lockedLocation && <LocationField key={`loc-${f.category}`} value={f.location} onChange={(v) => set("location", v)} />}
 
                 <label className="field">
                   <span>How?</span>
                   <textarea rows={3} value={f.how} onChange={(e) => set("how", e.target.value)} placeholder={info.howPlaceholder ?? "What you did"} />
                 </label>
 
+                {(lockedLocation || lockedAge) && (
+                  <p className="locked">
+                    <Icon name="check" size={15} />
+                    {lockedLocation && f.action ? <>At the {lockedLocation}</> : null}
+                    {lockedLocation && f.action && lockedAge ? ", as a " : lockedAge ? "As a " : ""}
+                    {lockedAge?.toLowerCase()}
+                  </p>
+                )}
+
+                {!lockedAge && (
                 <fieldset>
                   <legend>As which age?</legend>
                   <div className="segmented">
@@ -1056,6 +1070,7 @@ function StepDialog({
                     ))}
                   </div>
                 </fieldset>
+                )}
               </div>
             )}
 

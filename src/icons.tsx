@@ -161,6 +161,10 @@ export type Category = {
   freeAction?: boolean;
   /** Known things of this kind, offered as a dropdown. */
   options?: Group[];
+  /** Always done at this age, so the form doesn't ask. */
+  age?: string;
+  /** Steps that always happen in the same place, so the form doesn't ask where. */
+  stepLocations?: Record<string, string>;
   howPlaceholder?: string;
 };
 
@@ -168,10 +172,10 @@ export const CATEGORIES: Category[] = [
   { name: "Heart Piece", icon: "heartPiece", fixed: "Heart Piece", actions: ["Got it"], howPlaceholder: "What you did to get it" },
   { name: "Heart Container", icon: "heart", fixed: "Heart Container", actions: ["Got it"] },
   { name: "Gold Skulltula", icon: "spider", fixed: "Gold Skulltula", actions: ["Got the token"], howPlaceholder: "How you found or reached it" },
-  { name: "Mask", icon: "mask", subjectLabel: "Which mask?", subjectPlaceholder: "Mask name", actions: ["Got it", "Delivered", "Paid"], options: MASKS },
-  { name: "Item", icon: "bag", subjectLabel: "Which item?", subjectPlaceholder: "Item name", actions: ["Got it", "Bought", "Upgraded"], options: ITEMS },
-  { name: "Equipment", icon: "shield", subjectLabel: "Which equipment?", subjectPlaceholder: "Sword, shield, tunic, boots…", actions: ["Got it", "Bought"], options: EQUIPMENT },
-  { name: "Upgrade", icon: "upgrade", subjectLabel: "What got upgraded?", subjectPlaceholder: "Quiver, wallet, bomb bag…", actions: ["Got it", "Bought"], options: UPGRADES },
+  { name: "Mask", icon: "mask", subjectLabel: "Which mask?", subjectPlaceholder: "Mask name", actions: ["Got it", "Delivered", "Paid"], options: MASKS, age: "Child", stepLocations: { "Got it": "Happy Mask Shop", Paid: "Happy Mask Shop" } },
+  { name: "Item", icon: "bag", subjectLabel: "Which item?", subjectPlaceholder: "Item name", actions: ["Got it"], options: ITEMS },
+  { name: "Equipment", icon: "shield", subjectLabel: "Which equipment?", subjectPlaceholder: "Sword, shield, tunic, boots…", actions: ["Got it"], options: EQUIPMENT },
+  { name: "Upgrade", icon: "upgrade", subjectLabel: "What got upgraded?", subjectPlaceholder: "Quiver, wallet, bomb bag…", actions: ["Got it"], options: UPGRADES },
   { name: "Bottle", icon: "bottle", fixed: "Bottle", actions: ["Got it"] },
   { name: "Song", icon: "note", subjectLabel: "Which song?", subjectPlaceholder: "Song name", actions: ["Learned"], options: SONGS },
   { name: "Quest Item", icon: "gem", subjectLabel: "Which one?", subjectPlaceholder: "Stone, medallion…", actions: ["Got it"], options: QUEST_ITEMS },

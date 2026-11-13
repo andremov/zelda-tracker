@@ -362,6 +362,7 @@ legend, .field > span {
 .segmented button:last-child { border-right: none; }
 .segmented button.active { background: var(--green); color: var(--green-ink); }
 
+.locked { display: flex; align-items: center; gap: 6px; color: var(--green); font-style: italic; }
 .hint { font-style: italic; color: var(--muted); font-size: 0.92rem; }
 .error { color: var(--red); }
 .dupes { display: grid; gap: 12px; }
