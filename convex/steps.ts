@@ -1,5 +1,5 @@
 import { mutation, query, type MutationCtx } from "./_generated/server";
-import type { Doc } from "./_generated/dataModel";
+import type { Doc, Id } from "./_generated/dataModel";
 import { impliedBy, impliersOf, type StepKey } from "./links";
 import { v } from "convex/values";
 
@@ -34,6 +34,21 @@ async function giveProgress(ctx: MutationCtx, step: Doc<"steps">, player: string
       .unique();
     if (!has) await ctx.db.insert("progress", { stepId: t._id, player });
   }
+}
+
+/** Remove a player's progress on a step; an entry nobody has done anymore is removed. */
+async function takeProgress(ctx: MutationCtx, stepId: Id<"steps">, player: string) {
+  const mine = await ctx.db
+    .query("progress")
+    .withIndex("by_step_player", (q) => q.eq("stepId", stepId).eq("player", player))
+    .unique();
+  if (!mine) return;
+  await ctx.db.delete(mine._id);
+  const left = await ctx.db
+    .query("progress")
+    .withIndex("by_step", (q) => q.eq("stepId", stepId))
+    .first();
+  if (!left) await ctx.db.delete(stepId);
 }
 
 export const list = query({
@@ -95,22 +110,17 @@ export const setDone = mutation({
   args: { stepId: v.id("steps"), player: v.string(), done: v.boolean() },
   handler: async (ctx, { stepId, player, done }) => {
     const p = clean(player);
-    const existing = await ctx.db
-      .query("progress")
-      .withIndex("by_step_player", (q) => q.eq("stepId", stepId).eq("player", p))
-      .unique();
     if (done) {
       const step = await ctx.db.get(stepId);
       if (step) await giveProgress(ctx, step, p);
     }
-    if (!done && existing) {
-      await ctx.db.delete(existing._id);
-      // An entry nobody has done anymore is removed.
-      const left = await ctx.db
-        .query("progress")
-        .withIndex("by_step", (q) => q.eq("stepId", stepId))
-        .first();
-      if (!left) await ctx.db.delete(stepId);
+    if (!done) {
+      const step = await ctx.db.get(stepId);
+      if (!step) return;
+      // Undoing a step also undoes whatever counts as it (the fountain for its gift, Completed for Entered).
+      const targets = [step];
+      for (const k of impliersOf(step)) targets.push(...(await findSteps(ctx, k)));
+      for (const t of targets) await takeProgress(ctx, t._id, p);
     }
   },
 });

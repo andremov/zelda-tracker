@@ -398,7 +398,12 @@ function Journal(props: {
   const groups = new Map<string, Step[]>();
   for (const s of steps) {
     const twin = s.category === "Great Fairy" ? undefined : sameMomentAs(s);
-    const key = twin ? `${norm(twin.category)}|${norm(twin.subject)}` : `${norm(s.category)}|${norm(s.subject)}`;
+    // Countable kinds (heart pieces, skulltulas…) get one card per entry.
+    const key = categoryInfo(s.category).fixed
+      ? s._id
+      : twin
+        ? `${norm(twin.category)}|${norm(twin.subject)}`
+        : `${norm(s.category)}|${norm(s.subject)}`;
     groups.set(key, [...(groups.get(key) ?? []), s]);
   }
   const cards = [...groups.values()]
@@ -440,7 +445,8 @@ function SubjectCard({
   // Offer the next step only while this thing has steps nobody has logged yet.
   const allSteps = info.subjectActions?.[first.subject] ?? info.actions;
   const missing = isFairyCard ? [] : allSteps.filter((a) => !steps.some((s) => s.action === a));
-  const canAdd = !!info.fixed || missing.length > 0;
+  // Countable kinds are logged fresh from "Log a step", so their cards have no add button.
+  const canAdd = !info.fixed && missing.length > 0;
 
   return (
     <article className="frame subject-card">
@@ -449,8 +455,10 @@ function SubjectCard({
           <Icon name={info.icon} size={22} />
         </div>
         <div className="subject-title">
-          <h3>{info.fixed ? `${first.subject}s` : cardSubject}</h3>
-          {!info.fixed && <span className="eyebrow">{isFairyCard && gift ? `Great Fairy · ${gift}` : cardCategory}</span>}
+          <h3>{info.fixed ? (info.place ? first.subject : first.location || first.subject) : cardSubject}</h3>
+          <span className="eyebrow">
+            {isFairyCard && gift ? `Great Fairy · ${gift}` : info.fixed && info.place ? first.location : cardCategory}
+          </span>
         </div>
       </header>
       <ol className="steps">
@@ -459,7 +467,7 @@ function SubjectCard({
             key={s._id}
             step={s}
             fixed={!!info.fixed}
-            title={isFairyCard ? (s.category === "Great Fairy" ? "Visited the fountain" : `Got ${s.subject}`) : undefined}
+            title={isFairyCard ? (s.category === "Great Fairy" ? "Visited the fountain" : `Got ${s.subject}`) : s.action}
             player={player}
             who={doneBy.get(s._id) ?? []}
             onEdit={categoryInfo(s.category).noHow ? undefined : () => onEdit(s)}
@@ -470,11 +478,11 @@ function SubjectCard({
         <button
           className="add-next"
           onClick={() =>
-            onAdd({ ...EMPTY, category: first.category, subject: first.subject, action: !info.fixed && missing.length === 1 ? missing[0] : "" })
+            onAdd({ ...EMPTY, category: first.category, subject: first.subject, action: missing.length === 1 ? missing[0] : "" })
           }
         >
           <Icon name="plus" size={16} />{" "}
-          {info.fixed ? `Log another ${first.subject}` : missing.length === 1 ? `Log ${first.subject} · ${missing[0]}` : `Log a step for ${first.subject}`}
+          {missing.length === 1 ? `Log ${first.subject} · ${missing[0]}` : `Log a step for ${first.subject}`}
         </button>
       )}
     </article>
@@ -498,9 +506,7 @@ function StepRow({
 }) {
   const setDone = useMutation(api.steps.setDone);
   const mine = who.includes(player);
-  // For fixed kinds (heart pieces…) the place is what tells entries apart, so it leads.
-  const samePlace = !!categoryInfo(step.category).place;
-  const title = titleOverride ?? (fixed && !samePlace ? step.location || step.action : step.action);
+  const title = titleOverride ?? step.action;
   return (
     <li className={`step ${mine ? "done" : ""}`}>
       <button

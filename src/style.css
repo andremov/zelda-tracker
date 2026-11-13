@@ -267,6 +267,7 @@ input::placeholder, textarea::placeholder { color: var(--muted); opacity: 0.75; 
   color: #9a2f22; border: 2px solid currentColor; border-radius: 3px; padding: 1px 7px 0;
   box-shadow: inset 0 0 0 1px rgba(154, 47, 34, 0.35);
   opacity: 0.82; transform: rotate(-4deg); mix-blend-mode: multiply;
+  user-select: none; -webkit-user-select: none; cursor: default;
   -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='30'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -2.2 1.9'/%3E%3C/filter%3E%3Crect width='60' height='30' filter='url(%23s)'/%3E%3C/svg%3E");
   mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='30'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -2.2 1.9'/%3E%3C/filter%3E%3Crect width='60' height='30' filter='url(%23s)'/%3E%3C/svg%3E");
 }
