@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { DUNGEON_AGE, DUNGEON_STEPS, DUNGEONS, EQUIPMENT, ITEMS, MASKS, SONG_AGE, SONG_PLACE, SONGS, UPGRADES, type Group } from "./gamedata";
+import { ACQUIRED_AGE, ACQUIRED_PLACE, DUNGEON_AGE, DUNGEON_STEPS, DUNGEONS, EQUIPMENT, ITEMS, MASK_DELIVERY, MASK_STEPS, MASKS, SONG_AGE, SONG_PLACE, SONGS, UPGRADES, type Group } from "./gamedata";
 
 // Simple original line icons, 24x24, stroke-based.
 const paths: Record<string, ReactNode> = {
@@ -175,6 +175,10 @@ export type Category = {
   subjectActions?: Record<string, string[]>;
   /** Things of this kind that always happen in one place. */
   subjectPlace?: Record<string, string>;
+  /** A step whose place depends on the thing, e.g. where each mask is delivered: { step: { thing: place } }. */
+  stepPlaceBySubject?: Record<string, Record<string, string>>;
+  /** Nothing to explain once the rest is filled in, so the form doesn't ask "How?". */
+  noHow?: boolean;
   /** Shown under the step choice, to explain what a step covers. */
   note?: string;
   howPlaceholder?: string;
@@ -183,13 +187,13 @@ export type Category = {
 export const CATEGORIES: Category[] = [
   { name: "Heart Piece", icon: "heartPiece", fixed: "Heart Piece", actions: ["Got it"], howPlaceholder: "What you did to get it" },
   { name: "Gold Skulltula", icon: "spider", fixed: "Gold Skulltula", actions: ["Got the token"], howPlaceholder: "How you found or reached it" },
-  { name: "Mask", icon: "mask", subjectLabel: "Which mask?", subjectPlaceholder: "Mask name", actions: ["Got it", "Delivered", "Paid"], options: MASKS, age: "Child", stepLocations: { "Got it": "Happy Mask Shop", Paid: "Happy Mask Shop" } },
-  { name: "Item", icon: "bag", subjectLabel: "Which item?", subjectPlaceholder: "Item name", actions: ["Got it"], options: ITEMS },
-  { name: "Equipment", icon: "shield", subjectLabel: "Which equipment?", subjectPlaceholder: "Sword, shield, tunic, boots…", actions: ["Got it"], options: EQUIPMENT },
-  { name: "Upgrade", icon: "upgrade", subjectLabel: "What got upgraded?", subjectPlaceholder: "Quiver, wallet, bomb bag…", actions: ["Got it"], options: UPGRADES },
+  { name: "Mask", icon: "mask", subjectLabel: "Which mask?", subjectPlaceholder: "Mask name", actions: ["Got it", "Delivered", "Paid"], options: MASKS, subjectActions: MASK_STEPS, age: "Child", stepLocations: { "Got it": "Happy Mask Shop", Paid: "Happy Mask Shop" }, stepPlaceBySubject: { Delivered: MASK_DELIVERY }, noHow: true },
+  { name: "Item", icon: "bag", subjectLabel: "Which item?", subjectPlaceholder: "Item name", actions: ["Got it"], options: ITEMS, subjectPlace: ACQUIRED_PLACE, subjectAge: ACQUIRED_AGE },
+  { name: "Equipment", icon: "shield", subjectLabel: "Which equipment?", subjectPlaceholder: "Sword, shield, tunic, boots…", actions: ["Got it"], options: EQUIPMENT, subjectPlace: ACQUIRED_PLACE, subjectAge: ACQUIRED_AGE },
+  { name: "Upgrade", icon: "upgrade", subjectLabel: "What got upgraded?", subjectPlaceholder: "Quiver, wallet, bomb bag…", actions: ["Got it"], options: UPGRADES, subjectPlace: ACQUIRED_PLACE, subjectAge: ACQUIRED_AGE },
   { name: "Bottle", icon: "bottle", fixed: "Bottle", actions: ["Got it"] },
-  { name: "Song", icon: "note", subjectLabel: "Which song?", subjectPlaceholder: "Song name", actions: ["Learned"], options: SONGS, subjectPlace: SONG_PLACE, subjectAge: SONG_AGE },
-  { name: "Dungeon", icon: "door", subjectLabel: "Which dungeon?", subjectPlaceholder: "Dungeon name", actions: ["Entered", "Got the map", "Got the compass", "Got the boss key", "Completed"], options: DUNGEONS, subjectActions: DUNGEON_STEPS, groupNoun: "Age", subjectAge: DUNGEON_AGE, subjectIsPlace: true, note: "Completed means you beat the boss and got what it leaves behind: the heart container and the stone or medallion. That's one step. It also ticks your Entered and boss key, if someone has logged those." },
+  { name: "Song", icon: "note", subjectLabel: "Which song?", subjectPlaceholder: "Song name", actions: ["Learned"], options: SONGS, subjectPlace: SONG_PLACE, subjectAge: SONG_AGE, noHow: true },
+  { name: "Dungeon", icon: "door", subjectLabel: "Which dungeon?", subjectPlaceholder: "Dungeon name", actions: ["Entered", "Got the map", "Got the compass", "Got the boss key", "Completed"], options: DUNGEONS, subjectActions: DUNGEON_STEPS, groupNoun: "Age", subjectAge: DUNGEON_AGE, subjectIsPlace: true, note: "Completed means you beat the boss and got what it leaves behind: the heart container and the stone or medallion. That's one step. It also ticks your Entered and boss key, if someone has logged those.", noHow: true },
   { name: "Side Quest", icon: "scroll", subjectLabel: "Which quest?", subjectPlaceholder: "Quest name", actions: ["Started", "Progressed", "Completed"] },
   { name: "Other", icon: "star", subjectLabel: "What is it?", subjectPlaceholder: "Name it", actions: ["Got it", "Found", "Talked to", "Unlocked", "Completed"], freeAction: true },
 ];

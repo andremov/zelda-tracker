@@ -802,7 +802,10 @@ function StepDialog({
   // Some answers are known from the kind and step alone; those questions aren't asked.
   const subjectKnown = !!info.options?.some((g) => g.items.includes(f.subject));
   const lockedLocation =
-    info.stepLocations?.[f.action] ?? info.subjectPlace?.[f.subject] ?? (info.subjectIsPlace && subjectKnown ? f.subject : undefined);
+    info.stepPlaceBySubject?.[f.action]?.[f.subject] ??
+    info.stepLocations?.[f.action] ??
+    info.subjectPlace?.[f.subject] ??
+    (info.subjectIsPlace && subjectKnown ? f.subject : undefined);
   const lockedAge = info.age ?? info.subjectAge?.[f.subject];
   const final: Fields = { ...f, location: lockedLocation ?? f.location, age: lockedAge ?? f.age };
 
@@ -1037,10 +1040,12 @@ function StepDialog({
                       </fieldset>
                     )}
 
-                    <label className="field">
-                      <span>How?</span>
-                      <textarea rows={3} value={f.how} onChange={(e) => set("how", e.target.value)} placeholder={info.howPlaceholder ?? "What you did"} />
-                    </label>
+                    {!info.noHow && (
+                      <label className="field">
+                        <span>How?</span>
+                        <textarea rows={3} value={f.how} onChange={(e) => set("how", e.target.value)} placeholder={info.howPlaceholder ?? "What you did"} />
+                      </label>
+                    )}
                   </>
                 ) : (
                   <p className="hint">{subjectChosen ? "Pick the step to continue." : "Pick which one to continue."}</p>
