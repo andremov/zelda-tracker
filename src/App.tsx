@@ -1,11 +1,28 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../convex/_generated/api";
 import type { Doc, Id } from "../convex/_generated/dataModel";
 import { useLocal } from "./storage";
 import { CATEGORIES, Icon, categoryIcon, categoryInfo } from "./icons";
 import { REGIONS } from "./locations";
-import { BOSS_DUNGEONS, DUNGEON_ICON, DUNGEONS, GREAT_FAIRIES, HEART_PIECES, SET_COLOR, SONGS, type Group } from "./gamedata";
+import {
+  BOSS_DUNGEONS,
+  DUNGEON_ICON,
+  DUNGEON_STEPS,
+  DUNGEONS,
+  EQUIPMENT,
+  FROGS,
+  GREAT_FAIRIES,
+  HEART_PIECES,
+  ITEMS,
+  MASK_STEPS,
+  MASKS,
+  SET_COLOR,
+  SONGS,
+  TOTALS,
+  UPGRADES,
+  type Group,
+} from "./gamedata";
 import { sameMomentAs } from "../convex/links";
 
 type Step = Doc<"steps">;
@@ -91,6 +108,7 @@ function Tracker({ player, onChangePlayer }: { player: string; onChangePlayer: (
   const [kinds, setKinds] = useLocal<string[]>("filter-kinds", []);
   const [who, setWho] = useLocal<string[]>("filter-players", []);
   const [dialog, setDialog] = useState<DialogState>(null);
+  const [detail, setDetail] = useState<string | null>(null);
 
   const doneBy = useMemo(() => {
     const m = new Map<string, string[]>();
@@ -131,6 +149,7 @@ function Tracker({ player, onChangePlayer }: { player: string; onChangePlayer: (
       isMe={name === player}
       steps={data.steps}
       doneBy={doneBy}
+      onOpen={() => setDetail(name)}
     />
   );
 
@@ -194,6 +213,8 @@ function Tracker({ player, onChangePlayer }: { player: string; onChangePlayer: (
       <button className="fab" onClick={() => setDialog({ mode: "add", initial: EMPTY })} aria-label="Log a step">
         <Icon name="quill" size={26} />
       </button>
+
+      {detail && <SaveDetail name={detail} steps={data.steps} doneBy={doneBy} onClose={() => setDetail(null)} />}
 
       {dialog && (
         <StepDialog
@@ -328,7 +349,19 @@ function Track({
   );
 }
 
-function SaveCard({ name, isMe, steps, doneBy }: { name: string; isMe: boolean; steps: Step[]; doneBy: Map<string, string[]> }) {
+function SaveCard({
+  name,
+  isMe,
+  steps,
+  doneBy,
+  onOpen,
+}: {
+  name: string;
+  isMe: boolean;
+  steps: Step[];
+  doneBy: Map<string, string[]>;
+  onOpen: () => void;
+}) {
   const done = steps.filter((s) => doneBy.get(s._id)?.includes(name));
   const pieces = done.filter((s) => s.category === "Heart Piece").length;
   const completed = new Set(done.filter((s) => s.category === "Dungeon" && s.action === "Completed").map((s) => s.subject));
@@ -339,7 +372,14 @@ function SaveCard({ name, isMe, steps, doneBy }: { name: string; isMe: boolean; 
   const songs = new Set(done.filter((s) => s.category === "Song").map((s) => s.subject));
 
   return (
-    <section className={`frame save-card ${isMe ? "is-me" : ""}`}>
+    <section
+      className={`frame save-card ${isMe ? "is-me" : ""}`}
+      role="button"
+      tabIndex={0}
+      title={`See everything ${name} has done`}
+      onClick={onOpen}
+      onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), onOpen())}
+    >
       <header className="save-head">
         <h2 className="save-name">{name}</h2>
         <span className="tally-tile" title="Gold Skulltula tokens">
@@ -349,9 +389,100 @@ function SaveCard({ name, isMe, steps, doneBy }: { name: string; isMe: boolean; 
       </header>
       <Hearts full={hearts} quarters={pieces % 4} />
       <Track label="Dungeons" icon={(d) => DUNGEON_ICON[d] ?? "door"} rows={[DUNGEONS.flatMap((g) => g.items)]} have={completed} />
-      <Track label="Great Fairies" icon="fairy" rows={[GREAT_FAIRIES.flatMap((g) => g.items)]} have={fairies} />
       <Track label="Songs" icon="note" rows={SONGS.map((g) => g.items)} have={songs} />
+      <Track label="Great Fairies" icon="fairy" rows={[GREAT_FAIRIES.flatMap((g) => g.items)]} have={fairies} />
     </section>
+  );
+}
+
+/** Everything in the game for one player, lit where they've done it. Opened from a save card. */
+function SaveDetail({ name, steps, doneBy, onClose }: { name: string; steps: Step[]; doneBy: Map<string, string[]>; onClose: () => void }) {
+  const ref = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    ref.current?.showModal();
+  }, []);
+  const done = steps.filter((s) => doneBy.get(s._id)?.includes(name));
+  const has = (category: string, subject: string, action?: string) =>
+    done.some((s) => s.category === category && s.subject === subject && (!action || s.action === action));
+  const count = (category: string) => done.filter((s) => s.category === category).length;
+
+  const pieces = count("Heart Piece");
+  const completed = new Set(done.filter((s) => s.category === "Dungeon" && s.action === "Completed").map((s) => s.subject));
+  const hearts = BASE_HEARTS + BOSS_DUNGEONS.filter((d) => completed.has(d)).length + Math.floor(pieces / 4);
+
+  const list = (category: string, groups: Group[]) =>
+    groups.map((g) => (
+      <div key={g.label} className="detail-group">
+        {groups.length > 1 && <h4>{g.label}</h4>}
+        <div className="chk-list">
+          {g.items.map((x) => (
+            <span key={x} className={`chk ${has(category, x) ? "lit" : ""}`} style={has(category, x) && SET_COLOR[x] ? { background: SET_COLOR[x] } : undefined}>
+              {x}
+            </span>
+          ))}
+        </div>
+      </div>
+    ));
+
+  const stepsTable = (category: string, things: string[], stepsOf: (x: string) => string[]) => (
+    <div className="detail-table">
+      {things.map((x) => (
+        <div key={x} className="detail-row">
+          <span className={`detail-thing ${stepsOf(x).every((a) => has(category, x, a)) ? "all" : ""}`}>{x}</span>
+          <div className="chk-list">
+            {stepsOf(x).map((a) => (
+              <span key={a} className={`chk sm ${has(category, x, a) ? "lit" : ""}`}>
+                {a}
+              </span>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  const section = (title: string, icon: string, body: ReactNode) => (
+    <section className="detail-section">
+      <h3>
+        <Icon name={icon} size={18} /> {title}
+      </h3>
+      {body}
+    </section>
+  );
+
+  return (
+    <dialog ref={ref} className="dialog detail" onClose={onClose} onClick={(e) => e.target === ref.current && ref.current?.close()}>
+      <div className="dialog-body">
+        <header className="dialog-head">
+          <h2>{name}</h2>
+          <button type="button" className="icon-btn" onClick={() => ref.current?.close()} aria-label="Close">
+            <Icon name="x" size={18} />
+          </button>
+        </header>
+        <Ornament />
+
+        <Hearts full={hearts} quarters={pieces % 4} />
+        <div className="detail-counts">
+          {Object.entries(TOTALS).map(([c, total]) => (
+            <span key={c} className="tally-tile" title={c}>
+              <Icon name={categoryIcon(c)} size={18} />
+              <b>{count(c)}</b>
+              <span className="muted">/ {total}</span>
+              <small>{c}</small>
+            </span>
+          ))}
+        </div>
+
+        {section("Dungeons", "door", stepsTable("Dungeon", DUNGEONS.flatMap((g) => g.items), (d) => DUNGEON_STEPS[d] ?? []))}
+        {section("Songs", "note", list("Song", SONGS))}
+        {section("Great Fairies", "fairy", list("Great Fairy", GREAT_FAIRIES))}
+        {section("Masks", "mask", stepsTable("Mask", MASKS.flatMap((g) => g.items), (m) => MASK_STEPS[m] ?? ["Got it"]))}
+        {section("Items", "bag", list("Item", ITEMS))}
+        {section("Equipment", "shield", list("Equipment", EQUIPMENT))}
+        {section("Upgrades", "upgrade", list("Upgrade", UPGRADES))}
+        {section("Frogs", "frog", list("Frogs", FROGS))}
+      </div>
+    </dialog>
   );
 }
 

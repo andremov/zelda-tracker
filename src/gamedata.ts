@@ -321,7 +321,7 @@ export const SET_COLOR: Record<string, string> = {
   "Gerudo Training Ground": "#b4924a",
   "Ganon's Castle": "#3b2a4a",
   // Songs
-  "Zelda's Lullaby": "#7a6aa8",
+  "Zelda's Lullaby": "#c45c8a",
   "Epona's Song": "#9a5f35",
   "Saria's Song": "#4f8a3a",
   "Sun's Song": "#c9a227",
@@ -340,4 +340,12 @@ export const SET_COLOR: Record<string, string> = {
   "Death Mountain Great Fairy Fountain": "#5a9a3f",
   "Crater Great Fairy Fountain": "#2f7a3a",
   "Ganon's Castle Great Fairy Fountain": "#a8304a",
+};
+
+/** Totals for the countable kinds, shown in a save log's breakdown. */
+export const TOTALS: Record<string, number> = {
+  "Heart Piece": 36,
+  "Gold Skulltula": 100,
+  "Big Poe": 10,
+  Bottle: 4,
 };
