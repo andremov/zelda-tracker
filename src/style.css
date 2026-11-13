@@ -178,6 +178,30 @@ input::placeholder, textarea::placeholder { color: var(--muted); opacity: 0.75; 
 .tabs button.active { color: var(--green); background: var(--paper); border-color: var(--line); border-bottom: 2px solid var(--paper); }
 .tabs .count { font-family: var(--font-body); font-size: 0.85rem; background: var(--paper-2); border: 1px solid var(--line-soft); border-radius: 99px; padding: 0 7px; }
 
+.journal-tools { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.journal-tools .search { flex: 1; min-width: 200px; }
+.multi { position: relative; }
+.multi summary {
+  list-style: none; cursor: pointer; user-select: none;
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 12px; border: 1px solid var(--line); border-radius: 3px; background: var(--paper);
+  box-shadow: inset 0 1px 3px rgba(60, 40, 10, 0.12);
+}
+.multi summary::-webkit-details-marker { display: none; }
+.multi summary::after { content: ""; width: 6px; height: 6px; border-right: 1.5px solid var(--muted); border-bottom: 1.5px solid var(--muted); transform: rotate(45deg) translateY(-2px); margin-left: 2px; }
+.multi.on summary { border-color: var(--green-2); background: var(--green-wash); }
+.multi-label { font-family: var(--font-display); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.multi-value { max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.multi-menu {
+  position: absolute; right: 0; top: calc(100% + 4px); z-index: 30; min-width: 230px; max-height: 340px; overflow-y: auto;
+  display: grid; gap: 2px; padding: 6px;
+  background: var(--paper); border: 1px solid var(--line); border-radius: 4px; box-shadow: 0 12px 28px -10px rgba(40, 25, 5, 0.45);
+}
+.multi-option { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 3px; cursor: pointer; color: var(--green); }
+.multi-option > span:first-of-type { flex: 1; color: var(--ink); }
+.multi-option:hover { background: var(--paper-2); }
+.multi-option input { width: auto; box-shadow: none; accent-color: var(--green); }
+.multi-menu .text-btn { justify-self: start; margin: 4px 8px; }
 .search { position: relative; display: block; }
 .search svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); }
 .search input { padding-left: 40px; }
@@ -195,7 +219,6 @@ input::placeholder, textarea::placeholder { color: var(--muted); opacity: 0.75; 
 .chip.active span { color: inherit; opacity: 0.8; }
 
 /* ============ Save card ============ */
-.save-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
 .save-card { display: grid; gap: 14px; }
 .save-card.is-me { border-color: var(--green-2); box-shadow: inset 0 0 0 4px var(--paper), inset 0 0 0 5px var(--green-2), var(--shadow); }
 .save-head { display: flex; align-items: center; gap: 12px; }
@@ -263,29 +286,11 @@ input::placeholder, textarea::placeholder { color: var(--muted); opacity: 0.75; 
 }
 .add-next:hover { background: var(--green-wash); border-style: solid; }
 
-/* ============ Sealed ============ */
-.sealed-intro { display: flex; gap: 8px; align-items: start; color: var(--muted); font-style: italic; }
-.sealed-intro svg { flex: none; margin-top: 4px; }
-.sealed-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; }
-.sealed-card {
-  display: grid; justify-items: center; gap: 8px; text-align: center;
-  padding: 18px 12px 14px;
-  background:
-    repeating-linear-gradient(45deg, transparent 0 8px, rgba(120, 90, 40, 0.06) 8px 9px),
-    linear-gradient(var(--paper), var(--paper-2));
-  border: 1px solid var(--line); border-radius: 4px;
-  box-shadow: var(--shadow);
-}
-.seal {
-  width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center;
-  color: #f2d9cc;
-  background: radial-gradient(circle at 35% 30%, #b0402f, #6e1c13);
-  box-shadow: 0 0 0 3px rgba(110, 28, 19, 0.25), inset 0 -2px 4px rgba(0, 0, 0, 0.3);
-}
-.sealed-cat { font-family: var(--font-display); font-size: 0.85rem; font-weight: 600; }
-.center-btn { justify-self: center; }
-
 /* ============ Sidebar ============ */
+.side-title { font-size: 0.85rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--green); text-align: center; margin: 4px 0 -4px; }
+.side .save-card { padding: 16px 18px; gap: 10px; }
+.side .save-name h2 { font-size: 1.1rem; }
+.side .heart { width: 20px; height: 20px; }
 .panel { padding: 18px 18px 14px; }
 .panel-title { text-align: center; font-size: 1rem; letter-spacing: 0.1em; color: var(--green); }
 .feed { display: grid; gap: 10px; }

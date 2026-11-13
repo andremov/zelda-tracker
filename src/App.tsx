@@ -12,7 +12,6 @@ type Step = Doc<"steps">;
 type Progress = Doc<"progress">;
 type Fields = Pick<Step, "category" | "subject" | "action" | "location" | "how" | "age">;
 type DialogState = { mode: "add"; initial: Fields } | { mode: "edit"; step: Step } | null;
-type Tab = "journal" | "sealed" | "saves";
 
 const EMPTY: Fields = { category: "", subject: "", action: "", location: "", how: "", age: "" };
 const BASE_HEARTS = 3;
@@ -86,10 +85,9 @@ function PickName({ onPick }: { onPick: (name: string) => void }) {
 
 function Tracker({ player, onChangePlayer }: { player: string; onChangePlayer: () => void }) {
   const data = useQuery(api.steps.list);
-  const [revealed, setRevealed] = useLocal<string[]>(`revealed:${player}`, []);
-  const [tab, setTab] = useState<Tab>("journal");
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("");
+  const [kinds, setKinds] = useLocal<string[]>("filter-kinds", []);
+  const [who, setWho] = useLocal<string[]>("filter-players", []);
   const [dialog, setDialog] = useState<DialogState>(null);
 
   const doneBy = useMemo(() => {
@@ -107,22 +105,21 @@ function Tracker({ player, onChangePlayer }: { player: string; onChangePlayer: (
   }
 
   const isMine = (s: Step) => doneBy.get(s._id)?.includes(player) ?? false;
-  const isVisible = (s: Step) => isMine(s) || revealed.includes(s._id);
   const others = uniq(data.progress.map((p) => p.player)).filter((p) => p !== player);
   const players = [player, ...others];
-  const visible = data.steps.filter(isVisible);
-  const sealed = data.steps.filter((s) => !isVisible(s));
-
-  const pool = tab === "sealed" ? sealed : visible;
-  const chipCounts = new Map<string, number>();
-  for (const s of pool) chipCounts.set(s.category, (chipCounts.get(s.category) ?? 0) + 1);
-  const activeCategory = chipCounts.has(category) ? category : "";
+  // Filters: nothing ticked means everything. Players match entries any of them has done.
+  const kindCounts = new Map<string, number>();
+  for (const s of data.steps) kindCounts.set(s.category, (kindCounts.get(s.category) ?? 0) + 1);
+  const playerCounts = new Map(players.map((p) => [p, data.progress.filter((r) => r.player === p).length]));
+  const activeKinds = kinds.filter((k) => kindCounts.has(k));
+  const activeWho = who.filter((p) => players.includes(p));
 
   const q = norm(search);
-  const filtered = pool.filter(
+  const filtered = data.steps.filter(
     (s) =>
-      (!activeCategory || s.category === activeCategory) &&
-      (tab === "sealed" || !q || [s.subject, s.action, s.location, s.how, s.category].some((f) => norm(f).includes(q))),
+      (!activeKinds.length || activeKinds.includes(s.category)) &&
+      (!activeWho.length || activeWho.some((p) => doneBy.get(s._id)?.includes(p))) &&
+      (!q || [s.subject, s.action, s.location, s.how, s.category].some((f) => norm(f).includes(q))),
   );
 
   const saveCard = (name: string) => (
@@ -155,64 +152,41 @@ function Tracker({ player, onChangePlayer }: { player: string; onChangePlayer: (
 
       <div className="layout">
         <main className="main">
-          <nav className="tabs" role="tablist">
-            <TabButton id="journal" tab={tab} setTab={setTab} icon="scroll" label="Journal" count={visible.length} />
-            <TabButton id="sealed" tab={tab} setTab={setTab} icon="lock" label="Sealed" count={sealed.length} />
-            <TabButton id="saves" tab={tab} setTab={setTab} icon="save" label="Save Logs" count={players.length} />
-          </nav>
 
-          {tab === "saves" ? (
-            <div className="save-grid">{players.map(saveCard)}</div>
-          ) : (
-            <>
-              {tab === "journal" && saveCard(player)}
-
-              {tab === "journal" && (
+          <>
+              <div className="journal-tools">
                 <label className="search">
                   <Icon name="search" size={18} />
-                  <input type="search" placeholder="Search your journal" value={search} onChange={(e) => setSearch(e.target.value)} />
+                  <input type="search" placeholder="Search the journal" value={search} onChange={(e) => setSearch(e.target.value)} />
                 </label>
-              )}
-
-              {chipCounts.size > 1 && (
-                <div className="chips">
-                  <button className={`chip ${!activeCategory ? "active" : ""}`} onClick={() => setCategory("")}>
-                    All <span>{pool.length}</span>
-                  </button>
-                  {[...chipCounts.entries()]
-                    .sort(([a], [b]) => a.localeCompare(b))
-                    .map(([c, n]) => (
-                      <button key={c} className={`chip ${activeCategory === c ? "active" : ""}`} onClick={() => setCategory(c)}>
-                        <Icon name={categoryIcon(c)} size={15} /> {c} <span>{n}</span>
-                      </button>
-                    ))}
-                </div>
-              )}
-
-              {tab === "journal" ? (
-                <Journal
-                  steps={filtered}
-                  player={player}
-                  doneBy={doneBy}
-                  searching={!!q || !!activeCategory}
-                  onAdd={(initial) => setDialog({ mode: "add", initial })}
-                  onEdit={(step) => setDialog({ mode: "edit", step })}
+                <MultiSelect
+                  label="Kinds"
+                  options={[...kindCounts.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([k, n]) => ({ value: k, count: n, icon: categoryIcon(k) }))}
+                  selected={activeKinds}
+                  onChange={setKinds}
                 />
-              ) : (
-                <Sealed
-                  steps={filtered}
-                  doneBy={doneBy}
-                  onReveal={(id) => setRevealed([...revealed, id])}
-                  revealedCount={revealed.length}
-                  onHideAll={() => setRevealed([])}
+                <MultiSelect
+                  label="Players"
+                  options={players.map((p) => ({ value: p, count: playerCounts.get(p) ?? 0, note: p === player ? "you" : undefined }))}
+                  selected={activeWho}
+                  onChange={setWho}
                 />
-              )}
-            </>
-          )}
+              </div>
+
+              <Journal
+                steps={filtered}
+                player={player}
+                doneBy={doneBy}
+                searching={!!q || activeKinds.length > 0 || activeWho.length > 0}
+                onAdd={(initial) => setDialog({ mode: "add", initial })}
+                onEdit={(step) => setDialog({ mode: "edit", step })}
+              />
+          </>
         </main>
 
         <aside className="side">
-          <Activity progress={data.progress} steps={data.steps} isVisible={isVisible} />
+          <h2 className="side-title">Save Logs</h2>
+          {players.map(saveCard)}
         </aside>
       </div>
 
@@ -226,7 +200,6 @@ function Tracker({ player, onChangePlayer }: { player: string; onChangePlayer: (
           player={player}
           steps={data.steps}
           isMine={isMine}
-          visible={visible}
           doneBy={doneBy}
           onClose={() => setDialog(null)}
         />
@@ -235,11 +208,51 @@ function Tracker({ player, onChangePlayer }: { player: string; onChangePlayer: (
   );
 }
 
-function TabButton({ id, tab, setTab, icon, label, count }: { id: Tab; tab: Tab; setTab: (t: Tab) => void; icon: string; label: string; count: number }) {
+/** A dropdown of checkboxes. Nothing ticked means no filter. */
+function MultiSelect({
+  label,
+  options,
+  selected,
+  onChange,
+}: {
+  label: string;
+  options: { value: string; count: number; icon?: string; note?: string }[];
+  selected: string[];
+  onChange: (v: string[]) => void;
+}) {
+  const ref = useRef<HTMLDetailsElement>(null);
+  useEffect(() => {
+    const close = (e: MouseEvent) => {
+      if (ref.current?.open && !ref.current.contains(e.target as Node)) ref.current.open = false;
+    };
+    document.addEventListener("click", close);
+    return () => document.removeEventListener("click", close);
+  }, []);
+  const summary = !selected.length ? "All" : selected.length === 1 ? selected[0] : `${selected.length} selected`;
+  const toggle = (v: string) => onChange(selected.includes(v) ? selected.filter((x) => x !== v) : [...selected, v]);
   return (
-    <button role="tab" aria-selected={tab === id} className={tab === id ? "active" : ""} onClick={() => setTab(id)}>
-      <Icon name={icon} size={17} /> {label} <span className="count">{count}</span>
-    </button>
+    <details className={`multi ${selected.length ? "on" : ""}`} ref={ref}>
+      <summary>
+        <span className="multi-label">{label}</span>
+        <span className="multi-value">{summary}</span>
+      </summary>
+      <div className="multi-menu">
+        {options.map((o) => (
+          <label key={o.value} className="multi-option">
+            <input type="checkbox" checked={selected.includes(o.value)} onChange={() => toggle(o.value)} />
+            {o.icon && <Icon name={o.icon} size={15} />}
+            <span>{o.value}</span>
+            {o.note && <span className="pill">{o.note}</span>}
+            <span className="muted">{o.count}</span>
+          </label>
+        ))}
+        {selected.length > 0 && (
+          <button type="button" className="text-btn" onClick={() => onChange([])}>
+            Clear
+          </button>
+        )}
+      </div>
+    </details>
   );
 }
 
@@ -450,7 +463,6 @@ function StepRow({ step, fixed, player, who, onEdit }: { step: Step; fixed: bool
         <div className="step-head">
           <span className="step-action">{title}</span>
           {step.age && <span className={`age age-${norm(step.age)}`}>{step.age}</span>}
-          {!mine && <span className="pill">revealed</span>}
         </div>
         {!fixed && step.location && (
           <p className="step-where">
@@ -486,102 +498,6 @@ function StepRow({ step, fixed, player, who, onEdit }: { step: Step; fixed: bool
         </div>
       </div>
     </li>
-  );
-}
-
-/* ---------------- Sealed ---------------- */
-
-function Sealed({
-  steps,
-  doneBy,
-  onReveal,
-  revealedCount,
-  onHideAll,
-}: {
-  steps: Step[];
-  doneBy: Map<string, string[]>;
-  onReveal: (id: string) => void;
-  revealedCount: number;
-  onHideAll: () => void;
-}) {
-  return (
-    <>
-      <p className="sealed-intro">
-        <Icon name="lock" size={16} /> Steps your party has logged that you haven't done yet. They stay sealed until you choose to reveal one.
-      </p>
-      {!steps.length ? (
-        <div className="empty frame">
-          <Icon name="lock" size={40} />
-          <p>Nothing sealed. You've seen everything the party has logged.</p>
-        </div>
-      ) : (
-        <div className="sealed-grid">
-          {[...steps]
-            .sort((a, b) => b._creationTime - a._creationTime)
-            .map((s) => (
-              <div key={s._id} className="sealed-card">
-                <div className="seal" aria-hidden="true">
-                  <Icon name={categoryIcon(s.category)} size={20} />
-                </div>
-                <span className="sealed-cat">{s.category}</span>
-                <span className="muted small">done by {(doneBy.get(s._id) ?? [s.createdBy]).join(", ")}</span>
-                <button className="text-btn" onClick={() => onReveal(s._id)}>
-                  <Icon name="eye" size={15} /> Break the seal
-                </button>
-              </div>
-            ))}
-        </div>
-      )}
-      {revealedCount > 0 && (
-        <button className="text-btn center-btn" onClick={onHideAll}>
-          <Icon name="eyeOff" size={15} /> Re-seal the {revealedCount} step{revealedCount === 1 ? "" : "s"} I revealed
-        </button>
-      )}
-    </>
-  );
-}
-
-/* ---------------- Sidebar ---------------- */
-
-function Activity({ progress, steps, isVisible }: { progress: Progress[]; steps: Step[]; isVisible: (s: Step) => boolean }) {
-  const byId = new Map(steps.map((s) => [s._id as string, s]));
-  const recent = [...progress].sort((a, b) => b._creationTime - a._creationTime).slice(0, 14);
-  return (
-    <section className="frame panel">
-      <h2 className="panel-title">Party Chronicle</h2>
-      <Ornament />
-      {!recent.length ? (
-        <p className="muted small">Nothing yet.</p>
-      ) : (
-        <ul className="feed">
-          {recent.map((p) => {
-            const s = byId.get(p.stepId);
-            if (!s) return null;
-            const show = isVisible(s);
-            const info = categoryInfo(s.category);
-            return (
-              <li key={p._id}>
-                <div>
-                  <p>
-                    <b>{p.player}</b>{" "}
-                    {show ? (
-                      <>
-                        · {info.fixed ? s.subject : s.subject} <span className="muted">· {info.fixed ? s.location || s.action : s.action}</span>
-                      </>
-                    ) : (
-                      <span className="muted">
-                        sealed a <Icon name={info.icon} size={13} /> {s.category} step
-                      </span>
-                    )}
-                  </p>
-                  <span className="muted small">{ago(p._creationTime)}</span>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      )}
-    </section>
   );
 }
 
@@ -734,7 +650,6 @@ function StepDialog({
   player,
   steps,
   isMine,
-  visible,
   doneBy,
   onClose,
 }: {
@@ -742,7 +657,6 @@ function StepDialog({
   player: string;
   steps: Step[];
   isMine: (s: Step) => boolean;
-  visible: Step[];
   doneBy: Map<string, string[]>;
   onClose: () => void;
 }) {
@@ -785,7 +699,7 @@ function StepDialog({
   };
 
   // Dropdown options only come from steps you can already see, so choosing never spoils anything.
-  const subjects = uniq(visible.filter((s) => norm(s.category) === norm(f.category)).map((s) => s.subject));
+  const subjects = uniq(steps.filter((s) => norm(s.category) === norm(f.category)).map((s) => s.subject));
   // Steps are a fixed list per kind. Free text only for "Other" and kinds people add themselves.
   const freeAction = !!info.freeAction;
   const baseActions = info.subjectActions?.[f.subject] ?? info.actions;
