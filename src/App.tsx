@@ -5,7 +5,7 @@ import type { Doc, Id } from "../convex/_generated/dataModel";
 import { useLocal } from "./storage";
 import { CATEGORIES, Icon, categoryIcon, categoryInfo } from "./icons";
 import { REGIONS } from "./locations";
-import { BOSS_DUNGEONS, type Group } from "./gamedata";
+import { BOSS_DUNGEONS, DUNGEON_ICON, DUNGEONS, GREAT_FAIRIES, HEART_PIECES, SONGS, type Group } from "./gamedata";
 import { sameMomentAs } from "../convex/links";
 
 type Step = Doc<"steps">;
@@ -15,6 +15,8 @@ type DialogState = { mode: "add"; initial: Fields } | { mode: "edit"; step: Step
 
 const EMPTY: Fields = { category: "", subject: "", action: "", location: "", how: "", age: "" };
 const BASE_HEARTS = 3;
+// Start, one container per boss, and every four pieces.
+const MAX_HEARTS = BASE_HEARTS + 8 + HEART_PIECES / 4;
 
 const norm = (s: string) => s.trim().toLowerCase();
 const uniq = (xs: string[]) => [...new Set(xs.filter(Boolean))].sort((a, b) => a.localeCompare(b));
@@ -129,7 +131,6 @@ function Tracker({ player, onChangePlayer }: { player: string; onChangePlayer: (
       isMe={name === player}
       steps={data.steps}
       doneBy={doneBy}
-      progress={data.progress}
     />
   );
 
@@ -258,80 +259,94 @@ function MultiSelect({
 
 /* ---------------- Save logs ---------------- */
 
+const HEART = "M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z";
+
+/** Every heart in the game: collected ones filled, the next one filled by quarters, the rest dark. */
 function Hearts({ full, quarters }: { full: number; quarters: number }) {
   return (
-    <div className="hearts" aria-label={`${full} hearts${quarters ? ` and ${quarters}/4` : ""}`}>
-      {Array.from({ length: full }, (_, i) => (
-        <svg key={i} viewBox="0 0 24 24" className="heart full">
-          <path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" />
-        </svg>
-      ))}
-      {quarters > 0 && (
-        <svg viewBox="0 0 24 24" className="heart partial">
-          <defs>
-            <clipPath id={`q${quarters}`}>
-              {/* quarters fill clockwise from top-left */}
-              {quarters >= 1 && <rect x="0" y="0" width="12" height="12" />}
-              {quarters >= 2 && <rect x="12" y="0" width="12" height="12" />}
-              {quarters >= 3 && <rect x="12" y="12" width="12" height="12" />}
-            </clipPath>
-          </defs>
-          <path className="empty" d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" />
-          <path clipPath={`url(#q${quarters})`} d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" />
-        </svg>
-      )}
+    <div className="hearts" aria-label={`${full} of ${MAX_HEARTS} hearts${quarters ? ` and ${quarters}/4` : ""}`}>
+      {Array.from({ length: MAX_HEARTS }, (_, i) => {
+        if (i < full)
+          return (
+            <svg key={i} viewBox="0 0 24 24" className="heart full">
+              <path d={HEART} />
+            </svg>
+          );
+        const partial = i === full ? quarters : 0;
+        return (
+          <svg key={i} viewBox="0 0 24 24" className="heart missing">
+            {partial > 0 && (
+              <defs>
+                <clipPath id={`q${partial}`}>
+                  {/* quarters fill clockwise from top-left */}
+                  {partial >= 1 && <rect x="0" y="0" width="12" height="12" />}
+                  {partial >= 2 && <rect x="12" y="0" width="12" height="12" />}
+                  {partial >= 3 && <rect x="12" y="12" width="12" height="12" />}
+                </clipPath>
+              </defs>
+            )}
+            <path className="dark" d={HEART} />
+            {partial > 0 && <path className="piece" clipPath={`url(#q${partial})`} d={HEART} />}
+          </svg>
+        );
+      })}
     </div>
   );
 }
 
-function SaveCard({
-  name,
-  isMe,
-  steps,
-  doneBy,
-  progress,
-}: {
-  name: string;
-  isMe: boolean;
-  steps: Step[];
-  doneBy: Map<string, string[]>;
-  progress: Progress[];
-}) {
+/** One icon per thing in a complete set: lit when collected, dark when not. */
+function Track({ label, icon, items, have }: { label: string; icon: string | ((item: string) => string); items: string[]; have: Set<string> }) {
+  return (
+    <div className="track">
+      <span className="track-label">
+        {label} <b>{items.filter((x) => have.has(x)).length}</b>/{items.length}
+      </span>
+      <div className="track-icons">
+        {items.map((x) => (
+          <span key={x} className={`track-icon ${have.has(x) ? "lit" : ""}`} title={x}>
+            <Icon name={typeof icon === "string" ? icon : icon(x)} size={16} />
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
 
+// Shown as a set on the save card, or not at all; everything else is a plain count.
+const TRACKED = ["Heart Piece", "Dungeon", "Great Fairy", "Song", "Item", "Mask", "Gold Skulltula"];
+
+function SaveCard({ name, isMe, steps, doneBy }: { name: string; isMe: boolean; steps: Step[]; doneBy: Map<string, string[]> }) {
   const done = steps.filter((s) => doneBy.get(s._id)?.includes(name));
-  const count = (cat: string) => done.filter((s) => s.category === cat).length;
-  const pieces = count("Heart Piece");
-  const completed = (s: Step) => s.category === "Dungeon" && s.action === "Completed";
+  const pieces = done.filter((s) => s.category === "Heart Piece").length;
+  const completed = new Set(done.filter((s) => s.category === "Dungeon" && s.action === "Completed").map((s) => s.subject));
   // Each boss leaves a heart container, so a completed boss dungeon is a heart.
-  const containers = new Set(done.filter((s) => completed(s) && BOSS_DUNGEONS.includes(s.subject)).map((s) => s.subject)).size;
+  const containers = BOSS_DUNGEONS.filter((d) => completed.has(d)).length;
   const hearts = BASE_HEARTS + containers + Math.floor(pieces / 4);
+  const fairies = new Set(done.filter((s) => s.category === "Great Fairy").map((s) => s.subject));
+  const songs = new Set(done.filter((s) => s.category === "Song").map((s) => s.subject));
 
-  // Fixed kinds count every entry; named kinds count distinct things; dungeons count only completed ones.
+  // Fixed kinds count every entry; named kinds count distinct things.
   const tallies = new Map<string, Set<string>>();
   for (const s of done) {
-    if (s.category === "Heart Piece") continue;
-    if (s.category === "Dungeon" && !completed(s)) continue;
+    if (TRACKED.includes(s.category)) continue;
     const set = tallies.get(s.category) ?? new Set<string>();
     set.add(categoryInfo(s.category).fixed ? s._id : norm(s.subject));
     tallies.set(s.category, set);
   }
-  const lastActive = progress.filter((p) => p.player === name).reduce((m, p) => Math.max(m, p._creationTime), 0);
 
   return (
     <section className={`frame save-card ${isMe ? "is-me" : ""}`}>
       <header className="save-head">
-        <div className="save-name">
-          <h2>{name}</h2>
-          <span className="muted small">{lastActive ? `active ${ago(lastActive)}` : "no steps yet"}</span>
-        </div>
-        <div className="save-steps">
-          <b>{done.length}</b>
-          <span>steps</span>
-        </div>
+        <h2 className="save-name">{name}</h2>
+        <span className="tally-tile" title="Gold Skulltula tokens">
+          <Icon name="spider" size={18} />
+          <b>{done.filter((s) => s.category === "Gold Skulltula").length}</b>
+        </span>
       </header>
-
       <Hearts full={hearts} quarters={pieces % 4} />
-
+      <Track label="Dungeons" icon={(d) => DUNGEON_ICON[d] ?? "door"} items={DUNGEONS.flatMap((g) => g.items)} have={completed} />
+      <Track label="Songs" icon="note" items={SONGS.flatMap((g) => g.items)} have={songs} />
+      <Track label="Great Fairies" icon="fairy" items={GREAT_FAIRIES.flatMap((g) => g.items)} have={fairies} />
       {tallies.size > 0 && (
         <div className="save-tallies">
           {[...tallies.entries()]
@@ -340,12 +355,10 @@ function SaveCard({
               <span key={c} className="tally-tile" title={c}>
                 <Icon name={categoryIcon(c)} size={18} />
                 <b>{set.size}</b>
-                <small>{c}</small>
               </span>
             ))}
         </div>
       )}
-
     </section>
   );
 }
@@ -380,10 +393,12 @@ function Journal(props: {
     );
   }
 
-  // One card per (category, subject). Most recently touched first.
+  // One card per (category, subject). A Great Fairy and her gift are one moment, so they share the fountain's card.
+  // Most recently touched first.
   const groups = new Map<string, Step[]>();
   for (const s of steps) {
-    const key = `${norm(s.category)}|${norm(s.subject)}`;
+    const twin = s.category === "Great Fairy" ? undefined : sameMomentAs(s);
+    const key = twin ? `${norm(twin.category)}|${norm(twin.subject)}` : `${norm(s.category)}|${norm(s.subject)}`;
     groups.set(key, [...(groups.get(key) ?? []), s]);
   }
   const cards = [...groups.values()]
@@ -413,8 +428,20 @@ function SubjectCard({
   onEdit: (s: Step) => void;
 }) {
   const first = steps[0];
-  const info = categoryInfo(first.category);
-  const mineCount = steps.filter((s) => doneBy.get(s._id)?.includes(player)).length;
+  // A fountain card may hold the gift's entry only (if nobody logged the fountain itself).
+  const fountain = first.category === "Great Fairy" ? first : undefined;
+  const fairyTwin = fountain ? undefined : first.category !== "Great Fairy" ? sameMomentAs(first) : undefined;
+  const isFairyCard = !!fountain || (!!fairyTwin && fairyTwin.category === "Great Fairy");
+  const cardCategory = isFairyCard ? "Great Fairy" : first.category;
+  const cardSubject = fountain?.subject ?? fairyTwin?.subject ?? first.subject;
+  const info = categoryInfo(cardCategory);
+  const gift = isFairyCard ? sameMomentAs({ category: "Great Fairy", subject: cardSubject, action: "Got the gift" })?.subject : undefined;
+
+  // Offer the next step only while this thing has steps nobody has logged yet.
+  const allSteps = info.subjectActions?.[first.subject] ?? info.actions;
+  const missing = isFairyCard ? [] : allSteps.filter((a) => !steps.some((s) => s.action === a));
+  const canAdd = !!info.fixed || missing.length > 0;
+
   return (
     <article className="frame subject-card">
       <header>
@@ -422,39 +449,64 @@ function SubjectCard({
           <Icon name={info.icon} size={22} />
         </div>
         <div className="subject-title">
-          <h3>{info.fixed ? `${first.subject}s` : first.subject}</h3>
-          {!info.fixed && <span className="eyebrow">{first.category}</span>}
+          <h3>{info.fixed ? `${first.subject}s` : cardSubject}</h3>
+          {!info.fixed && <span className="eyebrow">{isFairyCard && gift ? `Great Fairy · ${gift}` : cardCategory}</span>}
         </div>
-        <span className="tally" title="Entries you've done in this card">
-          {mineCount}/{steps.length}
-        </span>
       </header>
       <ol className="steps">
         {steps.map((s) => (
-          <StepRow key={s._id} step={s} fixed={!!info.fixed} player={player} who={doneBy.get(s._id) ?? []} onEdit={() => onEdit(s)} />
+          <StepRow
+            key={s._id}
+            step={s}
+            fixed={!!info.fixed}
+            title={isFairyCard ? (s.category === "Great Fairy" ? "Visited the fountain" : `Got ${s.subject}`) : undefined}
+            player={player}
+            who={doneBy.get(s._id) ?? []}
+            onEdit={categoryInfo(s.category).noHow ? undefined : () => onEdit(s)}
+          />
         ))}
       </ol>
-      <button className="add-next" onClick={() => onAdd({ ...EMPTY, category: first.category, subject: first.subject })}>
-        <Icon name="plus" size={16} /> {info.fixed ? `Log another ${first.subject}` : `Add a step for ${first.subject}`}
-      </button>
+      {canAdd && (
+        <button
+          className="add-next"
+          onClick={() =>
+            onAdd({ ...EMPTY, category: first.category, subject: first.subject, action: !info.fixed && missing.length === 1 ? missing[0] : "" })
+          }
+        >
+          <Icon name="plus" size={16} />{" "}
+          {info.fixed ? `Log another ${first.subject}` : missing.length === 1 ? `Log ${first.subject} · ${missing[0]}` : `Log a step for ${first.subject}`}
+        </button>
+      )}
     </article>
   );
 }
 
-function StepRow({ step, fixed, player, who, onEdit }: { step: Step; fixed: boolean; player: string; who: string[]; onEdit: () => void }) {
+function StepRow({
+  step,
+  fixed,
+  title: titleOverride,
+  player,
+  who,
+  onEdit,
+}: {
+  step: Step;
+  fixed: boolean;
+  title?: string;
+  player: string;
+  who: string[];
+  onEdit?: () => void;
+}) {
   const setDone = useMutation(api.steps.setDone);
-  const remove = useMutation(api.steps.remove);
-  const [confirm, setConfirm] = useState(false);
   const mine = who.includes(player);
   // For fixed kinds (heart pieces…) the place is what tells entries apart, so it leads.
   const samePlace = !!categoryInfo(step.category).place;
-  const title = fixed && !samePlace ? step.location || step.action : step.action;
+  const title = titleOverride ?? (fixed && !samePlace ? step.location || step.action : step.action);
   return (
     <li className={`step ${mine ? "done" : ""}`}>
       <button
         className="check"
         aria-pressed={mine}
-        title={mine ? "Mark as not done" : "Mark as done"}
+        title={mine ? "Mark as not done (removed once nobody has it)" : "Mark as done"}
         onClick={() => setDone({ stepId: step._id, player, done: !mine })}
       >
         <Icon name="check" size={16} />
@@ -463,6 +515,13 @@ function StepRow({ step, fixed, player, who, onEdit }: { step: Step; fixed: bool
         <div className="step-head">
           <span className="step-action">{title}</span>
           {step.age && <span className={`age age-${norm(step.age)}`}>{step.age}</span>}
+          <div className="stamps">
+            {who.map((p) => (
+              <span key={p} className={`stamp ${p === player ? "mine" : ""}`} title={`${p} did this`}>
+                {p}
+              </span>
+            ))}
+          </div>
         </div>
         {!fixed && step.location && (
           <p className="step-where">
@@ -472,29 +531,15 @@ function StepRow({ step, fixed, player, who, onEdit }: { step: Step; fixed: bool
         {step.how && <p className="step-how">{step.how}</p>}
         <div className="step-foot">
           <span className="muted small">
-            {who.length ? <>done by {who.join(", ")}</> : "not done by anyone yet"} · logged by {step.createdBy}, {ago(step._creationTime)}
+            logged by {step.createdBy}, {ago(step._creationTime)}
           </span>
-          <div className="row-actions">
-            {confirm ? (
-              <>
-                <button className="text-btn danger" onClick={() => remove({ id: step._id })}>
-                  Delete for everyone
-                </button>
-                <button className="text-btn" onClick={() => setConfirm(false)}>
-                  Cancel
-                </button>
-              </>
-            ) : (
-              <>
-                <button className="icon-btn sm" onClick={onEdit} title="Edit">
-                  <Icon name="edit" size={15} />
-                </button>
-                <button className="icon-btn sm" onClick={() => setConfirm(true)} title="Delete">
-                  <Icon name="trash" size={15} />
-                </button>
-              </>
-            )}
-          </div>
+          {onEdit && (
+            <div className="row-actions">
+              <button className="icon-btn sm" onClick={onEdit} title="Fix a mistake in this entry">
+                <Icon name="edit" size={15} />
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </li>

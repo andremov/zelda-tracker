@@ -293,3 +293,22 @@ export const FROGS: Group[] = [
     items: ["Zelda's Lullaby", "Epona's Song", "Saria's Song", "Sun's Song", "Song of Time", "Song of Storms", "Frog minigame"],
   },
 ];
+
+/** Heart pieces in the game. */
+export const HEART_PIECES = 36;
+
+/** Symbol for each dungeon on the save card (original icons, see src/icons.tsx). */
+export const DUNGEON_ICON: Record<string, string> = {
+  "Inside the Deku Tree": "tree",
+  "Dodongo's Cavern": "cave",
+  "Inside Jabu-Jabu's Belly": "fish",
+  "Bottom of the Well": "well",
+  "Forest Temple": "leaf",
+  "Fire Temple": "flame",
+  "Water Temple": "drop",
+  "Shadow Temple": "moon",
+  "Spirit Temple": "sun",
+  "Ice Cavern": "snowflake",
+  "Gerudo Training Ground": "swords",
+  "Ganon's Castle": "tower",
+};

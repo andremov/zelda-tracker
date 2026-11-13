@@ -91,18 +91,6 @@ export const update = mutation({
   },
 });
 
-export const remove = mutation({
-  args: { id: v.id("steps") },
-  handler: async (ctx, { id }) => {
-    const rows = await ctx.db
-      .query("progress")
-      .withIndex("by_step", (q) => q.eq("stepId", id))
-      .collect();
-    for (const r of rows) await ctx.db.delete(r._id);
-    await ctx.db.delete(id);
-  },
-});
-
 export const setDone = mutation({
   args: { stepId: v.id("steps"), player: v.string(), done: v.boolean() },
   handler: async (ctx, { stepId, player, done }) => {
@@ -115,6 +103,14 @@ export const setDone = mutation({
       const step = await ctx.db.get(stepId);
       if (step) await giveProgress(ctx, step, p);
     }
-    if (!done && existing) await ctx.db.delete(existing._id);
+    if (!done && existing) {
+      await ctx.db.delete(existing._id);
+      // An entry nobody has done anymore is removed.
+      const left = await ctx.db
+        .query("progress")
+        .withIndex("by_step", (q) => q.eq("stepId", stepId))
+        .first();
+      if (!left) await ctx.db.delete(stepId);
+    }
   },
 });
