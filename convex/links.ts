@@ -17,7 +17,6 @@ const FAIRY_GIFTS: [string, string, string][] = [
   ["Hyrule Castle Great Fairy Fountain", "Item", "Din's Fire"],
   ["Zora's Fountain Great Fairy Fountain", "Item", "Farore's Wind"],
   ["Colossus Great Fairy Fountain", "Item", "Nayru's Love"],
-  ["Death Mountain Great Fairy Fountain", "Upgrade", "Magic Meter & Spin Attack"],
   ["Crater Great Fairy Fountain", "Upgrade", "Double Magic"],
   ["Ganon's Castle Great Fairy Fountain", "Upgrade", "Double Defense"],
 ];
@@ -41,7 +40,6 @@ const TIERS: [string, string[]][] = [
   ["Upgrade", ["Deku Nuts (30)", "Deku Nuts (40)"]],
   ["Upgrade", ["Goron's Bracelet", "Silver Gauntlets", "Golden Gauntlets"]],
   ["Upgrade", ["Silver Scale", "Golden Scale"]],
-  ["Upgrade", ["Magic Meter & Spin Attack", "Double Magic"]],
   ["Item", ["Hookshot", "Longshot"]],
 ];
 const got = (category: string, subject: string): StepKey => ({ category, subject, action: "Got it" });

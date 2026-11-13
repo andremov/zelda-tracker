@@ -56,7 +56,7 @@ export const UPGRADES: Group[] = [
   { label: "Deku capacity", items: ["Deku Sticks (20)", "Deku Sticks (30)", "Deku Nuts (30)", "Deku Nuts (40)"] },
   { label: "Strength", items: ["Goron's Bracelet", "Silver Gauntlets", "Golden Gauntlets"] },
   { label: "Diving", items: ["Silver Scale", "Golden Scale"] },
-  { label: "Magic & defense", items: ["Magic Meter & Spin Attack", "Double Magic", "Double Defense"] },
+  { label: "Magic & defense", items: ["Double Magic", "Double Defense"] },
 ];
 
 export const EQUIPMENT: Group[] = [
@@ -259,7 +259,6 @@ export const ACQUIRED: Record<string, { place?: string; age?: string }> = {
   "Golden Gauntlets": { place: "Ganon's Castle", age: "Adult" },
   "Silver Scale": { place: "Zora's Domain", age: "Child" },
   "Golden Scale": { place: "Fishing Pond", age: "Adult" },
-  "Magic Meter & Spin Attack": { place: "Death Mountain Great Fairy Fountain", age: "Child" },
   "Double Magic": { place: "Crater Great Fairy Fountain", age: "Adult" },
   "Double Defense": { place: "Ganon's Castle Great Fairy Fountain", age: "Adult" },
 };
