@@ -17,7 +17,7 @@ const FAIRY_GIFTS: [string, string, string][] = [
   ["Hyrule Castle Great Fairy Fountain", "Item", "Din's Fire"],
   ["Zora's Fountain Great Fairy Fountain", "Item", "Farore's Wind"],
   ["Colossus Great Fairy Fountain", "Item", "Nayru's Love"],
-  ["Death Mountain Great Fairy Fountain", "Upgrade", "Magic Meter"],
+  ["Death Mountain Great Fairy Fountain", "Upgrade", "Magic Meter & Spin Attack"],
   ["Crater Great Fairy Fountain", "Upgrade", "Double Magic"],
   ["Ganon's Castle Great Fairy Fountain", "Upgrade", "Double Defense"],
 ];
@@ -27,6 +27,24 @@ export const SAME_MOMENT: [StepKey, StepKey][] = FAIRY_GIFTS.map(([fountain, cat
   { category: "Great Fairy", subject: fountain, action: "Got the gift" },
   { category, subject: gift, action: "Got it" },
 ]);
+
+/**
+ * Things that come in sizes or tiers: getting a later one means you got the earlier ones first.
+ * One way only: logging the bigger bag ticks the smaller one, not the other way around.
+ */
+const TIERS: [string, string[]][] = [
+  ["Upgrade", ["Bullet Bag (40)", "Bullet Bag (50)"]],
+  ["Upgrade", ["Quiver (40)", "Quiver (50)"]],
+  ["Upgrade", ["Big Bomb Bag (30)", "Biggest Bomb Bag (40)"]],
+  ["Upgrade", ["Adult's Wallet", "Giant's Wallet"]],
+  ["Upgrade", ["Deku Sticks (20)", "Deku Sticks (30)"]],
+  ["Upgrade", ["Deku Nuts (30)", "Deku Nuts (40)"]],
+  ["Upgrade", ["Goron's Bracelet", "Silver Gauntlets", "Golden Gauntlets"]],
+  ["Upgrade", ["Silver Scale", "Golden Scale"]],
+  ["Upgrade", ["Magic Meter & Spin Attack", "Double Magic"]],
+  ["Item", ["Hookshot", "Longshot"]],
+];
+const got = (category: string, subject: string): StepKey => ({ category, subject, action: "Got it" });
 
 const same = (a: StepKey, b: StepKey) => a.category === b.category && a.subject === b.subject && a.action === b.action;
 
@@ -40,6 +58,10 @@ export function impliedBy(step: StepKey): StepKey[] {
     if (same(a, step)) out.push(b);
     if (same(b, step)) out.push(a);
   }
+  for (const [category, tiers] of TIERS) {
+    const i = step.action === "Got it" && step.category === category ? tiers.indexOf(step.subject) : -1;
+    for (const lower of tiers.slice(0, Math.max(i, 0))) out.push(got(category, lower));
+  }
   return out;
 }
 
@@ -52,6 +74,10 @@ export function impliersOf(step: StepKey): StepKey[] {
   for (const [a, b] of SAME_MOMENT) {
     if (same(a, step)) out.push(b);
     if (same(b, step)) out.push(a);
+  }
+  for (const [category, tiers] of TIERS) {
+    const i = step.action === "Got it" && step.category === category ? tiers.indexOf(step.subject) : -1;
+    if (i >= 0) for (const higher of tiers.slice(i + 1)) out.push(got(category, higher));
   }
   return out;
 }

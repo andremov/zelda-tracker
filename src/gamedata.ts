@@ -56,7 +56,7 @@ export const UPGRADES: Group[] = [
   { label: "Deku capacity", items: ["Deku Sticks (20)", "Deku Sticks (30)", "Deku Nuts (30)", "Deku Nuts (40)"] },
   { label: "Strength", items: ["Goron's Bracelet", "Silver Gauntlets", "Golden Gauntlets"] },
   { label: "Diving", items: ["Silver Scale", "Golden Scale"] },
-  { label: "Magic & defense", items: ["Magic Meter", "Double Magic", "Double Defense"] },
+  { label: "Magic & defense", items: ["Magic Meter & Spin Attack", "Double Magic", "Double Defense"] },
 ];
 
 export const EQUIPMENT: Group[] = [
@@ -244,8 +244,10 @@ export const ACQUIRED: Record<string, { place?: string; age?: string }> = {
   "Bullet Bag (50)": { place: "Market Shooting Gallery", age: "Child" },
   "Quiver (40)": { place: "Kakariko Shooting Gallery", age: "Adult" },
   "Quiver (50)": { place: "Gerudo's Fortress", age: "Adult" },
-  "Big Bomb Bag (30)": { place: "Bombchu Bowling Alley", age: "Child" },
-  "Biggest Bomb Bag (40)": { place: "Goron City", age: "Child" },
+  // The remake swaps these two compared to the original: the rolling Goron gives the first bag upgrade.
+  "Big Bomb Bag (30)": { place: "Goron City", age: "Child" },
+  "Biggest Bomb Bag (40)": { place: "Bombchu Bowling Alley", age: "Child" },
+  // Remake: 10 Skulltula tokens, holds 500.
   "Adult's Wallet": { place: "House of Skulltula", age: "Either" },
   "Giant's Wallet": { place: "House of Skulltula", age: "Either" },
   "Deku Sticks (20)": { place: "Lost Woods", age: "Child" },
@@ -257,7 +259,7 @@ export const ACQUIRED: Record<string, { place?: string; age?: string }> = {
   "Golden Gauntlets": { place: "Ganon's Castle", age: "Adult" },
   "Silver Scale": { place: "Zora's Domain", age: "Child" },
   "Golden Scale": { place: "Fishing Pond", age: "Adult" },
-  "Magic Meter": { place: "Death Mountain Great Fairy Fountain", age: "Child" },
+  "Magic Meter & Spin Attack": { place: "Death Mountain Great Fairy Fountain", age: "Child" },
   "Double Magic": { place: "Crater Great Fairy Fountain", age: "Adult" },
   "Double Defense": { place: "Ganon's Castle Great Fairy Fountain", age: "Adult" },
 };
