@@ -757,8 +757,6 @@ function StepDialog({
     how: init.how,
     age: init.age,
   });
-  const known = CATEGORIES.some((c) => c.name === init.category);
-  const [customCat, setCustomCat] = useState(!!init.category && !known);
   const [customAction, setCustomAction] = useState(false);
   const [busy, setBusy] = useState(false);
   const [dupes, setDupes] = useState<Step[] | null>(null);
@@ -772,7 +770,6 @@ function StepDialog({
   const set = <K extends keyof Fields>(k: K, v: string) => setF((prev) => ({ ...prev, [k]: v }));
   const pickCategory = (name: string) => {
     const next = categoryInfo(name);
-    setCustomCat(false);
     setCustomAction(false);
     setF((prev) => ({
       ...prev,
@@ -787,7 +784,6 @@ function StepDialog({
 
   // Dropdown options only come from steps you can already see, so choosing never spoils anything.
   const subjects = uniq(visible.filter((s) => norm(s.category) === norm(f.category)).map((s) => s.subject));
-  const customCats = uniq(steps.map((s) => s.category)).filter((c) => !CATEGORIES.some((k) => k.name === c));
   // Steps are a fixed list per kind. Free text only for "Other" and kinds people add themselves.
   const freeAction = !!info.freeAction;
   const baseActions = info.subjectActions?.[f.subject] ?? info.actions;
@@ -908,38 +904,18 @@ function StepDialog({
                   <button
                     type="button"
                     key={c.name}
-                    className={`cat-tile ${!customCat && f.category === c.name ? "active" : ""}`}
+                    className={`cat-tile ${f.category === c.name ? "active" : ""}`}
                     onClick={() => pickCategory(c.name)}
                   >
                     <Icon name={c.icon} size={22} />
                     <span>{c.name}</span>
                   </button>
                 ))}
-                {customCats.map((c) => (
-                  <button type="button" key={c} className={`cat-tile ${!customCat && f.category === c ? "active" : ""}`} onClick={() => pickCategory(c)}>
-                    <Icon name="star" size={22} />
-                    <span>{c}</span>
-                  </button>
-                ))}
-                <button
-                  type="button"
-                  className={`cat-tile ${customCat ? "active" : ""}`}
-                  onClick={() => {
-                    setCustomCat(true);
-                    setF((prev) => ({ ...prev, category: "", subject: categoryInfo(prev.category).fixed ? "" : prev.subject }));
-                  }}
-                >
-                  <Icon name="plus" size={22} />
-                  <span>New kind…</span>
-                </button>
               </div>
-              {customCat && (
-                <input className="mt" autoFocus value={f.category} onChange={(e) => set("category", e.target.value)} placeholder="Name the new kind" />
-              )}
             </fieldset>
 
             {f.category && (
-              <div className="form-rest" key={customCat ? "custom" : f.category}>
+              <div className="form-rest" key={f.category}>
                 {!info.fixed && info.options && (
                   <ListField
                     key={`subj-${f.category}`}

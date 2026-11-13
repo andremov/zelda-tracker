@@ -195,7 +195,6 @@ export const CATEGORIES: Category[] = [
   { name: "Song", icon: "note", subjectLabel: "Which song?", subjectPlaceholder: "Song name", actions: ["Learned"], options: SONGS, subjectPlace: SONG_PLACE, subjectAge: SONG_AGE, noHow: true },
   { name: "Dungeon", icon: "door", subjectLabel: "Which dungeon?", subjectPlaceholder: "Dungeon name", actions: ["Entered", "Got the map", "Got the compass", "Got the boss key", "Completed"], options: DUNGEONS, subjectActions: DUNGEON_STEPS, groupNoun: "Age", subjectAge: DUNGEON_AGE, subjectIsPlace: true, note: "Completed means you beat the boss and got what it leaves behind: the heart container and the stone or medallion. That's one step. It also ticks your Entered and boss key, if someone has logged those.", noHow: true },
   { name: "Side Quest", icon: "scroll", subjectLabel: "Which quest?", subjectPlaceholder: "Quest name", actions: ["Started", "Progressed", "Completed"] },
-  { name: "Other", icon: "star", subjectLabel: "What is it?", subjectPlaceholder: "Name it", actions: ["Got it", "Found", "Talked to", "Unlocked", "Completed"], freeAction: true },
 ];
 
 const FALLBACK: Category = { name: "", icon: "star", subjectLabel: "What is it?", subjectPlaceholder: "Name it", actions: ["Got it", "Found", "Completed"], freeAction: true };
