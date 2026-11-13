@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as links from "../links.js";
 import type * as steps from "../steps.js";
 
 import type {
@@ -17,6 +18,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  links: typeof links;
   steps: typeof steps;
 }>;
 
