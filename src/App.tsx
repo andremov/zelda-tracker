@@ -790,14 +790,16 @@ function StepDialog({
   const customCats = uniq(steps.map((s) => s.category)).filter((c) => !CATEGORIES.some((k) => k.name === c));
   // Steps are a fixed list per kind. Free text only for "Other" and kinds people add themselves.
   const freeAction = !!info.freeAction;
+  const baseActions = info.subjectActions?.[f.subject] ?? info.actions;
   const actionOptions =
-    state.mode === "edit" && f.action && !freeAction && !info.actions.includes(f.action) ? [...info.actions, f.action] : info.actions;
+    state.mode === "edit" && f.action && !freeAction && !baseActions.includes(f.action) ? [...baseActions, f.action] : baseActions;
   const showActionInput = freeAction && (customAction || (!!f.action && !actionOptions.includes(f.action)));
   const askAction = actionOptions.length > 1 || freeAction;
   const canSave = f.category.trim() && f.subject.trim() && f.action.trim();
   // Some answers are known from the kind and step alone; those questions aren't asked.
   const subjectKnown = !!info.options?.some((g) => g.items.includes(f.subject));
-  const lockedLocation = info.stepLocations?.[f.action] ?? (info.subjectIsPlace && subjectKnown ? f.subject : undefined);
+  const lockedLocation =
+    info.stepLocations?.[f.action] ?? info.subjectPlace?.[f.subject] ?? (info.subjectIsPlace && subjectKnown ? f.subject : undefined);
   const lockedAge = info.age ?? info.subjectAge?.[f.subject];
   const final: Fields = { ...f, location: lockedLocation ?? f.location, age: lockedAge ?? f.age };
 
@@ -937,8 +939,14 @@ function StepDialog({
                     key={`subj-${f.category}`}
                     label={info.subjectLabel ?? "What is it?"}
                     value={f.subject}
-                    onChange={(v) => set("subject", v)}
+                    onChange={(v) =>
+                      setF((prev) => {
+                        const steps = info.subjectActions?.[v] ?? info.actions;
+                        return { ...prev, subject: v, action: steps.includes(prev.action) ? prev.action : steps.length === 1 ? steps[0] : "" };
+                      })
+                    }
                     groups={info.options}
+                    groupNoun={info.groupNoun}
                     required
                   />
                 )}

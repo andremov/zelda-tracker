@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { DUNGEON_AGE, DUNGEONS, EQUIPMENT, ITEMS, MASKS, SONGS, UPGRADES, type Group } from "./gamedata";
+import { DUNGEON_AGE, DUNGEON_STEPS, DUNGEONS, EQUIPMENT, ITEMS, MASKS, SONG_AGE, SONG_PLACE, SONGS, UPGRADES, type Group } from "./gamedata";
 
 // Simple original line icons, 24x24, stroke-based.
 const paths: Record<string, ReactNode> = {
@@ -161,6 +161,8 @@ export type Category = {
   freeAction?: boolean;
   /** Known things of this kind, offered as a dropdown. */
   options?: Group[];
+  /** What the groups in `options` are, shown on the first dropdown. */
+  groupNoun?: string;
   /** Always done at this age, so the form doesn't ask. */
   age?: string;
   /** Steps that always happen in the same place, so the form doesn't ask where. */
@@ -169,6 +171,10 @@ export type Category = {
   subjectAge?: Record<string, string>;
   /** The thing is itself a place (a dungeon), so every step happens there. */
   subjectIsPlace?: boolean;
+  /** Steps that differ per thing (each dungeon has its own). Falls back to `actions`. */
+  subjectActions?: Record<string, string[]>;
+  /** Things of this kind that always happen in one place. */
+  subjectPlace?: Record<string, string>;
   /** Shown under the step choice, to explain what a step covers. */
   note?: string;
   howPlaceholder?: string;
@@ -182,8 +188,8 @@ export const CATEGORIES: Category[] = [
   { name: "Equipment", icon: "shield", subjectLabel: "Which equipment?", subjectPlaceholder: "Sword, shield, tunic, boots…", actions: ["Got it"], options: EQUIPMENT },
   { name: "Upgrade", icon: "upgrade", subjectLabel: "What got upgraded?", subjectPlaceholder: "Quiver, wallet, bomb bag…", actions: ["Got it"], options: UPGRADES },
   { name: "Bottle", icon: "bottle", fixed: "Bottle", actions: ["Got it"] },
-  { name: "Song", icon: "note", subjectLabel: "Which song?", subjectPlaceholder: "Song name", actions: ["Learned"], options: SONGS },
-  { name: "Dungeon", icon: "door", subjectLabel: "Which dungeon?", subjectPlaceholder: "Dungeon name", actions: ["Entered", "Got the map", "Got the compass", "Got the boss key", "Completed"], options: DUNGEONS, subjectAge: DUNGEON_AGE, subjectIsPlace: true, note: "Completed means you beat the boss and got what it leaves behind: the heart container and the stone or medallion. That's one step." },
+  { name: "Song", icon: "note", subjectLabel: "Which song?", subjectPlaceholder: "Song name", actions: ["Learned"], options: SONGS, subjectPlace: SONG_PLACE, subjectAge: SONG_AGE },
+  { name: "Dungeon", icon: "door", subjectLabel: "Which dungeon?", subjectPlaceholder: "Dungeon name", actions: ["Entered", "Got the map", "Got the compass", "Got the boss key", "Completed"], options: DUNGEONS, subjectActions: DUNGEON_STEPS, groupNoun: "Age", subjectAge: DUNGEON_AGE, subjectIsPlace: true, note: "Completed means you beat the boss and got what it leaves behind: the heart container and the stone or medallion. That's one step. It also ticks your Entered and boss key, if someone has logged those." },
   { name: "Side Quest", icon: "scroll", subjectLabel: "Which quest?", subjectPlaceholder: "Quest name", actions: ["Started", "Progressed", "Completed"] },
   { name: "Other", icon: "star", subjectLabel: "What is it?", subjectPlaceholder: "Name it", actions: ["Got it", "Found", "Talked to", "Unlocked", "Completed"], freeAction: true },
 ];

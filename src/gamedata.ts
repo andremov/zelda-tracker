@@ -81,18 +81,15 @@ export const MASKS: Group[] = [
 ];
 
 export const DUNGEONS: Group[] = [
+  { label: "Child", items: ["Inside the Deku Tree", "Dodongo's Cavern", "Inside Jabu-Jabu's Belly", "Bottom of the Well"] },
   {
-    label: "Dungeons",
+    label: "Adult",
     items: [
-      "Inside the Deku Tree",
-      "Dodongo's Cavern",
-      "Inside Jabu-Jabu's Belly",
       "Forest Temple",
       "Fire Temple",
       "Water Temple",
       "Shadow Temple",
       "Spirit Temple",
-      "Bottom of the Well",
       "Ice Cavern",
       "Gerudo Training Ground",
       "Ganon's Castle",
@@ -112,18 +109,59 @@ export const BOSS_DUNGEONS = [
   "Spirit Temple",
 ];
 
-/** The age each dungeon counts as. */
-export const DUNGEON_AGE: Record<string, string> = {
-  "Inside the Deku Tree": "Child",
-  "Dodongo's Cavern": "Child",
-  "Inside Jabu-Jabu's Belly": "Child",
-  "Bottom of the Well": "Child",
-  "Forest Temple": "Adult",
-  "Fire Temple": "Adult",
-  "Water Temple": "Adult",
-  "Shadow Temple": "Adult",
-  "Spirit Temple": "Adult",
-  "Ice Cavern": "Adult",
-  "Gerudo Training Ground": "Adult",
-  "Ganon's Castle": "Adult",
+/** Each dungeon's progress checklist. Only dungeons that have a boss key, map or compass list them. */
+const MAP_COMPASS = ["Entered", "Got the map", "Got the compass", "Completed"];
+const WITH_BOSS_KEY = ["Entered", "Got the map", "Got the compass", "Got the boss key", "Completed"];
+export const DUNGEON_STEPS: Record<string, string[]> = {
+  "Inside the Deku Tree": MAP_COMPASS,
+  "Dodongo's Cavern": MAP_COMPASS,
+  "Inside Jabu-Jabu's Belly": MAP_COMPASS,
+  "Bottom of the Well": MAP_COMPASS,
+  "Ice Cavern": MAP_COMPASS,
+  "Forest Temple": WITH_BOSS_KEY,
+  "Fire Temple": WITH_BOSS_KEY,
+  "Water Temple": WITH_BOSS_KEY,
+  "Shadow Temple": WITH_BOSS_KEY,
+  "Spirit Temple": WITH_BOSS_KEY,
+  "Gerudo Training Ground": ["Entered", "Completed"],
+  "Ganon's Castle": ["Entered", "Got the boss key", "Completed"],
+};
+
+/** You can't complete a dungeon without these, so ticking Completed ticks them too. Map and compass are optional. */
+export const COMPLETION_IMPLIES = ["Entered", "Got the boss key"];
+
+/** The age each dungeon counts as, read off the groups above. */
+export const DUNGEON_AGE: Record<string, string> = Object.fromEntries(DUNGEONS.flatMap((g) => g.items.map((d) => [d, g.label])));
+
+/** Where each song is learned. Only shown once you pick the song, i.e. after you've learned it. */
+export const SONG_PLACE: Record<string, string> = {
+  "Zelda's Lullaby": "Castle Courtyard",
+  "Epona's Song": "Lon Lon Ranch",
+  "Saria's Song": "Sacred Forest Meadow",
+  "Sun's Song": "Kakariko Graveyard",
+  "Song of Time": "Hyrule Field",
+  "Song of Storms": "Windmill",
+  "Scarecrow's Song": "Lake Hylia",
+  "Minuet of Forest": "Sacred Forest Meadow",
+  "Bolero of Fire": "Death Mountain Crater",
+  "Serenade of Water": "Ice Cavern",
+  "Nocturne of Shadow": "Kakariko Village",
+  "Requiem of Spirit": "Desert Colossus",
+  "Prelude of Light": "Temple of Time",
+};
+
+/** The age each song is learned at. Scarecrow's Song spans both ages, so it isn't listed. */
+export const SONG_AGE: Record<string, string> = {
+  "Zelda's Lullaby": "Child",
+  "Epona's Song": "Child",
+  "Saria's Song": "Child",
+  "Sun's Song": "Child",
+  "Song of Time": "Child",
+  "Song of Storms": "Adult",
+  "Minuet of Forest": "Adult",
+  "Bolero of Fire": "Adult",
+  "Serenade of Water": "Adult",
+  "Nocturne of Shadow": "Adult",
+  "Requiem of Spirit": "Adult",
+  "Prelude of Light": "Adult",
 };

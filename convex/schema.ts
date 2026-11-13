@@ -12,7 +12,7 @@ export default defineSchema({
     location: v.string(),
     how: v.string(),
     age: v.string(), // "Child" | "Adult" | ""
-  }),
+  }).index("by_subject", ["category", "subject"]),
   // Who has done which step. Each player checks steps off independently;
   // nothing is ever inferred from other steps.
   progress: defineTable({

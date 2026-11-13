@@ -1,4 +1,5 @@
-import { mutation, query } from "./_generated/server";
+import { mutation, query, type MutationCtx } from "./_generated/server";
+import type { Doc } from "./_generated/dataModel";
 import { v } from "convex/values";
 
 const fields = {
@@ -11,6 +12,29 @@ const fields = {
 };
 
 const clean = (s: string) => s.trim().slice(0, 500);
+
+// You can't complete a dungeon without entering it or (where it has one) its boss key.
+// Keep in sync with COMPLETION_IMPLIES in src/gamedata.ts.
+const COMPLETION_IMPLIES = ["Entered", "Got the boss key"];
+
+/** Give a player progress on a step, plus whatever that step implies. Only ticks entries that already exist. */
+async function giveProgress(ctx: MutationCtx, step: Doc<"steps">, player: string) {
+  const targets = [step];
+  if (step.category === "Dungeon" && step.action === "Completed") {
+    const siblings = await ctx.db
+      .query("steps")
+      .withIndex("by_subject", (q) => q.eq("category", step.category).eq("subject", step.subject))
+      .collect();
+    targets.push(...siblings.filter((s) => COMPLETION_IMPLIES.includes(s.action)));
+  }
+  for (const t of targets) {
+    const has = await ctx.db
+      .query("progress")
+      .withIndex("by_step_player", (q) => q.eq("stepId", t._id).eq("player", player))
+      .unique();
+    if (!has) await ctx.db.insert("progress", { stepId: t._id, player });
+  }
+}
 
 export const list = query({
   args: {},
@@ -37,7 +61,7 @@ export const add = mutation({
       how: clean(f.how),
       age: clean(f.age),
     });
-    await ctx.db.insert("progress", { stepId, player: p });
+    await giveProgress(ctx, (await ctx.db.get(stepId))!, p);
     return stepId;
   },
 });
@@ -76,8 +100,10 @@ export const setDone = mutation({
       .query("progress")
       .withIndex("by_step_player", (q) => q.eq("stepId", stepId).eq("player", p))
       .unique();
-    if (done && !existing) await ctx.db.insert("progress", { stepId, player: p });
+    if (done) {
+      const step = await ctx.db.get(stepId);
+      if (step) await giveProgress(ctx, step, p);
+    }
     if (!done && existing) await ctx.db.delete(existing._id);
   },
 });
-
