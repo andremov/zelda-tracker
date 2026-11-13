@@ -5,7 +5,7 @@ import type { Doc, Id } from "../convex/_generated/dataModel";
 import { useLocal } from "./storage";
 import { CATEGORIES, Icon, categoryIcon, categoryInfo } from "./icons";
 import { REGIONS } from "./locations";
-import type { Group } from "./gamedata";
+import { BOSS_DUNGEONS, type Group } from "./gamedata";
 
 type Step = Doc<"steps">;
 type Progress = Doc<"progress">;
@@ -287,12 +287,16 @@ function SaveCard({
   const done = steps.filter((s) => doneBy.get(s._id)?.includes(name));
   const count = (cat: string) => done.filter((s) => s.category === cat).length;
   const pieces = count("Heart Piece");
-  const hearts = BASE_HEARTS + count("Heart Container") + Math.floor(pieces / 4);
+  const completed = (s: Step) => s.category === "Dungeon" && s.action === "Completed";
+  // Each boss leaves a heart container, so a completed boss dungeon is a heart.
+  const containers = new Set(done.filter((s) => completed(s) && BOSS_DUNGEONS.includes(s.subject)).map((s) => s.subject)).size;
+  const hearts = BASE_HEARTS + containers + Math.floor(pieces / 4);
 
-  // Fixed kinds count every entry; named kinds count distinct things.
+  // Fixed kinds count every entry; named kinds count distinct things; dungeons count only completed ones.
   const tallies = new Map<string, Set<string>>();
   for (const s of done) {
-    if (s.category === "Heart Piece" || s.category === "Heart Container") continue;
+    if (s.category === "Heart Piece") continue;
+    if (s.category === "Dungeon" && !completed(s)) continue;
     const set = tallies.get(s.category) ?? new Set<string>();
     set.add(categoryInfo(s.category).fixed ? s._id : norm(s.subject));
     tallies.set(s.category, set);
@@ -583,9 +587,10 @@ function Activity({ progress, steps, isVisible }: { progress: Progress[]; steps:
 
 const NEW = "__new__";
 
+const regionOf = (place: string) => REGIONS.find((r) => r.places.includes(place))?.region ?? "";
+
 /** Region first, then a place in it. Only the place is stored; place names are unique. */
 function LocationField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-  const regionOf = (place: string) => REGIONS.find((r) => r.places.includes(place))?.region ?? "";
   const [region, setRegion] = useState(() => regionOf(value));
   const [typing, setTyping] = useState(() => !!value && !regionOf(value));
   const places = REGIONS.find((r) => r.region === region)?.places ?? [];
@@ -833,7 +838,10 @@ function StepDialog({
     setF((prev) => ({
       ...prev,
       category: name,
-      subject: next.fixed ?? (categoryInfo(prev.category).fixed ? "" : prev.subject),
+      // Keep what's typed only if it still makes sense for the new kind.
+      subject:
+        next.fixed ??
+        (categoryInfo(prev.category).fixed || (next.options && !next.options.some((g) => g.items.includes(prev.subject))) ? "" : prev.subject),
       action: next.actions.includes(prev.action) ? prev.action : next.actions.length === 1 ? next.actions[0] : "",
     }));
   };
@@ -849,8 +857,9 @@ function StepDialog({
   const askAction = actionOptions.length > 1 || freeAction;
   const canSave = f.category.trim() && f.subject.trim() && f.action.trim();
   // Some answers are known from the kind and step alone; those questions aren't asked.
-  const lockedLocation = info.stepLocations?.[f.action];
-  const lockedAge = info.age;
+  const subjectKnown = !!info.options?.some((g) => g.items.includes(f.subject));
+  const lockedLocation = info.stepLocations?.[f.action] ?? (info.subjectIsPlace && subjectKnown ? f.subject : undefined);
+  const lockedAge = info.age ?? info.subjectAge?.[f.subject];
   const final: Fields = { ...f, location: lockedLocation ?? f.location, age: lockedAge ?? f.age };
 
   const save = async (force = false) => {
@@ -1040,6 +1049,7 @@ function StepDialog({
                   {showActionInput && (
                     <input className="mt" autoFocus value={f.action} onChange={(e) => set("action", e.target.value)} placeholder="Describe the step" />
                   )}
+                  {info.note && <p className="hint mt">{info.note}</p>}
                 </fieldset>
                 )}
 
@@ -1052,10 +1062,17 @@ function StepDialog({
 
                 {(lockedLocation || lockedAge) && (
                   <p className="locked">
-                    <Icon name="check" size={15} />
-                    {lockedLocation && f.action ? <>At the {lockedLocation}</> : null}
-                    {lockedLocation && f.action && lockedAge ? ", as a " : lockedAge ? "As a " : ""}
-                    {lockedAge?.toLowerCase()}
+                    {lockedLocation && (
+                      <span>
+                        <Icon name="pin" size={15} /> {lockedLocation}
+                        {regionOf(lockedLocation) && <span className="muted"> · {regionOf(lockedLocation)}</span>}
+                      </span>
+                    )}
+                    {lockedAge && (
+                      <span>
+                        <Icon name="user" size={15} /> {lockedAge}
+                      </span>
+                    )}
                   </p>
                 )}
 

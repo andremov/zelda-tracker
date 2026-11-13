@@ -362,7 +362,8 @@ legend, .field > span {
 .segmented button:last-child { border-right: none; }
 .segmented button.active { background: var(--green); color: var(--green-ink); }
 
-.locked { display: flex; align-items: center; gap: 6px; color: var(--green); font-style: italic; }
+.locked { display: flex; flex-wrap: wrap; gap: 8px 18px; padding: 8px 12px; border-left: 3px solid var(--green-2); background: var(--green-wash); color: var(--green); }
+.locked > span { display: inline-flex; align-items: center; gap: 6px; }
 .hint { font-style: italic; color: var(--muted); font-size: 0.92rem; }
 .error { color: var(--red); }
 .dupes { display: grid; gap: 12px; }

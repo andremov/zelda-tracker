@@ -68,7 +68,7 @@ export const REGIONS: { region: string; places: string[] }[] = [
   },
   {
     region: "Zora's Domain",
-    places: ["Zora's River", "Zora's Domain", "Zora Shop", "Zora's Fountain", "Zora's Fountain Great Fairy Fountain", "Jabu-Jabu's Belly", "Ice Cavern"],
+    places: ["Zora's River", "Zora's Domain", "Zora Shop", "Zora's Fountain", "Zora's Fountain Great Fairy Fountain", "Inside Jabu-Jabu's Belly", "Ice Cavern"],
   },
   { region: "Lake Hylia", places: ["Lake Hylia", "Lakeside Laboratory", "Fishing Pond", "Water Temple"] },
   {
@@ -85,7 +85,7 @@ export const REGIONS: { region: string; places: string[] }[] = [
       "Spirit Temple",
     ],
   },
-  { region: "Ganon's Castle", places: ["Inside Ganon's Castle", "Ganon's Tower"] },
+  { region: "Ganon's Castle", places: ["Ganon's Castle", "Ganon's Tower"] },
   { region: "Anywhere", places: ["A grotto", "Overworld (anywhere)"] },
 ];
 

@@ -27,6 +27,7 @@ export const ITEMS: Group[] = [
       "Nayru's Love",
     ],
   },
+  { label: "Quest items", items: ["Light Medallion", "Stone of Agony", "Gerudo's Card"] },
   { label: "Child trading items", items: ["Weird Egg", "Chicken", "Zelda's Letter"] },
   {
     label: "Adult trading items",
@@ -75,15 +76,6 @@ export const SONGS: Group[] = [
   },
 ];
 
-export const QUEST_ITEMS: Group[] = [
-  { label: "Spiritual Stones", items: ["Kokiri's Emerald", "Goron's Ruby", "Zora's Sapphire"] },
-  {
-    label: "Medallions",
-    items: ["Forest Medallion", "Fire Medallion", "Water Medallion", "Spirit Medallion", "Shadow Medallion", "Light Medallion"],
-  },
-  { label: "Other", items: ["Stone of Agony", "Gerudo's Card"] },
-];
-
 export const MASKS: Group[] = [
   { label: "Masks", items: ["Keaton Mask", "Skull Mask", "Spooky Mask", "Bunny Hood", "Mask of Truth", "Goron Mask", "Zora Mask", "Gerudo Mask"] },
 ];
@@ -108,9 +100,29 @@ export const DUNGEONS: Group[] = [
   },
 ];
 
-export const BOSSES: Group[] = [
-  {
-    label: "Bosses",
-    items: ["Queen Gohma", "King Dodongo", "Barinade", "Phantom Ganon", "Volvagia", "Morpha", "Bongo Bongo", "Twinrova", "Ganondorf", "Ganon"],
-  },
+/** Dungeons that end in a boss. Completing one also means its heart container and its stone or medallion. */
+export const BOSS_DUNGEONS = [
+  "Inside the Deku Tree",
+  "Dodongo's Cavern",
+  "Inside Jabu-Jabu's Belly",
+  "Forest Temple",
+  "Fire Temple",
+  "Water Temple",
+  "Shadow Temple",
+  "Spirit Temple",
 ];
+
+/** The age each dungeon is played at. The Spirit Temple is played at both, so it isn't listed. */
+export const DUNGEON_AGE: Record<string, string> = {
+  "Inside the Deku Tree": "Child",
+  "Dodongo's Cavern": "Child",
+  "Inside Jabu-Jabu's Belly": "Child",
+  "Bottom of the Well": "Child",
+  "Forest Temple": "Adult",
+  "Fire Temple": "Adult",
+  "Water Temple": "Adult",
+  "Shadow Temple": "Adult",
+  "Ice Cavern": "Adult",
+  "Gerudo Training Ground": "Adult",
+  "Ganon's Castle": "Adult",
+};
