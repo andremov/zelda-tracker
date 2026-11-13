@@ -140,7 +140,7 @@ export function Race({ players, me, steps, doneBy }: { players: string[]; me: st
           const stemTop = p.above ? top + BUBBLE_H : lineY;
           const stemBottom = p.above ? lineY : top;
           return (
-            <div key={p.name} className={`runner ${p.above ? "leader" : ""} ${p.name === me ? "me" : ""}`}>
+            <div key={p.name} className={`runner ${p.above ? "leader" : ""} ${p.name === me ? "is-me" : ""}`}>
               <span className="race-stem" style={{ left: p.x, top: stemTop, height: stemBottom - stemTop }} />
               <span className="race-dot" style={{ left: p.x, top: lineY }} />
               <span

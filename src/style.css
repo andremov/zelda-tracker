@@ -443,6 +443,7 @@ legend, .field > span {
 }
 .race-stem { position: absolute; width: 2px; margin-left: -1px; background: var(--ink); }
 .bubble {
+  user-select: none; -webkit-user-select: none; cursor: default;
   position: absolute; z-index: 3; height: 30px; line-height: 26px; padding: 0 12px;
   white-space: nowrap; font-weight: 600; font-size: 0.95rem;
   background: #fffaf0; border: 2px solid var(--ink); border-radius: 15px;
@@ -460,5 +461,5 @@ legend, .field > span {
 .runner.leader .bubble { background: #f6dc8a; font-size: 1.05rem; }
 .runner.leader .bubble.up::after { border-top-color: #f6dc8a; }
 .runner.leader .race-dot { background: var(--gold); }
-.runner.me .race-dot { background: var(--green-2); }
-.runner.me .bubble { color: var(--green); }
+.runner.is-me .race-dot { background: var(--green-2); }
+.runner.is-me .bubble { color: var(--green); }
