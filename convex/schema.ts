@@ -21,10 +21,4 @@ export default defineSchema({
   })
     .index("by_step", ["stepId"])
     .index("by_step_player", ["stepId", "player"]),
-  // Free-form status each player writes on their own save log card.
-  players: defineTable({
-    name: v.string(),
-    lastSeen: v.string(),
-    note: v.string(),
-  }).index("by_name", ["name"]),
 });

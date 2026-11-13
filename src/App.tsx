@@ -7,22 +7,15 @@ import { CATEGORIES, Icon, categoryIcon, categoryInfo } from "./icons";
 
 type Step = Doc<"steps">;
 type Progress = Doc<"progress">;
-type PlayerDoc = Doc<"players">;
 type Fields = Pick<Step, "category" | "subject" | "action" | "location" | "how" | "age">;
 type DialogState = { mode: "add"; initial: Fields } | { mode: "edit"; step: Step } | null;
 type Tab = "journal" | "sealed" | "saves";
 
 const EMPTY: Fields = { category: "", subject: "", action: "", location: "", how: "", age: "" };
-const PLAYER_COLORS = ["#7a2e1f", "#2f5a35", "#2c4a6e", "#6b3a5c", "#8a6420", "#3d5f5a", "#5a4632", "#4a3f73"];
 const BASE_HEARTS = 3;
 
 const norm = (s: string) => s.trim().toLowerCase();
 const uniq = (xs: string[]) => [...new Set(xs.filter(Boolean))].sort((a, b) => a.localeCompare(b));
-const colorFor = (name: string) => {
-  let h = 0;
-  for (const ch of name) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
-  return PLAYER_COLORS[h % PLAYER_COLORS.length];
-};
 const ago = (t: number) => {
   const s = (Date.now() - t) / 1000;
   if (s < 60) return "just now";
@@ -33,25 +26,8 @@ const ago = (t: number) => {
 
 export default function App() {
   const [player, setPlayer] = useLocal<string>("player", "");
-  const [theme, setTheme] = useLocal<"" | "light" | "dark">("theme", "");
-  useEffect(() => {
-    if (theme) document.documentElement.dataset.theme = theme;
-    else delete document.documentElement.dataset.theme;
-  }, [theme]);
-  const toggleTheme = () => {
-    const dark = theme ? theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
-    setTheme(dark ? "light" : "dark");
-  };
   if (!player) return <PickName onPick={setPlayer} />;
-  return <Tracker player={player} onChangePlayer={() => setPlayer("")} onToggleTheme={toggleTheme} />;
-}
-
-function Crest({ name, size = 28 }: { name: string; size?: number }) {
-  return (
-    <span className="crest" style={{ background: colorFor(name), width: size, height: size * 1.12, fontSize: size * 0.46 }} title={name}>
-      {name.slice(0, 1).toUpperCase()}
-    </span>
-  );
+  return <Tracker player={player} onChangePlayer={() => setPlayer("")} />;
 }
 
 function Ornament() {
@@ -65,7 +41,7 @@ function Ornament() {
 
 function PickName({ onPick }: { onPick: (name: string) => void }) {
   const data = useQuery(api.steps.list);
-  const known = uniq([...(data?.progress.map((p) => p.player) ?? []), ...(data?.players.map((p) => p.name) ?? [])]);
+  const known = uniq(data?.progress.map((p) => p.player) ?? []);
   const [name, setName] = useState("");
   return (
     <main className="pick">
@@ -79,8 +55,7 @@ function PickName({ onPick }: { onPick: (name: string) => void }) {
             <div className="pick-players">
               {known.map((k) => (
                 <button key={k} className="pick-player" onClick={() => onPick(k)}>
-                  <Crest name={k} size={40} />
-                  <span>{k}</span>
+                  {k}
                 </button>
               ))}
             </div>
@@ -106,7 +81,7 @@ function PickName({ onPick }: { onPick: (name: string) => void }) {
   );
 }
 
-function Tracker({ player, onChangePlayer, onToggleTheme }: { player: string; onChangePlayer: () => void; onToggleTheme: () => void }) {
+function Tracker({ player, onChangePlayer }: { player: string; onChangePlayer: () => void }) {
   const data = useQuery(api.steps.list);
   const [revealed, setRevealed] = useLocal<string[]>(`revealed:${player}`, []);
   const [tab, setTab] = useState<Tab>("journal");
@@ -130,11 +105,10 @@ function Tracker({ player, onChangePlayer, onToggleTheme }: { player: string; on
 
   const isMine = (s: Step) => doneBy.get(s._id)?.includes(player) ?? false;
   const isVisible = (s: Step) => isMine(s) || revealed.includes(s._id);
-  const others = uniq([...data.progress.map((p) => p.player), ...data.players.map((p) => p.name)]).filter((p) => p !== player);
+  const others = uniq(data.progress.map((p) => p.player)).filter((p) => p !== player);
   const players = [player, ...others];
   const visible = data.steps.filter(isVisible);
   const sealed = data.steps.filter((s) => !isVisible(s));
-  const statusOf = (name: string) => data.players.find((p) => p.name === name);
 
   const pool = tab === "sealed" ? sealed : visible;
   const chipCounts = new Map<string, number>();
@@ -156,8 +130,6 @@ function Tracker({ player, onChangePlayer, onToggleTheme }: { player: string; on
       steps={data.steps}
       doneBy={doneBy}
       progress={data.progress}
-      status={statusOf(name)}
-      locations={uniq(visible.map((s) => s.location))}
     />
   );
 
@@ -167,12 +139,9 @@ function Tracker({ player, onChangePlayer, onToggleTheme }: { player: string; on
         <div className="topbar-inner">
           <span className="brand">Hyrule Log</span>
           <div className="topbar-actions">
-            <button className="icon-btn" onClick={onToggleTheme} title="Day / night">
-              <Icon name="eye" size={18} />
-            </button>
             <button className="me" onClick={onChangePlayer} title="Switch save">
-              <Crest name={player} size={22} />
-              <span className="me-name">{player}</span>
+              <Icon name="user" size={16} />
+              <span>{player}</span>
             </button>
             <button className="btn primary hide-mobile" onClick={() => setDialog({ mode: "add", initial: EMPTY })}>
               <Icon name="quill" size={18} /> Log a step
@@ -305,21 +274,13 @@ function SaveCard({
   steps,
   doneBy,
   progress,
-  status,
-  locations,
 }: {
   name: string;
   isMe: boolean;
   steps: Step[];
   doneBy: Map<string, string[]>;
   progress: Progress[];
-  status?: PlayerDoc;
-  locations: string[];
 }) {
-  const setStatus = useMutation(api.steps.setStatus);
-  const [editing, setEditing] = useState(false);
-  const [lastSeen, setLastSeen] = useState(status?.lastSeen ?? "");
-  const [note, setNote] = useState(status?.note ?? "");
 
   const done = steps.filter((s) => doneBy.get(s._id)?.includes(name));
   const count = (cat: string) => done.filter((s) => s.category === cat).length;
@@ -339,7 +300,6 @@ function SaveCard({
   return (
     <section className={`frame save-card ${isMe ? "is-me" : ""}`}>
       <header className="save-head">
-        <Crest name={name} size={38} />
         <div className="save-name">
           <h2>{name}</h2>
           <span className="muted small">{lastActive ? `active ${ago(lastActive)}` : "no steps yet"}</span>
@@ -366,57 +326,6 @@ function SaveCard({
         </div>
       )}
 
-      {editing ? (
-        <form
-          className="save-edit"
-          onSubmit={async (e) => {
-            e.preventDefault();
-            await setStatus({ player: name, lastSeen, note });
-            setEditing(false);
-          }}
-        >
-          <ComboField label="Last seen at" value={lastSeen} onChange={setLastSeen} options={locations} placeholder="Where you saved" />
-          <label className="field">
-            <span>Note</span>
-            <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="What you're up to, no spoilers" maxLength={200} />
-          </label>
-          <div className="dialog-actions">
-            <button type="button" className="text-btn" onClick={() => setEditing(false)}>
-              Cancel
-            </button>
-            <button type="submit" className="btn primary">
-              Save
-            </button>
-          </div>
-        </form>
-      ) : (
-        <div className="save-status">
-          {status?.lastSeen || status?.note ? (
-            <div className="save-status-text">
-              {status.lastSeen && (
-                <p>
-                  <Icon name="pin" size={15} /> {status.lastSeen}
-                </p>
-              )}
-              {status.note && <p className="save-note">“{status.note}”</p>}
-            </div>
-          ) : (
-            <p className="muted small">{isMe ? "Say where you left off." : "No note yet."}</p>
-          )}
-          {isMe && (
-            <button
-              className="text-btn"
-              onClick={() => {
-                setLastSeen(status?.lastSeen ?? "");
-                setNote(status?.note ?? "");
-                setEditing(true);
-              }}
-            >
-              <Icon name="edit" size={14} /> Update
-            </button>
-          )}
-        </div>
-      )}
     </section>
   );
 }
@@ -542,13 +451,8 @@ function StepRow({ step, fixed, player, who, onEdit }: { step: Step; fixed: bool
         )}
         {step.how && <p className="step-how">{step.how}</p>}
         <div className="step-foot">
-          <div className="who">
-            {who.map((p) => (
-              <Crest key={p} name={p} size={18} />
-            ))}
-          </div>
           <span className="muted small">
-            logged by {step.createdBy} · {ago(step._creationTime)}
+            {who.length ? <>done by {who.join(", ")}</> : "not done by anyone yet"} · logged by {step.createdBy}, {ago(step._creationTime)}
           </span>
           <div className="row-actions">
             {confirm ? (
@@ -612,11 +516,7 @@ function Sealed({
                   <Icon name={categoryIcon(s.category)} size={20} />
                 </div>
                 <span className="sealed-cat">{s.category}</span>
-                <div className="who">
-                  {(doneBy.get(s._id) ?? [s.createdBy]).map((p) => (
-                    <Crest key={p} name={p} size={18} />
-                  ))}
-                </div>
+                <span className="muted small">done by {(doneBy.get(s._id) ?? [s.createdBy]).join(", ")}</span>
                 <button className="text-btn" onClick={() => onReveal(s._id)}>
                   <Icon name="eye" size={15} /> Break the seal
                 </button>
@@ -653,7 +553,6 @@ function Activity({ progress, steps, isVisible }: { progress: Progress[]; steps:
             const info = categoryInfo(s.category);
             return (
               <li key={p._id}>
-                <Crest name={p.player} size={20} />
                 <div>
                   <p>
                     <b>{p.player}</b>{" "}
@@ -803,8 +702,12 @@ function StepDialog({
   const subjects = uniq(visible.filter((s) => norm(s.category) === norm(f.category)).map((s) => s.subject));
   const locations = uniq(visible.map((s) => s.location));
   const customCats = uniq(steps.map((s) => s.category)).filter((c) => !CATEGORIES.some((k) => k.name === c));
-  const actionOptions = uniq([...info.actions, ...visible.filter((s) => norm(s.category) === norm(f.category)).map((s) => s.action)]);
-  const showActionInput = customAction || (!!f.action && !actionOptions.includes(f.action));
+  // Steps are a fixed list per kind. Free text only for "Other" and kinds people add themselves.
+  const freeAction = !!info.freeAction;
+  const actionOptions =
+    state.mode === "edit" && f.action && !freeAction && !info.actions.includes(f.action) ? [...info.actions, f.action] : info.actions;
+  const showActionInput = freeAction && (customAction || (!!f.action && !actionOptions.includes(f.action)));
+  const askAction = actionOptions.length > 1 || freeAction;
   const canSave = f.category.trim() && f.subject.trim() && f.action.trim();
 
   const save = async (force = false) => {
@@ -950,6 +853,7 @@ function StepDialog({
                   />
                 )}
 
+                {askAction && (
                 <fieldset>
                   <legend>Which step?</legend>
                   <div className="quick">
@@ -966,21 +870,24 @@ function StepDialog({
                         {a}
                       </button>
                     ))}
-                    <button
-                      type="button"
-                      className={`chip ${showActionInput ? "active" : ""}`}
-                      onClick={() => {
-                        setCustomAction(true);
-                        set("action", "");
-                      }}
-                    >
-                      Other…
-                    </button>
+                    {freeAction && (
+                      <button
+                        type="button"
+                        className={`chip ${showActionInput ? "active" : ""}`}
+                        onClick={() => {
+                          setCustomAction(true);
+                          set("action", "");
+                        }}
+                      >
+                        Other…
+                      </button>
+                    )}
                   </div>
                   {showActionInput && (
                     <input className="mt" autoFocus value={f.action} onChange={(e) => set("action", e.target.value)} placeholder="Describe the step" />
                   )}
                 </fieldset>
+                )}
 
                 <ComboField label="Where?" value={f.location} onChange={(v) => set("location", v)} options={locations} placeholder="Where it happened" />
 

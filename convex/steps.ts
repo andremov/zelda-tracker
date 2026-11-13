@@ -17,8 +17,7 @@ export const list = query({
   handler: async (ctx) => {
     const steps = await ctx.db.query("steps").collect();
     const progress = await ctx.db.query("progress").collect();
-    const players = await ctx.db.query("players").collect();
-    return { steps, progress, players };
+    return { steps, progress };
   },
 });
 
@@ -82,17 +81,3 @@ export const setDone = mutation({
   },
 });
 
-export const setStatus = mutation({
-  args: { player: v.string(), lastSeen: v.string(), note: v.string() },
-  handler: async (ctx, { player, lastSeen, note }) => {
-    const name = clean(player);
-    if (!name) throw new Error("Player is required");
-    const existing = await ctx.db
-      .query("players")
-      .withIndex("by_name", (q) => q.eq("name", name))
-      .unique();
-    const fields = { lastSeen: clean(lastSeen), note: clean(note) };
-    if (existing) await ctx.db.patch(existing._id, fields);
-    else await ctx.db.insert("players", { name, ...fields });
-  },
-});

@@ -157,6 +157,7 @@ export type Category = {
   subjectLabel?: string;
   subjectPlaceholder?: string;
   actions: string[];
+  freeAction?: boolean;
   howPlaceholder?: string;
 };
 
@@ -164,20 +165,20 @@ export const CATEGORIES: Category[] = [
   { name: "Heart Piece", icon: "heartPiece", fixed: "Heart Piece", actions: ["Got it"], howPlaceholder: "What you did to get it" },
   { name: "Heart Container", icon: "heart", fixed: "Heart Container", actions: ["Got it"] },
   { name: "Gold Skulltula", icon: "spider", fixed: "Gold Skulltula", actions: ["Got the token"], howPlaceholder: "How you found or reached it" },
-  { name: "Mask", icon: "mask", subjectLabel: "Which mask?", subjectPlaceholder: "Mask name", actions: ["Got it", "Delivered", "Paid", "Borrowed", "Traded"] },
-  { name: "Item", icon: "bag", subjectLabel: "Which item?", subjectPlaceholder: "Item name", actions: ["Got it", "Bought", "Traded", "Upgraded"] },
-  { name: "Equipment", icon: "shield", subjectLabel: "Which equipment?", subjectPlaceholder: "Sword, shield, tunic, boots…", actions: ["Got it", "Bought", "Upgraded"] },
+  { name: "Mask", icon: "mask", subjectLabel: "Which mask?", subjectPlaceholder: "Mask name", actions: ["Got it", "Delivered", "Paid"] },
+  { name: "Item", icon: "bag", subjectLabel: "Which item?", subjectPlaceholder: "Item name", actions: ["Got it", "Bought", "Upgraded"] },
+  { name: "Equipment", icon: "shield", subjectLabel: "Which equipment?", subjectPlaceholder: "Sword, shield, tunic, boots…", actions: ["Got it", "Bought"] },
   { name: "Upgrade", icon: "upgrade", subjectLabel: "What got upgraded?", subjectPlaceholder: "Quiver, wallet, bomb bag…", actions: ["Got it", "Bought"] },
   { name: "Bottle", icon: "bottle", fixed: "Bottle", actions: ["Got it"] },
-  { name: "Song", icon: "note", subjectLabel: "Which song?", subjectPlaceholder: "Song name", actions: ["Learned", "Heard"] },
+  { name: "Song", icon: "note", subjectLabel: "Which song?", subjectPlaceholder: "Song name", actions: ["Learned"] },
   { name: "Quest Item", icon: "gem", subjectLabel: "Which one?", subjectPlaceholder: "Stone, medallion…", actions: ["Got it"] },
   { name: "Dungeon", icon: "door", subjectLabel: "Which dungeon?", subjectPlaceholder: "Dungeon name", actions: ["Entered", "Got the map", "Got the compass", "Got the boss key", "Completed"] },
   { name: "Boss", icon: "skull", subjectLabel: "Which boss?", subjectPlaceholder: "Boss name", actions: ["Reached", "Defeated"] },
   { name: "Side Quest", icon: "scroll", subjectLabel: "Which quest?", subjectPlaceholder: "Quest name", actions: ["Started", "Progressed", "Completed"] },
-  { name: "Other", icon: "star", subjectLabel: "What is it?", subjectPlaceholder: "Name it", actions: ["Got it", "Found", "Talked to", "Unlocked", "Completed"] },
+  { name: "Other", icon: "star", subjectLabel: "What is it?", subjectPlaceholder: "Name it", actions: ["Got it", "Found", "Talked to", "Unlocked", "Completed"], freeAction: true },
 ];
 
-const FALLBACK: Category = { name: "", icon: "star", subjectLabel: "What is it?", subjectPlaceholder: "Name it", actions: ["Got it", "Found", "Completed"] };
+const FALLBACK: Category = { name: "", icon: "star", subjectLabel: "What is it?", subjectPlaceholder: "Name it", actions: ["Got it", "Found", "Completed"], freeAction: true };
 
 export const categoryInfo = (category: string): Category =>
   CATEGORIES.find((c) => c.name.toLowerCase() === category.trim().toLowerCase()) ?? { ...FALLBACK, name: category };
