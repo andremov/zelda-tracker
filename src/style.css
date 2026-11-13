@@ -23,6 +23,20 @@
 /* ============ Base ============ */
 * { box-sizing: border-box; }
 html, body { margin: 0; }
+
+/* Scrollbars: a thin gold-brown thumb on a parchment track */
+@supports not selector(::-webkit-scrollbar) {
+  * { scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--line) 85%, var(--ink)) transparent; }
+}
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, #c2a56c, #a3864e);
+  border: 2px solid transparent; background-clip: padding-box; border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover { background: linear-gradient(90deg, var(--gold), #84641f); background-clip: padding-box; }
+::-webkit-scrollbar-corner { background: transparent; }
+html::-webkit-scrollbar-track { background: color-mix(in srgb, var(--bg) 80%, var(--line)); border-left: 1px solid var(--line-soft); }
 body {
   background-color: var(--bg);
   background-image:
@@ -159,10 +173,17 @@ input::placeholder, textarea::placeholder { color: var(--muted); opacity: 0.75; 
   display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 28px; align-items: start;
 }
 .main { display: grid; gap: 16px; min-width: 0; }
-.side { position: sticky; top: 80px; display: grid; gap: 16px; }
+/* The save logs scroll on their own, so the journal and the saves can be read side by side. */
+.side {
+  position: sticky; top: 80px; display: grid; gap: 16px; align-content: start;
+  max-height: calc(100vh - 96px); overflow-y: auto; overscroll-behavior: contain;
+  /* room for card shadows and the hover lift, which the scroll box would otherwise clip */
+  padding: 4px 8px 16px; margin: -4px -8px 0;
+  scrollbar-gutter: stable;
+}
 @media (max-width: 900px) {
   .layout { grid-template-columns: minmax(0, 1fr); }
-  .side { position: static; }
+  .side { position: static; max-height: none; overflow: visible; }
 }
 
 /* ============ Tabs, search, chips ============ */
