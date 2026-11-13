@@ -422,3 +422,43 @@ legend, .field > span {
 .detail-thing { color: var(--muted); }
 .detail-thing.all { color: var(--ink); font-weight: 600; }
 @media (max-width: 560px) { .detail-row { grid-template-columns: 1fr; gap: 4px; } }
+
+/* ============ Race ============ */
+.race { grid-column: 1 / -1; padding: 16px 22px 18px; }
+.race-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+.race-head .side-title { margin: 0; }
+.race-head .segmented button { font-size: 0.9rem; padding: 5px 12px; }
+.race-note { margin: 6px 0 4px; }
+.race-track { position: relative; margin: 0 6px; }
+.race-line {
+  position: absolute; left: 0; right: 0; height: 4px; margin-top: -2px;
+  background: repeating-linear-gradient(90deg, var(--line) 0 10px, var(--line-soft) 10px 20px);
+  border-radius: 2px;
+}
+.race-tick { position: absolute; top: -4px; width: 2px; height: 12px; margin-left: -1px; background: var(--line); }
+.race-goal { position: absolute; right: -14px; width: 22px; height: 20px; fill: var(--gold); }
+.race-dot {
+  position: absolute; width: 12px; height: 12px; margin: -6px 0 0 -6px;
+  border-radius: 50%; background: var(--paper); border: 2px solid var(--ink); z-index: 2;
+}
+.race-stem { position: absolute; width: 2px; margin-left: -1px; background: var(--ink); }
+.bubble {
+  position: absolute; z-index: 3; height: 30px; line-height: 26px; padding: 0 12px;
+  white-space: nowrap; font-weight: 600; font-size: 0.95rem;
+  background: #fffaf0; border: 2px solid var(--ink); border-radius: 15px;
+  box-shadow: 2px 2px 0 var(--ink);
+}
+/* The tail points at the runner on the line: a dark triangle with a lighter one inside it. */
+.bubble::before, .bubble::after {
+  content: ""; position: absolute; left: clamp(12px, var(--tail), calc(100% - 12px));
+  border: solid transparent;
+}
+.bubble.down::before { bottom: 100%; border-width: 0 7px 9px; border-bottom-color: var(--ink); margin-left: -7px; }
+.bubble.down::after { bottom: calc(100% - 3px); border-width: 0 5px 7px; border-bottom-color: #fffaf0; margin-left: -5px; }
+.bubble.up::before { top: 100%; border-width: 9px 7px 0; border-top-color: var(--ink); margin-left: -7px; }
+.bubble.up::after { top: calc(100% - 3px); border-width: 7px 5px 0; border-top-color: #fffaf0; margin-left: -5px; }
+.runner.leader .bubble { background: #f6dc8a; font-size: 1.05rem; }
+.runner.leader .bubble.up::after { border-top-color: #f6dc8a; }
+.runner.leader .race-dot { background: var(--gold); }
+.runner.me .race-dot { background: var(--green-2); }
+.runner.me .bubble { color: var(--green); }

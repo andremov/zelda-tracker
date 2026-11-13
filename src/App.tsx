@@ -3,6 +3,7 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "../convex/_generated/api";
 import type { Doc, Id } from "../convex/_generated/dataModel";
 import { useLocal } from "./storage";
+import { Race } from "./Race";
 import { CATEGORIES, Icon, categoryIcon, categoryInfo } from "./icons";
 import { REGIONS } from "./locations";
 import {
@@ -171,6 +172,7 @@ function Tracker({ player, onChangePlayer }: { player: string; onChangePlayer: (
       </header>
 
       <div className="layout">
+        <Race players={players} me={player} steps={data.steps} doneBy={doneBy} />
         <main className="main">
 
           <>
