@@ -194,16 +194,8 @@ function Tracker({ player, onChangePlayer }: { player: string; onChangePlayer: (
                   options={players.map((p) => ({ value: p, count: playerCounts.get(p) ?? 0, note: p === player ? "you" : undefined }))}
                   selected={activeWho}
                   onChange={setWho}
+                  extra={{ label: "Anyone but me", hint: "Steps you haven't done yet", checked: notMine, onChange: setNotMine }}
                 />
-                <button
-                  type="button"
-                  className={`filter-toggle ${notMine ? "on" : ""}`}
-                  aria-pressed={notMine}
-                  title="Only show steps you haven't done yet"
-                  onClick={() => setNotMine(!notMine)}
-                >
-                  Not mine
-                </button>
               </div>
 
               <Journal
@@ -249,11 +241,14 @@ function MultiSelect({
   options,
   selected,
   onChange,
+  extra,
 }: {
   label: string;
   options: { value: string; count: number; icon?: string; note?: string }[];
   selected: string[];
   onChange: (v: string[]) => void;
+  /** A special option shown first, kept apart from the list (e.g. "Anyone but me"). */
+  extra?: { label: string; hint?: string; checked: boolean; onChange: (v: boolean) => void };
 }) {
   const ref = useRef<HTMLDetailsElement>(null);
   useEffect(() => {
@@ -263,15 +258,22 @@ function MultiSelect({
     document.addEventListener("click", close);
     return () => document.removeEventListener("click", close);
   }, []);
-  const summary = !selected.length ? "All" : selected.length === 1 ? selected[0] : `${selected.length} selected`;
+  const picked = [...(extra?.checked ? [extra.label] : []), ...selected];
+  const summary = !picked.length ? "All" : picked.length === 1 ? picked[0] : `${picked.length} selected`;
   const toggle = (v: string) => onChange(selected.includes(v) ? selected.filter((x) => x !== v) : [...selected, v]);
   return (
-    <details className={`multi ${selected.length ? "on" : ""}`} ref={ref}>
+    <details className={`multi ${picked.length ? "on" : ""}`} ref={ref}>
       <summary>
         <span className="multi-label">{label}</span>
         <span className="multi-value">{summary}</span>
       </summary>
       <div className="multi-menu">
+        {extra && (
+          <label className="multi-option multi-extra" title={extra.hint}>
+            <input type="checkbox" checked={extra.checked} onChange={() => extra.onChange(!extra.checked)} />
+            <span>{extra.label}</span>
+          </label>
+        )}
         {options.map((o) => (
           <label key={o.value} className="multi-option">
             <input type="checkbox" checked={selected.includes(o.value)} onChange={() => toggle(o.value)} />
@@ -281,8 +283,15 @@ function MultiSelect({
             <span className="muted">{o.count}</span>
           </label>
         ))}
-        {selected.length > 0 && (
-          <button type="button" className="text-btn" onClick={() => onChange([])}>
+        {picked.length > 0 && (
+          <button
+            type="button"
+            className="text-btn"
+            onClick={() => {
+              onChange([]);
+              extra?.onChange(false);
+            }}
+          >
             Clear
           </button>
         )}
