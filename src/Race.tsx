@@ -1,14 +1,17 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import type { Doc } from "../convex/_generated/dataModel";
 import { useLocal } from "./storage";
+import { Icon } from "./icons";
 import {
   BOSS_DUNGEONS,
+  DUNGEON_ICON,
   DUNGEON_STEPS,
   EQUIPMENT,
   FROGS,
   GREAT_FAIRIES,
   ITEMS,
   MASK_STEPS,
+  SET_COLOR,
   SONGS,
   TOTALS,
   UPGRADES,
@@ -25,6 +28,9 @@ const flat = (groups: Group[]) => groups.flatMap((g) => g.items);
 const STORY: string[] = [...BOSS_DUNGEONS, "Ganon's Castle"].flatMap((d) =>
   (DUNGEON_STEPS[d] ?? []).filter((a) => a === "Entered" || a === "Got the boss key" || a === "Completed").map((a) => key("Dungeon", d, a)),
 );
+
+/** Where on the story line each boss dungeon is done, if they're played in order. Ganon's Castle is the finish. */
+const MILESTONES = BOSS_DUNGEONS.map((d) => ({ dungeon: d, at: (STORY.indexOf(key("Dungeon", d, "Completed")) + 1) / STORY.length }));
 
 /** Every named step in the game's lists. Countable kinds are added on top, up to their totals. */
 const EVERYTHING: string[] = [
@@ -50,7 +56,7 @@ function progress(mode: Mode, done: Step[]) {
 
 const BUBBLE_H = 30;
 const ROW = 38; // bubble plus the gap to the next row
-const NEAR = 16; // from the line to the first row
+const NEAR = 22; // from the line to the first row, clear of the milestones
 const GAP = 8;
 
 type Placed = { name: string; frac: number; x: number; left: number; row: number; above: boolean };
@@ -128,10 +134,20 @@ export function Race({ players, me, steps, doneBy }: { players: string[]; me: st
 
       <div className="race-track" ref={trackRef} style={{ height }}>
         <div className="race-line" style={{ top: lineY }}>
-          {[0.25, 0.5, 0.75].map((t) => (
-            <span key={t} className="race-tick" style={{ left: `${t * 100}%` }} />
-          ))}
+          {mode === "full" &&
+            [0.25, 0.5, 0.75].map((t) => <span key={t} className="race-tick" style={{ left: `${t * 100}%` }} />)}
         </div>
+        {mode === "story" &&
+          MILESTONES.map((m) => (
+            <span
+              key={m.dungeon}
+              className="milestone"
+              style={{ left: `${m.at * 100}%`, top: lineY, background: SET_COLOR[m.dungeon] }}
+              title={m.dungeon}
+            >
+              <Icon name={DUNGEON_ICON[m.dungeon] ?? "door"} size={12} />
+            </span>
+          ))}
         <svg className="race-goal" viewBox="0 0 24 21" style={{ top: lineY - 10 }} aria-hidden="true">
           <path d="M12 1 17.5 10.5H6.5zM6.5 10.5 12 20H1zM17.5 10.5 23 20H12z" />
         </svg>
