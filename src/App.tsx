@@ -908,10 +908,12 @@ function StepDialog({
   const setDone = useMutation(api.steps.setDone);
   const ref = useRef<HTMLDialogElement>(null);
   const init = state.mode === "edit" ? state.step : state.initial;
+  // Opening with only a kind chosen (e.g. from a filtered feed) fills in what picking that kind would.
+  const initInfo = categoryInfo(init.category);
   const [f, setF] = useState<Fields>({
     category: init.category,
-    subject: init.subject,
-    action: init.action,
+    subject: init.subject || (init.category && initInfo.fixed) || "",
+    action: init.action || (init.category && initInfo.actions.length === 1 ? initInfo.actions[0] : ""),
     location: init.location,
     how: init.how,
     age: init.age,
