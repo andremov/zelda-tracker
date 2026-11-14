@@ -1,6 +1,6 @@
 import { mutation, query, type MutationCtx } from "./_generated/server";
 import type { Doc, Id } from "./_generated/dataModel";
-import { COUNTABLE, impliedBy, impliersOf, type StepKey } from "./links";
+import { COUNTABLE, impliedBy, impliersOf, STACKING, type StepKey } from "./links";
 import { v } from "convex/values";
 
 const fields = {
@@ -69,7 +69,10 @@ export const add = mutation({
     }
     // Named things have one entry per step: if it's already logged, this just ticks it.
     if (!COUNTABLE.includes(clean(f.category))) {
-      const [existing] = await findSteps(ctx, { category: clean(f.category), subject: clean(f.subject), action: clean(f.action) });
+      // Stacking upgrades have one entry per place instead.
+      const [existing] = (await findSteps(ctx, { category: clean(f.category), subject: clean(f.subject), action: clean(f.action) })).filter(
+        (s) => !(clean(f.subject) in STACKING) || s.location.toLowerCase() === clean(f.location).toLowerCase(),
+      );
       if (existing) {
         await giveProgress(ctx, existing, p);
         return existing._id;

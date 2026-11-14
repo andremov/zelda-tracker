@@ -9,6 +9,19 @@ export type StepKey = { category: string; subject: string; action: string };
  */
 export const COUNTABLE = ["Heart Piece", "Gold Skulltula", "Big Poe", "Bottle"];
 
+/**
+ * Capacity upgrades that stack: each place gives the next size, whichever you visit first.
+ * Logged as "<thing> Upgrade" with the place; one entry per place, and the count is the bag size.
+ * Value: how many there are in the game.
+ */
+export const STACKING: Record<string, number> = {
+  "Bullet Bag Upgrade": 2,
+  "Quiver Upgrade": 2,
+  "Bomb Bag Upgrade": 2,
+  "Deku Stick Upgrade": 2,
+  "Deku Nut Upgrade": 2,
+};
+
 /** You can't complete a dungeon without entering it or (where it has one) its boss key. Map and compass are optional. */
 export const COMPLETION_IMPLIES = ["Entered", "Got the boss key"];
 
@@ -32,11 +45,7 @@ export const SAME_MOMENT: [StepKey, StepKey][] = FAIRY_GIFTS.map(([fountain, cat
  * One way only: logging the bigger bag ticks the smaller one, not the other way around.
  */
 const TIERS: [string, string[]][] = [
-  ["Upgrade", ["Bullet Bag (40)", "Bullet Bag (50)"]],
-  ["Upgrade", ["Quiver (40)", "Quiver (50)"]],
   ["Upgrade", ["Adult's Wallet", "Giant's Wallet"]],
-  ["Upgrade", ["Deku Sticks (20)", "Deku Sticks (30)"]],
-  ["Upgrade", ["Deku Nuts (30)", "Deku Nuts (40)"]],
   ["Upgrade", ["Goron's Bracelet", "Silver Gauntlets", "Golden Gauntlets"]],
   ["Upgrade", ["Silver Scale", "Golden Scale"]],
   ["Item", ["Hookshot", "Longshot"]],

@@ -24,7 +24,7 @@ import {
   UPGRADES,
   type Group,
 } from "./gamedata";
-import { sameMomentAs } from "../convex/links";
+import { sameMomentAs, STACKING } from "../convex/links";
 
 type Step = Doc<"steps">;
 type Progress = Doc<"progress">;
@@ -417,11 +417,15 @@ function SaveDetail({ name, steps, doneBy, onClose }: { name: string; steps: Ste
       <div key={g.label} className="detail-group">
         {groups.length > 1 && <h4>{g.label}</h4>}
         <div className="chk-list">
-          {g.items.map((x) => (
-            <span key={x} className={`chk ${has(category, x) ? "lit" : ""}`} style={has(category, x) && SET_COLOR[x] ? { background: SET_COLOR[x] } : undefined}>
-              {x}
-            </span>
-          ))}
+          {g.items.map((x) => {
+            const n = done.filter((s) => s.category === category && s.subject === x).length;
+            return (
+              <span key={x} className={`chk ${n ? "lit" : ""}`} style={n && SET_COLOR[x] ? { background: SET_COLOR[x] } : undefined}>
+                {x}
+                {x in STACKING && ` ${n}/${STACKING[x]}`}
+              </span>
+            );
+          })}
         </div>
       </div>
     ));
@@ -571,7 +575,10 @@ function SubjectCard({
   const allSteps = info.subjectActions?.[first.subject] ?? info.actions;
   const missing = isFairyCard ? [] : allSteps.filter((a) => !steps.some((s) => s.action === a));
   // Countable kinds are logged fresh from "Log a step", so their cards have no add button.
-  const canAdd = !info.fixed && missing.length > 0;
+  // Stacking upgrades: one entry per place, so offer another while some are left.
+  const stack = STACKING[first.subject] ?? 0;
+  const another = stack > 0 && steps.length < stack;
+  const canAdd = !info.fixed && (missing.length > 0 || another);
 
   return (
     <article className="frame subject-card">
@@ -603,11 +610,11 @@ function SubjectCard({
         <button
           className="add-next"
           onClick={() =>
-            onAdd({ ...EMPTY, category: first.category, subject: first.subject, action: missing.length === 1 ? missing[0] : "" })
+            onAdd({ ...EMPTY, category: first.category, subject: first.subject, action: another ? allSteps[0] : missing.length === 1 ? missing[0] : "" })
           }
         >
           <Icon name="plus" size={16} />{" "}
-          {missing.length === 1 ? `Log ${first.subject} · ${missing[0]}` : `Log a step for ${first.subject}`}
+          {another ? `Log another ${first.subject}` : missing.length === 1 ? `Log ${first.subject} · ${missing[0]}` : `Log a step for ${first.subject}`}
         </button>
       )}
     </article>
