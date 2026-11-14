@@ -27,7 +27,7 @@ export const ITEMS: Group[] = [
       "Nayru's Love",
     ],
   },
-  { label: "Quest items", items: ["Light Medallion", "Stone of Agony", "Gerudo's Card"] },
+  { label: "Quest items", items: ["Light Medallion", "Echo Gem", "Gerudo's Card"] },
   { label: "Other", items: ["Epona"] },
   { label: "Child trading items", items: ["Weird Egg", "Chicken", "Zelda's Letter"] },
   {
@@ -208,7 +208,7 @@ export const ACQUIRED: Record<string, { place?: string; age?: string }> = {
   Epona: { place: "Lon Lon Ranch", age: "Adult" },
   // Quest items
   "Light Medallion": { place: "Temple of Time", age: "Adult" },
-  "Stone of Agony": { place: "House of Skulltula", age: "Either" },
+  "Echo Gem": { place: "House of Skulltula", age: "Either" },
   "Gerudo's Card": { place: "Gerudo's Fortress", age: "Adult" },
   // Trading items
   "Weird Egg": { place: "Hyrule Castle", age: "Child" },
