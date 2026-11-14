@@ -49,7 +49,7 @@ const ago = (t: number) => {
 export default function App() {
   const [player, setPlayer] = useLocal<string>("player", "");
   if (!player) return <PickName onPick={setPlayer} />;
-  return <Tracker player={player} onChangePlayer={() => setPlayer("")} />;
+  return <Tracker player={player} onSwitch={setPlayer} />;
 }
 
 function Ornament() {
@@ -103,7 +103,7 @@ function PickName({ onPick }: { onPick: (name: string) => void }) {
   );
 }
 
-function Tracker({ player, onChangePlayer }: { player: string; onChangePlayer: () => void }) {
+function Tracker({ player, onSwitch }: { player: string; onSwitch: (name: string) => void }) {
   const data = useQuery(api.steps.list);
   const [search, setSearch] = useState("");
   const [kinds, setKinds] = useLocal<string[]>("filter-kinds", []);
@@ -162,10 +162,7 @@ function Tracker({ player, onChangePlayer }: { player: string; onChangePlayer: (
         <div className="topbar-inner">
           <span className="brand">Hyrule Log</span>
           <div className="topbar-actions">
-            <button className="me" onClick={onChangePlayer} title="Switch save">
-              <Icon name="user" size={16} />
-              <span>{player}</span>
-            </button>
+            <PlayerSwitch player={player} players={players} onSwitch={onSwitch} />
             <button className="btn primary hide-mobile" onClick={() => setDialog({ mode: "add", initial: EMPTY })}>
               <Icon name="quill" size={18} /> Log a step
             </button>
@@ -295,6 +292,41 @@ function MultiSelect({
             Clear
           </button>
         )}
+      </div>
+    </details>
+  );
+}
+
+/** The current player in the top bar; opens a list of everyone to switch saves in one tap. */
+function PlayerSwitch({ player, players, onSwitch }: { player: string; players: string[]; onSwitch: (name: string) => void }) {
+  const ref = useRef<HTMLDetailsElement>(null);
+  useEffect(() => {
+    const close = (e: MouseEvent) => {
+      if (ref.current?.open && !ref.current.contains(e.target as Node)) ref.current.open = false;
+    };
+    document.addEventListener("click", close);
+    return () => document.removeEventListener("click", close);
+  }, []);
+  const pick = (name: string) => {
+    if (ref.current) ref.current.open = false;
+    onSwitch(name);
+  };
+  return (
+    <details className="me-switch" ref={ref}>
+      <summary className="me" title="Switch save">
+        <Icon name="user" size={16} />
+        <span>{player}</span>
+      </summary>
+      <div className="multi-menu me-menu">
+        {[...players].sort((a, b) => a.localeCompare(b)).map((p) => (
+          <button key={p} type="button" className={`me-option ${p === player ? "current" : ""}`} onClick={() => pick(p)}>
+            {p}
+            {p === player && <Icon name="check" size={15} />}
+          </button>
+        ))}
+        <button type="button" className="me-option me-new" onClick={() => pick("")}>
+          <Icon name="plus" size={15} /> Someone new
+        </button>
       </div>
     </details>
   );

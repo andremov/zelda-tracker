@@ -165,6 +165,18 @@ input::placeholder, textarea::placeholder { color: var(--muted); opacity: 0.75; 
   padding: 5px 14px 5px 10px; font-weight: 500;
 }
 .me:hover { background: rgba(0, 0, 0, 0.3); }
+.me-switch { position: relative; }
+.me-switch summary { list-style: none; cursor: pointer; user-select: none; }
+.me-switch summary::-webkit-details-marker { display: none; }
+.me-switch summary::after { content: ""; width: 6px; height: 6px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg) translateY(-2px); margin-left: 2px; opacity: 0.7; }
+.me-menu { right: 0; left: auto; min-width: 180px; color: var(--ink); }
+.me-option {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%;
+  font: inherit; text-align: left; background: none; border: none; padding: 7px 10px; border-radius: 3px; cursor: pointer; color: var(--ink);
+}
+.me-option:hover { background: var(--paper-2); }
+.me-option.current { font-weight: 600; color: var(--green); }
+.me-new { justify-content: flex-start; color: var(--muted); border-top: 1px solid var(--line-soft); border-radius: 0 0 3px 3px; margin-top: 4px; padding-top: 9px; }
 .topbar .btn.primary { background: linear-gradient(#d8b766, #a98431); border-color: #8a6a22; color: #22190a; }
 
 /* ============ Layout ============ */
