@@ -193,15 +193,15 @@ function Tracker({ player, onSwitch }: { player: string; onSwitch: (name: string
                   onChange={setWho}
                   extra={{ label: "Anyone but me", hint: "Steps you haven't done yet", checked: notMine, onChange: setNotMine }}
                 />
-                {/* Picks up the kind you're filtered to, so a Skulltula-only feed logs a Skulltula. */}
-                <button
-                  type="button"
-                  className="btn primary feed-log"
-                  onClick={() => setDialog({ mode: "add", initial: { ...EMPTY, category: activeKinds.length === 1 ? activeKinds[0] : "" } })}
-                >
-                  <Icon name="quill" size={18} /> {activeKinds.length === 1 ? `Log ${activeKinds[0]}` : "Log a step"}
-                </button>
               </div>
+              {/* Picks up the kind you're filtered to, so a Skulltula-only feed logs a Skulltula. */}
+              <button
+                type="button"
+                className="btn primary feed-log"
+                onClick={() => setDialog({ mode: "add", initial: { ...EMPTY, category: activeKinds.length === 1 ? activeKinds[0] : "" } })}
+              >
+                <Icon name="quill" size={18} /> {activeKinds.length === 1 ? `Log ${activeKinds[0]}` : "Log a step"}
+              </button>
 
               <Journal
                 steps={filtered}
