@@ -38,6 +38,17 @@ const MAX_HEARTS = BASE_HEARTS + 8 + HEART_PIECES / 4;
 
 const norm = (s: string) => s.trim().toLowerCase();
 const uniq = (xs: string[]) => [...new Set(xs.filter(Boolean))].sort((a, b) => a.localeCompare(b));
+
+// The feed's place filter: an entry's place is matched to the map ignoring case; anything else goes under Other.
+const OTHER_REGION = "Other";
+const MAP_ORDER = REGIONS.flatMap((r) => r.places);
+const MAP_PLACE = new Map(MAP_ORDER.map((p) => [norm(p), p]));
+const MAP_REGION = new Map(REGIONS.flatMap((r) => r.places.map((p) => [p, r.region] as const)));
+const placeOf = (location: string) => MAP_PLACE.get(norm(location)) ?? (location.trim() || "No place");
+const regionOfPlace = (place: string) => MAP_REGION.get(place) ?? OTHER_REGION;
+/** A whole region in the filter, kept apart from place names. */
+const regionKey = (region: string) => `region:${region}`;
+type PlaceGroup = { region: string; places: string[] };
 const ago = (t: number) => {
   const s = (Date.now() - t) / 1000;
   if (s < 60) return "just now";
@@ -109,6 +120,7 @@ function Tracker({ player, onSwitch }: { player: string; onSwitch: (name: string
   const [kinds, setKinds] = useLocal<string[]>("filter-kinds", []);
   const [who, setWho] = useLocal<string[]>("filter-players", []);
   const [notMine, setNotMine] = useLocal<boolean>("filter-not-mine", false);
+  const [places, setPlaces] = useLocal<string[]>("filter-places", []);
   const [dialog, setDialog] = useState<DialogState>(null);
   const [detail, setDetail] = useState<string | null>(null);
 
@@ -135,11 +147,29 @@ function Tracker({ player, onSwitch }: { player: string; onSwitch: (name: string
   const playerCounts = new Map(players.map((p) => [p, data.progress.filter((r) => r.player === p).length]));
   const activeKinds = kinds.filter((k) => kindCounts.has(k));
   const activeWho = who.filter((p) => players.includes(p));
+  // Places that have entries, grouped by region in map order.
+  const placeCounts = new Map<string, number>();
+  for (const s of data.steps) placeCounts.set(placeOf(s.location), (placeCounts.get(placeOf(s.location)) ?? 0) + 1);
+  const mapIndex = (p: string) => (MAP_ORDER.includes(p) ? MAP_ORDER.indexOf(p) : MAP_ORDER.length);
+  const placeGroups: PlaceGroup[] = [...REGIONS.map((r) => r.region), OTHER_REGION]
+    .map((region) => ({
+      region,
+      places: [...placeCounts.keys()]
+        .filter((p) => regionOfPlace(p) === region)
+        .sort((a, b) => mapIndex(a) - mapIndex(b) || a.localeCompare(b)),
+    }))
+    .filter((g) => g.places.length);
+  const activePlaces = places.filter((v) => placeCounts.has(v) || placeGroups.some((g) => regionKey(g.region) === v));
+  const placeMatches = (location: string) => {
+    const p = placeOf(location);
+    return activePlaces.includes(p) || activePlaces.includes(regionKey(regionOfPlace(p)));
+  };
 
   const q = norm(search);
   const filtered = data.steps.filter(
     (s) =>
       (!activeKinds.length || activeKinds.includes(s.category)) &&
+      (!activePlaces.length || placeMatches(s.location)) &&
       (!activeWho.length || activeWho.some((p) => doneBy.get(s._id)?.includes(p))) &&
       (!notMine || !isMine(s)) &&
       (!q || [s.subject, s.action, s.location, s.how, s.category].some((f) => norm(f).includes(q))),
@@ -186,6 +216,7 @@ function Tracker({ player, onSwitch }: { player: string; onSwitch: (name: string
                   selected={activeKinds}
                   onChange={setKinds}
                 />
+                <PlaceSelect groups={placeGroups} counts={placeCounts} selected={activePlaces} onChange={setPlaces} />
                 <MultiSelect
                   label="Players"
                   options={players.map((p) => ({ value: p, count: playerCounts.get(p) ?? 0, note: p === player ? "you" : undefined }))}
@@ -207,7 +238,7 @@ function Tracker({ player, onSwitch }: { player: string; onSwitch: (name: string
                 steps={filtered}
                 player={player}
                 doneBy={doneBy}
-                searching={!!q || activeKinds.length > 0 || activeWho.length > 0 || notMine}
+                searching={!!q || activeKinds.length > 0 || activePlaces.length > 0 || activeWho.length > 0 || notMine}
                 onAdd={(initial) => setDialog({ mode: "add", initial })}
                 onEdit={(step) => setDialog({ mode: "edit", step })}
               />
@@ -297,6 +328,86 @@ function MultiSelect({
               extra?.onChange(false);
             }}
           >
+            Clear
+          </button>
+        )}
+      </div>
+    </details>
+  );
+}
+
+/**
+ * The place filter: regions, each with its places indented under it. Ticking a region keeps every place in it,
+ * including ones logged later; ticking all of a region's places turns into the region.
+ */
+function PlaceSelect({
+  groups,
+  counts,
+  selected,
+  onChange,
+}: {
+  groups: PlaceGroup[];
+  counts: Map<string, number>;
+  selected: string[];
+  onChange: (v: string[]) => void;
+}) {
+  const ref = useRef<HTMLDetailsElement>(null);
+  useEffect(() => {
+    const close = (e: MouseEvent) => {
+      if (ref.current?.open && !ref.current.contains(e.target as Node)) ref.current.open = false;
+    };
+    document.addEventListener("click", close);
+    return () => document.removeEventListener("click", close);
+  }, []);
+  const regionOn = (g: PlaceGroup) => selected.includes(regionKey(g.region));
+  const toggleRegion = (g: PlaceGroup) => {
+    const rest = selected.filter((v) => v !== regionKey(g.region) && !g.places.includes(v));
+    onChange(regionOn(g) ? rest : [...rest, regionKey(g.region)]);
+  };
+  const togglePlace = (g: PlaceGroup, p: string) => {
+    if (regionOn(g)) return onChange([...selected.filter((v) => v !== regionKey(g.region)), ...g.places.filter((x) => x !== p)]);
+    if (selected.includes(p)) return onChange(selected.filter((v) => v !== p));
+    const next = [...selected, p];
+    onChange(g.places.every((x) => next.includes(x)) ? [...next.filter((v) => !g.places.includes(v)), regionKey(g.region)] : next);
+  };
+  const names = selected.map((v) => v.replace(/^region:/, ""));
+  const summary = !names.length ? "All" : names.length === 1 ? names[0] : `${names.length} selected`;
+  return (
+    <details className={`multi ${names.length ? "on" : ""}`} ref={ref}>
+      <summary>
+        <span className="multi-label">Places</span>
+        <span className="multi-value">{summary}</span>
+      </summary>
+      <div className="multi-menu">
+        {groups.map((g) => {
+          const on = regionOn(g);
+          const some = !on && g.places.some((p) => selected.includes(p));
+          return (
+            <div key={g.region} className="multi-group">
+              <label className="multi-option multi-region">
+                <input
+                  type="checkbox"
+                  checked={on}
+                  ref={(el) => {
+                    if (el) el.indeterminate = some;
+                  }}
+                  onChange={() => toggleRegion(g)}
+                />
+                <span>{g.region}</span>
+                <span className="muted">{g.places.reduce((n, p) => n + (counts.get(p) ?? 0), 0)}</span>
+              </label>
+              {g.places.map((p) => (
+                <label key={p} className="multi-option multi-sub">
+                  <input type="checkbox" checked={on || selected.includes(p)} onChange={() => togglePlace(g, p)} />
+                  <span>{p}</span>
+                  <span className="muted">{counts.get(p) ?? 0}</span>
+                </label>
+              ))}
+            </div>
+          );
+        })}
+        {names.length > 0 && (
+          <button type="button" className="text-btn" onClick={() => onChange([])}>
             Clear
           </button>
         )}
