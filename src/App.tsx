@@ -108,6 +108,7 @@ function Tracker({ player, onChangePlayer }: { player: string; onChangePlayer: (
   const [search, setSearch] = useState("");
   const [kinds, setKinds] = useLocal<string[]>("filter-kinds", []);
   const [who, setWho] = useLocal<string[]>("filter-players", []);
+  const [notMine, setNotMine] = useLocal<boolean>("filter-not-mine", false);
   const [dialog, setDialog] = useState<DialogState>(null);
   const [detail, setDetail] = useState<string | null>(null);
 
@@ -140,6 +141,7 @@ function Tracker({ player, onChangePlayer }: { player: string; onChangePlayer: (
     (s) =>
       (!activeKinds.length || activeKinds.includes(s.category)) &&
       (!activeWho.length || activeWho.some((p) => doneBy.get(s._id)?.includes(p))) &&
+      (!notMine || !isMine(s)) &&
       (!q || [s.subject, s.action, s.location, s.how, s.category].some((f) => norm(f).includes(q))),
   );
 
@@ -193,13 +195,22 @@ function Tracker({ player, onChangePlayer }: { player: string; onChangePlayer: (
                   selected={activeWho}
                   onChange={setWho}
                 />
+                <button
+                  type="button"
+                  className={`filter-toggle ${notMine ? "on" : ""}`}
+                  aria-pressed={notMine}
+                  title="Only show steps you haven't done yet"
+                  onClick={() => setNotMine(!notMine)}
+                >
+                  Not mine
+                </button>
               </div>
 
               <Journal
                 steps={filtered}
                 player={player}
                 doneBy={doneBy}
-                searching={!!q || activeKinds.length > 0 || activeWho.length > 0}
+                searching={!!q || activeKinds.length > 0 || activeWho.length > 0 || notMine}
                 onAdd={(initial) => setDialog({ mode: "add", initial })}
                 onEdit={(step) => setDialog({ mode: "edit", step })}
               />
