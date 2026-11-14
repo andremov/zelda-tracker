@@ -142,38 +142,52 @@ function Tracker({ player, onSwitch }: { player: string; onSwitch: (name: string
   const others = uniq(data.progress.map((p) => p.player)).filter((p) => p !== player);
   const players = [player, ...others];
   // Filters: nothing ticked means everything. Players match entries any of them has done.
-  const kindCounts = new Map<string, number>();
-  for (const s of data.steps) kindCounts.set(s.category, (kindCounts.get(s.category) ?? 0) + 1);
-  const playerCounts = new Map(players.map((p) => [p, data.progress.filter((r) => r.player === p).length]));
-  const activeKinds = kinds.filter((k) => kindCounts.has(k));
+  const allKinds = uniq(data.steps.map((s) => s.category));
+  const activeKinds = kinds.filter((k) => allKinds.includes(k));
   const activeWho = who.filter((p) => players.includes(p));
   // Places that have entries, grouped by region in map order.
-  const placeCounts = new Map<string, number>();
-  for (const s of data.steps) placeCounts.set(placeOf(s.location), (placeCounts.get(placeOf(s.location)) ?? 0) + 1);
+  const allPlaces = new Set(data.steps.map((s) => placeOf(s.location)));
   const mapIndex = (p: string) => (MAP_ORDER.includes(p) ? MAP_ORDER.indexOf(p) : MAP_ORDER.length);
   const placeGroups: PlaceGroup[] = [...REGIONS.map((r) => r.region), OTHER_REGION]
     .map((region) => ({
       region,
-      places: [...placeCounts.keys()]
-        .filter((p) => regionOfPlace(p) === region)
-        .sort((a, b) => mapIndex(a) - mapIndex(b) || a.localeCompare(b)),
+      places: [...allPlaces].filter((p) => regionOfPlace(p) === region).sort((a, b) => mapIndex(a) - mapIndex(b) || a.localeCompare(b)),
     }))
     .filter((g) => g.places.length);
-  const activePlaces = places.filter((v) => placeCounts.has(v) || placeGroups.some((g) => regionKey(g.region) === v));
-  const placeMatches = (location: string) => {
-    const p = placeOf(location);
-    return activePlaces.includes(p) || activePlaces.includes(regionKey(regionOfPlace(p)));
-  };
+  const activePlaces = places.filter((v) => allPlaces.has(v) || placeGroups.some((g) => regionKey(g.region) === v));
 
   const q = norm(search);
-  const filtered = data.steps.filter(
-    (s) =>
-      (!activeKinds.length || activeKinds.includes(s.category)) &&
-      (!activePlaces.length || placeMatches(s.location)) &&
-      (!activeWho.length || activeWho.some((p) => doneBy.get(s._id)?.includes(p))) &&
-      (!notMine || !isMine(s)) &&
-      (!q || [s.subject, s.action, s.location, s.how, s.category].some((f) => norm(f).includes(q))),
-  );
+  const passes = {
+    kind: (s: Step) => !activeKinds.length || activeKinds.includes(s.category),
+    place: (s: Step) => {
+      const p = placeOf(s.location);
+      return !activePlaces.length || activePlaces.includes(p) || activePlaces.includes(regionKey(regionOfPlace(p)));
+    },
+    who: (s: Step) => (!activeWho.length || activeWho.some((p) => doneBy.get(s._id)?.includes(p))) && (!notMine || !isMine(s)),
+    search: (s: Step) => !q || [s.subject, s.action, s.location, s.how, s.category].some((f) => norm(f).includes(q)),
+  };
+  /** Steps that pass every filter except one: what a dropdown's counts are taken from, so they match what ticking shows. */
+  const allBut = (skip: keyof typeof passes) =>
+    data.steps.filter((s) => (Object.keys(passes) as (keyof typeof passes)[]).every((k) => k === skip || passes[k](s)));
+  const filtered = allBut("search").filter(passes.search);
+  const tally = (steps: Step[], keyOf: (s: Step) => string[]) => {
+    const m = new Map<string, number>();
+    for (const s of steps) for (const k of keyOf(s)) m.set(k, (m.get(k) ?? 0) + 1);
+    return m;
+  };
+  const kindCounts = tally(allBut("kind"), (s) => [s.category]);
+  const placeCounts = tally(allBut("place"), (s) => [placeOf(s.location)]);
+  // (the player counts ignore "Anyone but me" too: it belongs to the same dropdown)
+  const playerSteps = data.steps.filter((s) => passes.kind(s) && passes.place(s) && passes.search(s));
+  const playerCounts = tally(playerSteps, (s) => doneBy.get(s._id) ?? []);
+  const filtering = !!q || activeKinds.length > 0 || activePlaces.length > 0 || activeWho.length > 0 || notMine;
+  const clearFilters = () => {
+    setSearch("");
+    setKinds([]);
+    setPlaces([]);
+    setWho([]);
+    setNotMine(false);
+  };
 
   const saveCard = (name: string) => (
     <SaveCard
@@ -206,39 +220,46 @@ function Tracker({ player, onSwitch }: { player: string; onSwitch: (name: string
 
           <>
               <div className="journal-tools">
-                <label className="search">
-                  <Icon name="search" size={18} />
-                  <input type="search" placeholder="Search the journal" value={search} onChange={(e) => setSearch(e.target.value)} />
-                </label>
-                <MultiSelect
-                  label="Kinds"
-                  options={[...kindCounts.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([k, n]) => ({ value: k, count: n, icon: categoryIcon(k) }))}
-                  selected={activeKinds}
-                  onChange={setKinds}
-                />
-                <PlaceSelect groups={placeGroups} counts={placeCounts} selected={activePlaces} onChange={setPlaces} />
-                <MultiSelect
-                  label="Players"
-                  options={players.map((p) => ({ value: p, count: playerCounts.get(p) ?? 0, note: p === player ? "you" : undefined }))}
-                  selected={activeWho}
-                  onChange={setWho}
-                  extra={{ label: "Anyone but me", hint: "Steps you haven't done yet", checked: notMine, onChange: setNotMine }}
-                />
+                <div className="journal-row">
+                  <label className="search">
+                    <Icon name="search" size={18} />
+                    <input type="search" placeholder="Search the journal" value={search} onChange={(e) => setSearch(e.target.value)} />
+                  </label>
+                  {/* Picks up the kind you're filtered to, so a Skulltula-only feed logs a Skulltula. */}
+                  <button
+                    type="button"
+                    className="btn primary feed-log"
+                    onClick={() => setDialog({ mode: "add", initial: { ...EMPTY, category: activeKinds.length === 1 ? activeKinds[0] : "" } })}
+                  >
+                    <Icon name="quill" size={18} /> {activeKinds.length === 1 ? `Log ${activeKinds[0]}` : "Log a step"}
+                  </button>
+                </div>
+                <div className="journal-row">
+                  <MultiSelect
+                    label="Kinds"
+                    options={allKinds.map((k) => ({ value: k, count: kindCounts.get(k) ?? 0, icon: categoryIcon(k) }))}
+                    selected={activeKinds}
+                    onChange={setKinds}
+                  />
+                  <PlaceSelect groups={placeGroups} counts={placeCounts} selected={activePlaces} onChange={setPlaces} />
+                  <MultiSelect
+                    label="Players"
+                    options={players.map((p) => ({ value: p, count: playerCounts.get(p) ?? 0, note: p === player ? "you" : undefined }))}
+                    selected={activeWho}
+                    onChange={setWho}
+                    extra={{ label: "Anyone but me", hint: "Steps you haven't done yet", checked: notMine, onChange: setNotMine }}
+                  />
+                  <button type="button" className="btn clear-filters" disabled={!filtering} onClick={clearFilters}>
+                    Clear filters
+                  </button>
+                </div>
               </div>
-              {/* Picks up the kind you're filtered to, so a Skulltula-only feed logs a Skulltula. */}
-              <button
-                type="button"
-                className="btn primary feed-log"
-                onClick={() => setDialog({ mode: "add", initial: { ...EMPTY, category: activeKinds.length === 1 ? activeKinds[0] : "" } })}
-              >
-                <Icon name="quill" size={18} /> {activeKinds.length === 1 ? `Log ${activeKinds[0]}` : "Log a step"}
-              </button>
 
               <Journal
                 steps={filtered}
                 player={player}
                 doneBy={doneBy}
-                searching={!!q || activeKinds.length > 0 || activePlaces.length > 0 || activeWho.length > 0 || notMine}
+                searching={filtering}
                 onAdd={(initial) => setDialog({ mode: "add", initial })}
                 onEdit={(step) => setDialog({ mode: "edit", step })}
               />

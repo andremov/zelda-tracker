@@ -211,9 +211,14 @@ input::placeholder, textarea::placeholder { color: var(--muted); opacity: 0.75; 
 .tabs button.active { color: var(--green); background: var(--paper); border-color: var(--line); border-bottom: 2px solid var(--paper); }
 .tabs .count { font-family: var(--font-body); font-size: 0.85rem; background: var(--paper-2); border: 1px solid var(--line-soft); border-radius: 99px; padding: 0 7px; }
 
-.journal-tools { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-.journal-tools .search { flex: 1; min-width: 200px; }
-.feed-log { width: 100%; justify-content: center; }
+.journal-tools { display: grid; gap: 10px; }
+.journal-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.journal-row .search { flex: 1; min-width: 160px; }
+.feed-log { justify-content: center; white-space: nowrap; }
+.clear-filters { margin-left: auto; }
+/* (the first two dropdowns sit at the row's left edge: their menus open rightward so they stay on screen) */
+.journal-row .multi:nth-child(-n + 2) .multi-menu { left: 0; right: auto; }
+.btn:disabled { opacity: 0.45; cursor: default; }
 .multi { position: relative; }
 .multi summary {
   list-style: none; cursor: pointer; user-select: none;
