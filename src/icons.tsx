@@ -181,6 +181,14 @@ const paths: Record<string, ReactNode> = {
       <path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1" />
     </>
   ),
+  well: (
+    <>
+      <path d="M4 7h16M6 7l1-3h10l1 3M8 7v4M16 7v4" />
+      <path d="M5 11h14v9H5z" />
+      <path d="M5 15.5h14" />
+    </>
+  ),
+  snowflake: <path d="M12 2.5v19M3.8 7.25l16.4 9.5M3.8 16.75l16.4-9.5M9.5 4 12 6.5 14.5 4M9.5 20 12 17.5 14.5 20" />,
   swords: <path d="M4 4l11 11M15 15l2 0 0 2M17 17l3 3M20 4 9 15M9 15l-2 0 0 2M7 17l-3 3M13 9l3-3M11 9 8 6" />,
   tower: (
     <>

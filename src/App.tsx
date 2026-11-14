@@ -11,6 +11,7 @@ import {
   DUNGEON_ICON,
   DUNGEON_STEPS,
   DUNGEONS,
+  MINI_DUNGEONS,
   EQUIPMENT,
   FROGS,
   GREAT_FAIRIES,
@@ -582,7 +583,7 @@ function SaveCard({
         </span>
       </header>
       <Hearts full={hearts} quarters={pieces % 4} />
-      <Track label="Dungeons" icon={(d) => DUNGEON_ICON[d] ?? "door"} rows={[DUNGEONS.flatMap((g) => g.items)]} have={completed} />
+      <Track label="Dungeons" icon={(d) => DUNGEON_ICON[d] ?? "door"} rows={[DUNGEONS.flatMap((g) => g.items).filter((d) => !MINI_DUNGEONS.includes(d))]} have={completed} />
       <Track label="Songs" icon="note" rows={SONGS.map((g) => g.items)} have={songs} />
       <Track label="Great Fairies" icon="fairy" rows={[GREAT_FAIRIES.flatMap((g) => g.items)]} have={fairies} />
     </section>
