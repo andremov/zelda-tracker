@@ -213,6 +213,7 @@ input::placeholder, textarea::placeholder { color: var(--muted); opacity: 0.75; 
 
 .journal-tools { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
 .journal-tools .search { flex: 1; min-width: 200px; }
+.journal-tools .feed-log { margin-left: auto; white-space: nowrap; }
 .multi { position: relative; }
 .multi summary {
   list-style: none; cursor: pointer; user-select: none;
