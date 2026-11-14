@@ -34,7 +34,6 @@ export const SAME_MOMENT: [StepKey, StepKey][] = FAIRY_GIFTS.map(([fountain, cat
 const TIERS: [string, string[]][] = [
   ["Upgrade", ["Bullet Bag (40)", "Bullet Bag (50)"]],
   ["Upgrade", ["Quiver (40)", "Quiver (50)"]],
-  ["Upgrade", ["Big Bomb Bag (30)", "Biggest Bomb Bag (40)"]],
   ["Upgrade", ["Adult's Wallet", "Giant's Wallet"]],
   ["Upgrade", ["Deku Sticks (20)", "Deku Sticks (30)"]],
   ["Upgrade", ["Deku Nuts (30)", "Deku Nuts (40)"]],
