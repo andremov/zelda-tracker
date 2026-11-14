@@ -9,6 +9,7 @@
  */
 
 import type * as links from "../links.js";
+import type * as migrations from "../migrations.js";
 import type * as steps from "../steps.js";
 
 import type {
@@ -19,6 +20,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   links: typeof links;
+  migrations: typeof migrations;
   steps: typeof steps;
 }>;
 
