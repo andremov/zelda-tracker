@@ -928,8 +928,8 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "subject": "Gold Skulltula",
     "action": "Got the token",
     "location": "Water Temple",
-    "how": "3F: inside the central tower, reached with the Longshot",
-    "age": ""
+    "how": "3F: high on the north wall inside the central pillar (Longshot)",
+    "age": "Adult"
   },
   {
     "key": "gs:15506432733081566465",
@@ -937,8 +937,8 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "subject": "Gold Skulltula",
     "action": "Got the token",
     "location": "Water Temple",
-    "how": "1F: in a corner of the whirlpool river",
-    "age": ""
+    "how": "2F: on a wall above the second whirlpool (Longshot)",
+    "age": "Adult"
   },
   {
     "key": "gs:16157272130665282352",
@@ -946,8 +946,8 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "subject": "Gold Skulltula",
     "action": "Got the token",
     "location": "Water Temple",
-    "how": "Low down, near a crystal switch and spikes",
-    "age": ""
+    "how": "B1: on the path beneath the central pillar, by the crystal switch and spikes (Iron Boots, Hookshot)",
+    "age": "Adult"
   },
   {
     "key": "gs:186694424287048567",
@@ -955,8 +955,8 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "subject": "Gold Skulltula",
     "action": "Got the token",
     "location": "Water Temple",
-    "how": "3F: on the north wall of the room with platforms falling down the waterfall",
-    "age": ""
+    "how": "1F: behind a waterfall in the rolling-boulder room (Longshot)",
+    "age": "Adult"
   },
   {
     "key": "gs:4399424945134189769",
@@ -964,8 +964,8 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "subject": "Gold Skulltula",
     "action": "Got the token",
     "location": "Water Temple",
-    "how": "Near a breakable wall",
-    "age": ""
+    "how": "2F: behind a bombable wall in the blue-lit east room, with the water at the middle level (Iron Boots, Bombs)",
+    "age": "Adult"
   },
   {
     "key": "gs:9600417828645642589",
