@@ -273,7 +273,8 @@ def from_save(s: Save):
     pieces = s.num("PlayerStatus.MaxLife") - 4 * (3 + containers) + s.num("PouchData.Obj_Heart_Piece.StockNum")
     counts = {
         "Gold Skulltula": s.num("PouchData.Item_Token_Gold.StockNum"),
-        "Big Poe": sum(s.flag("HyruleField_Defeat_BigPoe_%02d" % i) for i in range(1, 11)),
+        # The per-Poe HyruleField_Defeat_BigPoe_NN flags are never set in this remake; the defeat count is.
+        "Big Poe": min(10, max(0, s.num("DefeatedEnemyNum.Enemy_Poe_Big"))),
     }
     if 0 <= pieces <= 36:
         counts["Heart Piece"] = pieces
@@ -297,7 +298,7 @@ def convex(kind, path, args, url=None):
     return res["value"]
 
 
-def keys(s, named):
+def keys(s, named, counts):
     """The site's catalog key for everything the save shows (see convex/catalog.ts in the site's repo):
     "category|subject|action" for named things, gs:/hp:<map id> for placed skulltulas and heart pieces,
     hp:/up:<flag> for rewards, poe:<nn> for Big Poes."""
@@ -305,7 +306,8 @@ def keys(s, named):
     out |= {"%s:%s" % (kind, k) for k, kind in SAVE_KEYS["placed"].items() if int(k) in s.ids}
     out |= {"hp:" + f for f in SAVE_KEYS["heart_flags"] if s.flag(f)}
     out |= {"up:" + f for f in SAVE_KEYS["upgrade_flags"] if s.flag(f)}
-    out |= {"poe:%02d" % i for i in range(1, 11) if s.flag("HyruleField_Defeat_BigPoe_%02d" % i)}
+    # Big Poes are told apart only by count: the first n of poe:01..poe:10.
+    out |= {"poe:%02d" % i for i in range(1, 1 + counts["Big Poe"])}
     return out
 
 
@@ -347,7 +349,7 @@ def sync(a):
 
     s = Save(*read_save(path))
     named, counts, stacks = from_save(s)
-    found = keys(s, named)
+    found = keys(s, named, counts)
     if a.show:
         print(path)
         for k in sorted(found): print("  " + k)
