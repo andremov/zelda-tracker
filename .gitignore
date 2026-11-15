@@ -7,3 +7,9 @@ dist
 
 .vercel
 .env*
+
+# save sync: each player's own settings and run files
+sync/config.json
+sync/state.json
+sync/sync.log
+sync/__pycache__

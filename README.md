@@ -29,6 +29,8 @@ After changing the catalog, run `npx convex run catalog:seed` (add `--prod` for 
 
 ## Sync API
 
+The [`sync/`](sync/README.md) folder has a ready-made save sync for Hookshot saves: set your name and save folder, and it ticks everything for you.
+
 A save sync calls the public mutation `steps:tick` with `{ "player": "Name", "keys": [...] }`. Keys the player already has are skipped. It returns `{ ticked, unknown }`: what was new, and the keys the catalog doesn't have. `steps:list` returns the ticked entries (each with its `key`) and all ticks.
 
 ## Stack
