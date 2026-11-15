@@ -4,6 +4,8 @@ import { Icon, categoryIcon } from "./icons";
 
 /** How long each map is shown, in ms. The CSS animations in style.css use the same length (--showcase-slide). */
 const SLIDE_MS = 60_000;
+/** At most this many times the zoom that shows the whole map. */
+const MAX_ZOOM = 1.6;
 
 /** Entries pop in after the title and are all gone just before the map changes (fractions of the slide). */
 const ENTRIES_FROM = 0.1;
@@ -79,18 +81,20 @@ function ShowcaseSlide({ slide, steps, players, doneBy, placeOf }: { slide: Slid
     if (!el) return;
     const vw = el.clientWidth;
     const vh = el.clientHeight;
-    const s = Math.max(vw / image.w, vh / image.h) * 1.25;
+    // Fill the screen with a little extra, but never more than MAX_ZOOM times the size that shows the whole map:
+    // tall or narrow maps (Ganon's Castle, Sacred Forest Meadow) would otherwise be blown up far too much.
+    const fit = Math.min(vw / image.w, vh / image.h);
+    const s = Math.min(Math.max(vw / image.w, vh / image.h) * 1.25, fit * MAX_ZOOM);
     const w = image.w * s;
     const h = image.h * s;
     const cx = (vw - w) / 2;
     const cy = (vh - h) / 2;
     const at = (x: number, y: number) => `translate(${x}px, ${y}px) scale(${s})`;
-    const ends = [
-      [at(0, cy), at(vw - w, cy)],
-      [at(vw - w, cy), at(0, cy)],
-      [at(cx, 0), at(cx, vh - h)],
-      [at(cx, vh - h), at(cx, 0)],
-    ];
+    // Pan along an axis the map overflows; if it overflows neither, drift a little sideways around the center.
+    const ends: [string, string][] = [];
+    if (w - vw > 40) ends.push([at(0, cy), at(vw - w, cy)], [at(vw - w, cy), at(0, cy)]);
+    if (h - vh > 40) ends.push([at(cx, 0), at(cx, vh - h)], [at(cx, vh - h), at(cx, 0)]);
+    if (!ends.length) ends.push([at(cx - 40, cy), at(cx + 40, cy)], [at(cx + 40, cy), at(cx - 40, cy)]);
     const [from, to] = ends[Math.floor(Math.random() * ends.length)];
     setPan({ from, to });
     const raf = requestAnimationFrame(() => requestAnimationFrame(() => setMoving(true)));
