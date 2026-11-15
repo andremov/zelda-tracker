@@ -747,8 +747,8 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "category": "Gold Skulltula",
     "subject": "Gold Skulltula",
     "action": "Got the token",
-    "location": "Lon Lon Ranch",
-    "how": "Behind a web, with a regular Skulltula nearby (maybe in a grotto)",
+    "location": "Hyrule Field",
+    "how": "Open grotto in the southwest of the field, near the road down to Lake Hylia: behind a web, with a regular Skulltula guarding it",
     "age": ""
   },
   {
