@@ -144,8 +144,8 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "category": "Gold Skulltula",
     "subject": "Gold Skulltula",
     "action": "Got the token",
-    "location": "A grotto",
-    "how": "Adult: in a crate in a grotto with a Gossip Stone",
+    "location": "Hyrule Field",
+    "how": "Adult: open grotto in the grass in the south of the field, between the Lost Woods bridge and the road to Lake Hylia; in a crate by the Gossip Stone",
     "age": "Adult"
   },
   {
@@ -1044,8 +1044,8 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "category": "Heart Piece",
     "subject": "Heart Piece",
     "action": "Got it",
-    "location": "A grotto",
-    "how": "Bought from a Business Scrub",
+    "location": "Hyrule Field",
+    "how": "Bought from a Business Scrub in an open grotto among the rocks just east of the Market drawbridge",
     "age": ""
   },
   {
