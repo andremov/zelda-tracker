@@ -145,7 +145,7 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "subject": "Gold Skulltula",
     "action": "Got the token",
     "location": "Hyrule Field",
-    "how": "Adult: open grotto in the grass in the south of the field, between the Lost Woods bridge and the road to Lake Hylia; in a crate by the Gossip Stone",
+    "how": "Open grotto in the grass in the south of the field, between the Lost Woods bridge and the road to Lake Hylia; in a crate by the Gossip Stone",
     "age": "Adult"
   },
   {
@@ -217,7 +217,7 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "subject": "Gold Skulltula",
     "action": "Got the token",
     "location": "Death Mountain Trail",
-    "how": "Adult: above Dodongo's Cavern, break the rock (hammer)",
+    "how": "Above Dodongo's Cavern, break the rock (hammer)",
     "age": "Adult"
   },
   {
@@ -235,7 +235,7 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "subject": "Gold Skulltula",
     "action": "Got the token",
     "location": "Death Mountain Trail",
-    "how": "Adult: near the summit on the falling-rocks path, break the rock (hammer)",
+    "how": "Near the summit on the falling-rocks path, break the rock (hammer)",
     "age": "Adult"
   },
   {
@@ -244,8 +244,8 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "subject": "Gold Skulltula",
     "action": "Got the token",
     "location": "Desert Colossus",
-    "how": "Adult, at night: on a tree or a hill (one of two)",
-    "age": ""
+    "how": "At night: on a tree or a hill (one of two)",
+    "age": "Adult"
   },
   {
     "key": "gs:15057756765324812936",
@@ -253,8 +253,8 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "subject": "Gold Skulltula",
     "action": "Got the token",
     "location": "Desert Colossus",
-    "how": "Adult, at night: on a tree or a hill (one of two)",
-    "age": ""
+    "how": "At night: on a tree or a hill (one of two)",
+    "age": "Adult"
   },
   {
     "key": "gs:234735562946824289",
@@ -307,8 +307,8 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "subject": "Gold Skulltula",
     "action": "Got the token",
     "location": "Dodongo's Cavern",
-    "how": "Near the scarecrow spot (adult: hookshot, or the Scarecrow's Song)",
-    "age": ""
+    "how": "Near the scarecrow spot (hookshot, or the Scarecrow's Song)",
+    "age": "Adult"
   },
   {
     "key": "gs:12751796212121957464",
@@ -406,7 +406,7 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "subject": "Gold Skulltula",
     "action": "Got the token",
     "location": "Gerudo Valley",
-    "how": "Adult, at night: on a rock pillar (one of two)",
+    "how": "At night: on a rock pillar (one of two)",
     "age": "Adult"
   },
   {
@@ -415,7 +415,7 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "subject": "Gold Skulltula",
     "action": "Got the token",
     "location": "Gerudo Valley",
-    "how": "Adult, at night: near the carpenters' tent (one of two)",
+    "how": "At night: near the carpenters' tent (one of two)",
     "age": "Adult"
   },
   {
@@ -424,7 +424,7 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "subject": "Gold Skulltula",
     "action": "Got the token",
     "location": "Gerudo Valley",
-    "how": "Child, at night: on the wall under the small bridge (boomerang)",
+    "how": "At night: on the wall under the small bridge (boomerang)",
     "age": "Child"
   },
   {
@@ -442,7 +442,7 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "subject": "Gold Skulltula",
     "action": "Got the token",
     "location": "Gerudo's Fortress",
-    "how": "Adult, at night: in the horseback archery range",
+    "how": "At night: in the horseback archery range",
     "age": "Adult"
   },
   {
@@ -451,7 +451,7 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "subject": "Gold Skulltula",
     "action": "Got the token",
     "location": "Gerudo's Fortress",
-    "how": "Adult, at night: on the top floor of the fortress",
+    "how": "At night: on the top floor of the fortress",
     "age": "Adult"
   },
   {
@@ -460,7 +460,7 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "subject": "Gold Skulltula",
     "action": "Got the token",
     "location": "Goron City",
-    "how": "Adult: on the central platform",
+    "how": "On the central platform",
     "age": "Adult"
   },
   {
@@ -658,7 +658,7 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "subject": "Gold Skulltula",
     "action": "Got the token",
     "location": "Kakariko Village",
-    "how": "Adult, at night: on the roof of Impa's house, next to the Cucco pen",
+    "how": "At night: on the roof of Impa's house, next to the Cucco pen",
     "age": "Adult"
   },
   {
@@ -685,7 +685,7 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "subject": "Gold Skulltula",
     "action": "Got the token",
     "location": "Kokiri Forest",
-    "how": "Adult, at night: on the wall of the House of Twins",
+    "how": "At night: on the wall of the House of Twins",
     "age": "Adult"
   },
   {
@@ -712,7 +712,7 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "subject": "Gold Skulltula",
     "action": "Got the token",
     "location": "Lake Hylia",
-    "how": "Adult, at night: out over the lake",
+    "how": "At night: out over the lake",
     "age": "Adult"
   },
   {
@@ -730,7 +730,7 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "subject": "Gold Skulltula",
     "action": "Got the token",
     "location": "Lakeside Laboratory",
-    "how": "Child, at night: on the laboratory wall",
+    "how": "At night: on the laboratory wall",
     "age": "Child"
   },
   {
@@ -739,7 +739,7 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "subject": "Gold Skulltula",
     "action": "Got the token",
     "location": "Lakeside Laboratory",
-    "how": "Adult: in a crate at the bottom of the laboratory pool (Iron Boots)",
+    "how": "In a crate at the bottom of the laboratory pool (Iron Boots)",
     "age": "Adult"
   },
   {
@@ -793,8 +793,8 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "subject": "Gold Skulltula",
     "action": "Got the token",
     "location": "Lost Woods",
-    "how": "High above the Forest Stage entrance (adult: ride the magic bean plant)",
-    "age": ""
+    "how": "High above the Forest Stage entrance (ride the magic bean plant)",
+    "age": "Adult"
   },
   {
     "key": "gs:9333354743976439033",
@@ -820,8 +820,8 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "subject": "Gold Skulltula",
     "action": "Got the token",
     "location": "Outside Ganon's Castle",
-    "how": "Adult: outside Ganon's Castle, on a pillar",
-    "age": ""
+    "how": "Outside Ganon's Castle, on a pillar",
+    "age": "Adult"
   },
   {
     "key": "gs:14473218207379268379",
@@ -829,7 +829,7 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "subject": "Gold Skulltula",
     "action": "Got the token",
     "location": "Sacred Forest Meadow",
-    "how": "Adult, at night: on a wall in the meadow",
+    "how": "At night: on a wall in the meadow",
     "age": "Adult"
   },
   {
@@ -973,7 +973,7 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "subject": "Gold Skulltula",
     "action": "Got the token",
     "location": "Zora's Domain",
-    "how": "Adult: on the frozen waterfall",
+    "how": "On the frozen waterfall",
     "age": "Adult"
   },
   {
@@ -1000,8 +1000,8 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "subject": "Gold Skulltula",
     "action": "Got the token",
     "location": "Zora's Fountain",
-    "how": "Adult: high up in the hidden cave (Silver Gauntlets)",
-    "age": ""
+    "how": "High up in the hidden cave (Silver Gauntlets)",
+    "age": "Adult"
   },
   {
     "key": "gs:10917372215719266172",
@@ -1009,7 +1009,7 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "subject": "Gold Skulltula",
     "action": "Got the token",
     "location": "Zora's River",
-    "how": "Adult, at night: near the raised grottos (hookshot)",
+    "how": "At night: near the raised grottos (hookshot)",
     "age": "Adult"
   },
   {
@@ -1036,7 +1036,7 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "subject": "Gold Skulltula",
     "action": "Got the token",
     "location": "Zora's River",
-    "how": "Adult, at night: above the bridge (hookshot)",
+    "how": "At night: above the bridge (hookshot)",
     "age": "Adult"
   },
   {
@@ -1072,8 +1072,8 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "subject": "Heart Piece",
     "action": "Got it",
     "location": "Death Mountain Crater",
-    "how": "On top of the volcano: plant a magic bean by the Bolero warp pad as a child, ride the plant as an adult",
-    "age": ""
+    "how": "On top of the volcano: plant a magic bean by the Bolero warp pad as a child, then ride the plant",
+    "age": "Adult"
   },
   {
     "key": "hp:DeathMountain_Enemy_Scrub_Business_HeartPiece_01",
@@ -1099,8 +1099,8 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "subject": "Heart Piece",
     "action": "Got it",
     "location": "Desert Colossus",
-    "how": "Up on a high ledge (adult: ride the magic bean plant)",
-    "age": ""
+    "how": "Up on a high ledge (ride the magic bean plant)",
+    "age": "Adult"
   },
   {
     "key": "hp:SubEvent_FindRichard_GetHeartPiece",
@@ -1171,8 +1171,8 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "subject": "Heart Piece",
     "action": "Got it",
     "location": "Kakariko Graveyard",
-    "how": "On top of a wall, to the left. Need to plant seed as a child.",
-    "age": ""
+    "how": "On top of a wall, to the left. Need to plant a magic bean as a child.",
+    "age": "Adult"
   },
   {
     "key": "hp:GraveYard_DiggingHoleTour_Drop_HeartPiece",
@@ -1234,7 +1234,7 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "subject": "Heart Piece",
     "action": "Got it",
     "location": "Lake Hylia",
-    "how": "Adult: up high by the laboratory",
+    "how": "Up high by the laboratory",
     "age": "Adult"
   },
   {
@@ -1271,7 +1271,7 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "action": "Got it",
     "location": "Lost Woods",
     "how": "Played Saria's Song for the Skull Kid on the stump",
-    "age": ""
+    "age": "Child"
   },
   {
     "key": "hp:MiniGame_ChoiceTreasure_IsClear",
@@ -1306,7 +1306,7 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "subject": "Heart Piece",
     "action": "Got it",
     "location": "Zora's Fountain",
-    "how": "Adult: on top of the iceberg",
+    "how": "On top of the iceberg",
     "age": "Adult"
   },
   {
@@ -1315,7 +1315,7 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "subject": "Heart Piece",
     "action": "Got it",
     "location": "Zora's Fountain",
-    "how": "Adult: at the bottom of the fountain (Iron Boots)",
+    "how": "At the bottom of the fountain (Iron Boots)",
     "age": "Adult"
   },
   {
