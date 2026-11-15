@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactElement } from "react";
 import { AREAS, AREA_PLACES, COUNTED, type Age, type Area, type CountedStep } from "./MapView";
 import { Icon, categoryIcon } from "./icons";
 
@@ -100,7 +100,7 @@ function ShowcaseSlide({ slide, steps, doneBy, placeOf }: { slide: Slide } & Pro
     );
   }, [area, age, steps, doneBy, placeOf]);
 
-  // Pages: as few entries per page as fit the time, stacked in one column so they never overlap.
+  // Pages: as few entries per page as fit the time; the cards of a page are placed apart so they never overlap.
   const span = (ENTRIES_TO - ENTRIES_FROM) * SLIDE_MS;
   const stack = Math.min(MAX_STACK, Math.max(1, Math.ceil(entries.length / Math.max(1, Math.floor(span / MIN_PAGE_MS)))));
   const pages = Array.from({ length: Math.ceil(entries.length / stack) }, (_, i) => entries.slice(i * stack, (i + 1) * stack));
@@ -136,30 +136,117 @@ function ShowcaseSlide({ slide, steps, doneBy, placeOf }: { slide: Slide } & Pro
         <span>{age === "child" ? "Child" : "Adult"}</span>
       </div>
 
-      <div className="showcase-entries">
-        {entries.length === 0 && t >= 0 && t < span && <div className="showcase-entry empty">Nothing found here yet</div>}
-        {page?.map(({ step, who }, i) => (
+      <Scatter key={pageIndex} durationMs={pageMs} leaving={leaving}>
+        {entries.length === 0 && t >= 0 && t < span
+          ? [<div key="empty" className="showcase-entry empty">Nothing found here yet</div>]
+          : (page ?? []).map(({ step, who }) => (
+              <div key={step._id} className="showcase-entry">
+                <div className="showcase-entry-head">
+                  <Icon name={categoryIcon(step.category)} size={20} />
+                  <span className="eyebrow">{step.category}</span>
+                  {placeOf(step.location) !== area.name && <span className="showcase-place">{step.location}</span>}
+                </div>
+                <p>{step.how || "No description yet"}</p>
+                <div className="stamps">
+                  {who.map((p) => (
+                    <span key={p} className="stamp">
+                      {p}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+      </Scatter>
+    </div>
+  );
+}
+
+type Spot = { x: number; y: number; dx: number; dy: number; rot: number; drot: number };
+
+/**
+ * Lays its children out at random spots whose centers fall in the middle half of the screen, never overlapping,
+ * and lets each one drift a little while it's up. Measures the cards first (hidden), then places them.
+ */
+function Scatter({ children, durationMs, leaving }: { children: ReactElement[]; durationMs: number; leaving: boolean }) {
+  const area = useRef<HTMLDivElement>(null);
+  const cards = useRef<(HTMLDivElement | null)[]>([]);
+  const [spots, setSpots] = useState<Spot[] | null>(null);
+  const count = children.length;
+
+  useLayoutEffect(() => {
+    const el = area.current;
+    if (!el || !count) return;
+    const W = el.clientWidth;
+    const H = el.clientHeight;
+    const GAP = 16;
+    const DRIFT = 60; // keep room for the drift so moving cards don't run into each other
+    const placed: { x: number; y: number; w: number; h: number }[] = [];
+    const overlap = (r: { x: number; y: number; w: number; h: number }) =>
+      placed.reduce((sum, q) => {
+        const ox = Math.min(r.x + r.w, q.x + q.w) + GAP + DRIFT - Math.max(r.x, q.x);
+        const oy = Math.min(r.y + r.h, q.y + q.h) + GAP + DRIFT - Math.max(r.y, q.y);
+        return sum + (ox > 0 && oy > 0 ? ox * oy : 0);
+      }, 0);
+    const out: Spot[] = [];
+    for (let i = 0; i < count; i++) {
+      const w = cards.current[i]?.offsetWidth ?? 340;
+      const h = cards.current[i]?.offsetHeight ?? 140;
+      let best = { x: 0, y: 0, w, h };
+      let bestScore = Infinity;
+      for (let tries = 0; tries < 300 && bestScore > 0; tries++) {
+        // center somewhere in the middle half, card kept fully on screen
+        const cx = W * (0.25 + Math.random() * 0.5);
+        const cy = H * (0.25 + Math.random() * 0.5);
+        const r = { x: Math.min(Math.max(cx - w / 2, 12), W - w - 12), y: Math.min(Math.max(cy - h / 2, 12), H - h - 12), w, h };
+        const score = overlap(r);
+        if (score < bestScore) [best, bestScore] = [r, score];
+      }
+      placed.push(best);
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 30 + Math.random() * 30;
+      out.push({
+        x: best.x,
+        y: best.y,
+        dx: Math.cos(angle) * dist,
+        dy: Math.sin(angle) * dist,
+        rot: (Math.random() - 0.5) * 4,
+        drot: (Math.random() - 0.5) * 3,
+      });
+    }
+    setSpots(out);
+  }, [count]);
+
+  return (
+    <div ref={area} className="showcase-scatter">
+      {children.map((child, i) => {
+        const spot = spots?.[i];
+        return (
           <div
-            key={`${pageIndex}-${step._id}`}
-            className={`showcase-entry ${leaving ? "leaving" : ""}`}
-            style={{ animationDelay: leaving ? "0ms" : `${i * 250}ms` }}
+            key={child.key}
+            ref={(el) => {
+              cards.current[i] = el;
+            }}
+            className="showcase-drift"
+            style={
+              spot
+                ? ({
+                    left: spot.x,
+                    top: spot.y,
+                    "--dx": `${spot.dx}px`,
+                    "--dy": `${spot.dy}px`,
+                    "--rot": `${spot.rot}deg`,
+                    "--drot": `${spot.rot + spot.drot}deg`,
+                    animationDuration: `${durationMs}ms`,
+                  } as CSSProperties)
+                : { visibility: "hidden", left: 0, top: 0, animation: "none" }
+            }
           >
-            <div className="showcase-entry-head">
-              <Icon name={categoryIcon(step.category)} size={20} />
-              <span className="eyebrow">{step.category}</span>
-              {placeOf(step.location) !== area.name && <span className="showcase-place">{step.location}</span>}
-            </div>
-            <p>{step.how || "No description yet"}</p>
-            <div className="stamps">
-              {who.map((p) => (
-                <span key={p} className="stamp">
-                  {p}
-                </span>
-              ))}
+            <div className={`showcase-pop ${leaving ? "leaving" : ""}`} style={{ animationDelay: leaving ? "0ms" : `${i * 350}ms` }}>
+              {child}
             </div>
           </div>
-        ))}
-      </div>
+        );
+      })}
     </div>
   );
 }
