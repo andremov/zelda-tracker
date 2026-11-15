@@ -1,0 +1,433 @@
+[
+ {
+  "id": "KokiriForest",
+  "name": "Kokiri Forest",
+  "child": {
+   "src": "KokiriForest_child.webp",
+   "w": 1870,
+   "h": 992,
+   "crop": [
+    100,
+    267
+   ]
+  },
+  "adult": {
+   "src": "KokiriForest_adult.webp",
+   "w": 1870,
+   "h": 992,
+   "crop": [
+    100,
+    267
+   ]
+  }
+ },
+ {
+  "id": "LostWood",
+  "name": "Lost Woods",
+  "child": {
+   "src": "LostWood_child.webp",
+   "w": 1220,
+   "h": 1238,
+   "crop": [
+    390,
+    101
+   ]
+  },
+  "adult": {
+   "src": "LostWood_child.webp",
+   "w": 1220,
+   "h": 1238,
+   "crop": [
+    390,
+    101
+   ]
+  }
+ },
+ {
+  "id": "SacredForestMeadow",
+  "name": "Sacred Forest Meadow",
+  "child": {
+   "src": "SacredForestMeadow_child.webp",
+   "w": 378,
+   "h": 1437,
+   "crop": [
+    852,
+    3
+   ]
+  },
+  "adult": {
+   "src": "SacredForestMeadow_child.webp",
+   "w": 378,
+   "h": 1437,
+   "crop": [
+    852,
+    3
+   ]
+  }
+ },
+ {
+  "id": "HyruleField",
+  "name": "Hyrule Field",
+  "child": {
+   "src": "HyruleField_child.webp",
+   "w": 1599,
+   "h": 1273,
+   "crop": [
+    140,
+    107
+   ]
+  },
+  "adult": {
+   "src": "HyruleField_adult.webp",
+   "w": 1599,
+   "h": 1273,
+   "crop": [
+    140,
+    107
+   ]
+  }
+ },
+ {
+  "id": "LonLonRanch",
+  "name": "Lon Lon Ranch",
+  "child": {
+   "src": "LonLonRanch_child.webp",
+   "w": 1190,
+   "h": 1080,
+   "crop": [
+    390,
+    180
+   ]
+  },
+  "adult": {
+   "src": "LonLonRanch_child.webp",
+   "w": 1190,
+   "h": 1080,
+   "crop": [
+    390,
+    180
+   ]
+  }
+ },
+ {
+  "id": "Market",
+  "name": "Market",
+  "child": {
+   "src": "Market_child.webp",
+   "w": 1560,
+   "h": 1293,
+   "crop": [
+    200,
+    101
+   ]
+  },
+  "adult": {
+   "src": "Market_adult.webp",
+   "w": 1000,
+   "h": 1293,
+   "crop": [
+    760,
+    101
+   ]
+  }
+ },
+ {
+  "id": "HyruleCastle",
+  "name": "Hyrule Castle",
+  "child": {
+   "src": "HyruleCastle_child.webp",
+   "w": 949,
+   "h": 1380,
+   "crop": [
+    661,
+    20
+   ]
+  },
+  "adult": {
+   "src": "HyruleCastle_adult.webp",
+   "w": 937,
+   "h": 1186,
+   "crop": [
+    583,
+    65
+   ]
+  }
+ },
+ {
+  "id": "KakarikoVillage",
+  "name": "Kakariko Village",
+  "child": {
+   "src": "KakarikoVillage_child.webp",
+   "w": 1390,
+   "h": 1360,
+   "crop": [
+    280,
+    60
+   ]
+  },
+  "adult": {
+   "src": "KakarikoVillage_adult.webp",
+   "w": 1390,
+   "h": 1360,
+   "crop": [
+    280,
+    60
+   ]
+  }
+ },
+ {
+  "id": "Graveyard",
+  "name": "Kakariko Graveyard",
+  "child": {
+   "src": "Graveyard_child.webp",
+   "w": 1860,
+   "h": 753,
+   "crop": [
+    130,
+    287
+   ]
+  },
+  "adult": {
+   "src": "Graveyard_adult.webp",
+   "w": 1860,
+   "h": 753,
+   "crop": [
+    130,
+    287
+   ]
+  }
+ },
+ {
+  "id": "DeathMountainTrail",
+  "name": "Death Mountain Trail",
+  "child": {
+   "src": "DeathMountainTrail_child.webp",
+   "w": 576,
+   "h": 1320,
+   "crop": [
+    670,
+    40
+   ]
+  },
+  "adult": {
+   "src": "DeathMountainTrail_child.webp",
+   "w": 576,
+   "h": 1320,
+   "crop": [
+    670,
+    40
+   ]
+  }
+ },
+ {
+  "id": "GoronCity",
+  "name": "Goron City",
+  "child": {
+   "src": "GoronCity_child.webp",
+   "w": 1318,
+   "h": 1240,
+   "crop": [
+    350,
+    60
+   ]
+  },
+  "adult": {
+   "src": "GoronCity_adult.webp",
+   "w": 1318,
+   "h": 1280,
+   "crop": [
+    350,
+    20
+   ]
+  }
+ },
+ {
+  "id": "DeathMountainCrater",
+  "name": "Death Mountain Crater",
+  "child": {
+   "src": "DeathMountainCrater_child.webp",
+   "w": 1170,
+   "h": 1340,
+   "crop": [
+    480,
+    20
+   ]
+  },
+  "adult": {
+   "src": "DeathMountainCrater_adult.webp",
+   "w": 1280,
+   "h": 1340,
+   "crop": [
+    370,
+    20
+   ]
+  }
+ },
+ {
+  "id": "ZoraRiver",
+  "name": "Zora's River",
+  "child": {
+   "src": "ZoraRiver_child.webp",
+   "w": 1940,
+   "h": 937,
+   "crop": [
+    40,
+    280
+   ]
+  },
+  "adult": {
+   "src": "ZoraRiver_child.webp",
+   "w": 1940,
+   "h": 937,
+   "crop": [
+    40,
+    280
+   ]
+  }
+ },
+ {
+  "id": "ZoraDomain",
+  "name": "Zora's Domain",
+  "child": {
+   "src": "ZoraDomain_child.webp",
+   "w": 1806,
+   "h": 1131,
+   "crop": [
+    102,
+    260
+   ]
+  },
+  "adult": {
+   "src": "ZoraDomain_adult.webp",
+   "w": 1806,
+   "h": 1131,
+   "crop": [
+    102,
+    260
+   ]
+  }
+ },
+ {
+  "id": "ZoraFountain",
+  "name": "Zora's Fountain",
+  "child": {
+   "src": "ZoraFountain_child.webp",
+   "w": 1304,
+   "h": 1271,
+   "crop": [
+    382,
+    163
+   ]
+  },
+  "adult": {
+   "src": "ZoraFountain_adult.webp",
+   "w": 1304,
+   "h": 1354,
+   "crop": [
+    382,
+    80
+   ]
+  }
+ },
+ {
+  "id": "LakeHylia",
+  "name": "Lake Hylia",
+  "child": {
+   "src": "LakeHylia_child.webp",
+   "w": 1480,
+   "h": 1175,
+   "crop": [
+    310,
+    145
+   ]
+  },
+  "adult": {
+   "src": "LakeHylia_adult.webp",
+   "w": 1480,
+   "h": 1174,
+   "crop": [
+    310,
+    145
+   ]
+  }
+ },
+ {
+  "id": "GerudoValley",
+  "name": "Gerudo Valley",
+  "child": {
+   "src": "GerudoValley_child.webp",
+   "w": 1286,
+   "h": 1420,
+   "crop": [
+    470,
+    20
+   ]
+  },
+  "adult": {
+   "src": "GerudoValley_adult.webp",
+   "w": 1386,
+   "h": 1420,
+   "crop": [
+    370,
+    20
+   ]
+  }
+ },
+ {
+  "id": "GerudoFortress",
+  "name": "Gerudo's Fortress",
+  "adult": {
+   "src": "GerudoFortress_adult.webp",
+   "w": 1630,
+   "h": 1374,
+   "crop": [
+    170,
+    61
+   ]
+  }
+ },
+ {
+  "id": "HauntedWasteland",
+  "name": "Haunted Wasteland",
+  "child": {
+   "src": "HauntedWasteland_child.webp",
+   "w": 1226,
+   "h": 1234,
+   "crop": [
+    387,
+    103
+   ]
+  },
+  "adult": {
+   "src": "HauntedWasteland_child.webp",
+   "w": 1226,
+   "h": 1234,
+   "crop": [
+    387,
+    103
+   ]
+  }
+ },
+ {
+  "id": "DesertColossus",
+  "name": "Desert Colossus",
+  "child": {
+   "src": "DesertColossus_child.webp",
+   "w": 1468,
+   "h": 1217,
+   "crop": [
+    202,
+    122
+   ]
+  },
+  "adult": {
+   "src": "DesertColossus_child.webp",
+   "w": 1468,
+   "h": 1217,
+   "crop": [
+    202,
+    122
+   ]
+  }
+ }
+]

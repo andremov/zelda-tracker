@@ -5,6 +5,7 @@ import type { FunctionReturnType } from "convex/server";
 import type { Doc } from "../convex/_generated/dataModel";
 import { useLocal } from "./storage";
 import { Race } from "./Race";
+import { MapView } from "./MapView";
 import { CATEGORIES, Icon, categoryIcon, categoryInfo } from "./icons";
 import { REGIONS } from "./locations";
 import {
@@ -125,6 +126,7 @@ function Tracker({ player, onSwitch }: { player: string; onSwitch: (name: string
   const [places, setPlaces] = useLocal<string[]>("filter-places", []);
   const [dialog, setDialog] = useState<DialogState>(null);
   const [detail, setDetail] = useState<string | null>(null);
+  const [view, setView] = useLocal<"journal" | "map">("view", "journal");
 
   const doneBy = useMemo(() => {
     const m = new Map<string, string[]>();
@@ -219,7 +221,18 @@ function Tracker({ player, onSwitch }: { player: string; onSwitch: (name: string
       <div className="layout">
         <Race players={players} me={player} steps={data.steps} doneBy={doneBy} />
         <main className="main">
+          <div className="segmented view-switch">
+            <button type="button" className={view === "journal" ? "active" : ""} onClick={() => setView("journal")}>
+              Journal
+            </button>
+            <button type="button" className={view === "map" ? "active" : ""} onClick={() => setView("map")}>
+              Map
+            </button>
+          </div>
 
+          {view === "map" ? (
+            <MapView />
+          ) : (
           <>
               <div className="journal-tools">
                 <div className="journal-row">
@@ -265,6 +278,7 @@ function Tracker({ player, onSwitch }: { player: string; onSwitch: (name: string
                 onMark={() => setDialog(NO_PICK)}
               />
           </>
+          )}
         </main>
 
         <aside className="side">

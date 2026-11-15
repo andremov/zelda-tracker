@@ -11,6 +11,7 @@ The server holds a fixed list of everything in the game: every item, song, mask,
 - **Ticking from a save.** Heart pieces, Gold Skulltulas, Big Poes, bottles and bag upgrades only come from a save sync, which ticks them by key (see below).
 - **No spoilers.** Steps you haven't done appear only as "Heart Piece · done by Bea". Click Reveal to see one.
 - **Scoreboard.** Counts per player per category.
+- **Map.** The game's own area maps, child and adult, in `public/maps/` (decoded from its UI map textures; `maps.json` lists them). Drag to move, wheel or pinch to zoom.
 - **No accounts.** Each device remembers which player is using it. The data is open to anyone with the URL, which is fine for a group of friends.
 
 ## The catalog
