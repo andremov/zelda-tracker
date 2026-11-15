@@ -13,7 +13,8 @@ const MIN_PAGE_MS = 7_000;
 const MAX_STACK = 4;
 const LEAVE_MS = 600;
 
-type Slide = { area: Area; age: Age };
+/** "either": the area's child and adult maps are the same picture, so it plays once with both ages' entries. */
+type Slide = { area: Area; age: Age | "either" };
 type Props = {
   steps: CountedStep[];
   doneBy: Map<string, string[]>;
@@ -28,7 +29,12 @@ const shuffle = <T,>(xs: T[]) => {
   }
   return a;
 };
-const allSlides = (): Slide[] => AREAS.flatMap((area) => (["child", "adult"] as const).filter((age) => area[age]).map((age) => ({ area, age })));
+const allSlides = (): Slide[] =>
+  AREAS.flatMap((area): Slide[] =>
+    area.child && area.adult && area.child.src === area.adult.src
+      ? [{ area, age: "either" }]
+      : (["child", "adult"] as const).filter((age) => area[age]).map((age) => ({ area, age })),
+  );
 
 /** A hands-off tour of the maps: one a minute, panned edge to edge, with the area's collectibles popping in and out. */
 export function Showcase({ steps, doneBy, placeOf }: Props) {
@@ -60,7 +66,7 @@ export function Showcase({ steps, doneBy, placeOf }: Props) {
 
 function ShowcaseSlide({ slide, steps, doneBy, placeOf }: { slide: Slide } & Props) {
   const { area, age } = slide;
-  const image = area[age]!;
+  const image = (age === "either" ? area.child : area[age])!;
   const box = useRef<HTMLDivElement>(null);
   const [pan, setPan] = useState<{ from: string; to: string } | null>(null);
   const [moving, setMoving] = useState(false);
@@ -89,12 +95,12 @@ function ShowcaseSlide({ slide, steps, doneBy, placeOf }: { slide: Slide } & Pro
     return () => cancelAnimationFrame(raf);
   }, [image]);
 
-  // This area's heart pieces and skulltulas at this age (no age: either), only those somebody has ticked.
+  // This area's heart pieces and skulltulas at this age (no age: either; an "either" slide: all), only those somebody has ticked.
   const entries = useMemo(() => {
     const places = AREA_PLACES[area.id] ?? [];
     return COUNTED.flatMap((category) =>
       steps
-        .filter((s) => s.category === category && places.includes(placeOf(s.location)) && (!s.age || s.age.toLowerCase() === age))
+        .filter((s) => s.category === category && places.includes(placeOf(s.location)) && (age === "either" || !s.age || s.age.toLowerCase() === age))
         .map((s) => ({ step: s, who: doneBy.get(s._id) ?? [] }))
         .filter((e) => e.who.length > 0),
     );
@@ -133,7 +139,7 @@ function ShowcaseSlide({ slide, steps, doneBy, placeOf }: { slide: Slide } & Pro
 
       <div className="showcase-title">
         <h2>{area.name}</h2>
-        <span>{age === "child" ? "Child" : "Adult"}</span>
+        <span>{age === "either" ? "Either age" : age === "child" ? "Child" : "Adult"}</span>
       </div>
 
       <Scatter key={pageIndex} durationMs={pageMs} leaving={leaving}>
@@ -144,6 +150,7 @@ function ShowcaseSlide({ slide, steps, doneBy, placeOf }: { slide: Slide } & Pro
                 <div className="showcase-entry-head">
                   <Icon name={categoryIcon(step.category)} size={20} />
                   <span className="eyebrow">{step.category}</span>
+                  {age === "either" && step.age && <span className={`age age-${step.age.toLowerCase()}`}>{step.age}</span>}
                   {placeOf(step.location) !== area.name && <span className="showcase-place">{step.location}</span>}
                 </div>
                 <p>{step.how || "No description yet"}</p>
