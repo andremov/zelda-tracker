@@ -50,6 +50,12 @@ const MAP_PLACE = new Map(MAP_ORDER.map((p) => [norm(p), p]));
 const MAP_REGION = new Map(REGIONS.flatMap((r) => r.places.map((p) => [p, r.region] as const)));
 const placeOf = (location: string) => MAP_PLACE.get(norm(location)) ?? (location.trim() || "No place");
 const regionOfPlace = (place: string) => MAP_REGION.get(place) ?? OTHER_REGION;
+/** The journal's age filter. An entry with no age can be done at either age. */
+const AGES = ["Child", "Adult", "Either age"];
+const ageOf = (s: { age?: string }) => {
+  const a = norm(s.age ?? "");
+  return a === "child" ? "Child" : a === "adult" ? "Adult" : "Either age";
+};
 /** A whole region in the filter, kept apart from place names. */
 const regionKey = (region: string) => `region:${region}`;
 type PlaceGroup = { region: string; places: string[] };
@@ -125,6 +131,7 @@ function Tracker({ player, onSwitch }: { player: string; onSwitch: (name: string
   const [who, setWho] = useLocal<string[]>("filter-players", []);
   const [notMine, setNotMine] = useLocal<boolean>("filter-not-mine", false);
   const [places, setPlaces] = useLocal<string[]>("filter-places", []);
+  const [ages, setAges] = useLocal<string[]>("filter-ages", []);
   const [dialog, setDialog] = useState<DialogState>(null);
   const [detail, setDetail] = useState<string | null>(null);
   const [view, setView] = useLocal<"journal" | "map" | "showcase">("view", "journal");
@@ -161,6 +168,8 @@ function Tracker({ player, onSwitch }: { player: string; onSwitch: (name: string
     .filter((g) => g.places.length);
   const activePlaces = places.filter((v) => allPlaces.has(v) || placeGroups.some((g) => regionKey(g.region) === v));
 
+  const activeAges = ages.filter((a) => AGES.includes(a));
+
   const q = norm(search);
   const passes = {
     kind: (s: Step) => !activeKinds.length || activeKinds.includes(s.category),
@@ -168,6 +177,7 @@ function Tracker({ player, onSwitch }: { player: string; onSwitch: (name: string
       const p = placeOf(s.location);
       return !activePlaces.length || activePlaces.includes(p) || activePlaces.includes(regionKey(regionOfPlace(p)));
     },
+    age: (s: Step) => !activeAges.length || activeAges.includes(ageOf(s)),
     who: (s: Step) => (!activeWho.length || activeWho.some((p) => doneBy.get(s._id)?.includes(p))) && (!notMine || !isMine(s)),
     search: (s: Step) => !q || [s.subject, s.action, s.location, s.how, s.category].some((f) => norm(f).includes(q)),
   };
@@ -182,14 +192,16 @@ function Tracker({ player, onSwitch }: { player: string; onSwitch: (name: string
   };
   const kindCounts = tally(allBut("kind"), (s) => [s.category]);
   const placeCounts = tally(allBut("place"), (s) => [placeOf(s.location)]);
+  const ageCounts = tally(allBut("age"), (s) => [ageOf(s)]);
   // (the player counts ignore "Anyone but me" too: it belongs to the same dropdown)
-  const playerSteps = data.steps.filter((s) => passes.kind(s) && passes.place(s) && passes.search(s));
+  const playerSteps = data.steps.filter((s) => passes.kind(s) && passes.place(s) && passes.age(s) && passes.search(s));
   const playerCounts = tally(playerSteps, (s) => doneBy.get(s._id) ?? []);
-  const filtering = !!q || activeKinds.length > 0 || activePlaces.length > 0 || activeWho.length > 0 || notMine;
+  const filtering = !!q || activeKinds.length > 0 || activePlaces.length > 0 || activeAges.length > 0 || activeWho.length > 0 || notMine;
   const clearFilters = () => {
     setSearch("");
     setKinds([]);
     setPlaces([]);
+    setAges([]);
     setWho([]);
     setNotMine(false);
   };
@@ -244,6 +256,7 @@ function Tracker({ player, onSwitch }: { player: string; onSwitch: (name: string
                 setSearch("");
                 setKinds([category]);
                 setPlaces(inPlaces);
+                setAges([]);
                 setWho([]);
                 setNotMine(false);
                 setView("journal");
@@ -278,6 +291,12 @@ function Tracker({ player, onSwitch }: { player: string; onSwitch: (name: string
                     onChange={setKinds}
                   />
                   <PlaceSelect groups={placeGroups} counts={placeCounts} selected={activePlaces} onChange={setPlaces} />
+                  <MultiSelect
+                    label="Ages"
+                    options={AGES.map((a) => ({ value: a, count: ageCounts.get(a) ?? 0 }))}
+                    selected={activeAges}
+                    onChange={setAges}
+                  />
                   <MultiSelect
                     label="Players"
                     options={players.map((p) => ({ value: p, count: playerCounts.get(p) ?? 0, note: p === player ? "you" : undefined }))}
