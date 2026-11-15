@@ -155,7 +155,7 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "action": "Got the token",
     "location": "Hyrule Castle",
     "how": "Song of Storms grotto near the castle: behind a bombable wall",
-    "age": ""
+    "age": "Child"
   },
   {
     "key": "gs:12165938013608963606",
@@ -488,7 +488,7 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "action": "Got the token",
     "location": "Hyrule Castle",
     "how": "Tree in the castle gardens",
-    "age": ""
+    "age": "Child"
   },
   {
     "key": "gs:2177746409373494991",
