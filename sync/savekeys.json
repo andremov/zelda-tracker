@@ -141,6 +141,10 @@
   "MiniGame_BombchuBowling_ClearFirstTime",
   "MiniGame_HitTarget_HrlCity_Get_BulletBag",
   "MiniGame_HitTarget_Kakariko_Get_Quiver",
-  "MiniGame_HorseBackArchery_Get_Quiver"
+  "MiniGame_HorseBackArchery_Get_Quiver",
+  "LostWood_Enemy_Scrub_Business_DekuStickPouch_01",
+  "LostWood_ScrubForestStage_SkullMaskEventLaunched",
+  "Lostwood_Enemy_Scrub_Business_DekuNutsPouch_01",
+  "LostWood_ScrubForestStage_TrueMaskEventLaunched"
  ]
 }

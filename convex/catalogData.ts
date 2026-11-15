@@ -1400,21 +1400,39 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "age": ""
   },
   {
-    "key": "up:deku-nut-lost-woods-scrub",
+    "key": "up:Lostwood_Enemy_Scrub_Business_DekuNutsPouch_01",
     "category": "Upgrade",
     "subject": "Deku Nut Upgrade",
     "action": "Got it",
     "location": "Lost Woods",
-    "how": "Bought from a Business Scrub",
+    "how": "Bought from the Business Scrub in the grotto before the Sacred Forest Meadow",
     "age": "Child"
   },
   {
-    "key": "up:deku-stick-lost-woods",
+    "key": "up:LostWood_ScrubForestStage_TrueMaskEventLaunched",
+    "category": "Upgrade",
+    "subject": "Deku Nut Upgrade",
+    "action": "Got it",
+    "location": "Lost Woods",
+    "how": "Wear the Mask of Truth on the Forest Stage (the Deku Theater)",
+    "age": "Child"
+  },
+  {
+    "key": "up:LostWood_Enemy_Scrub_Business_DekuStickPouch_01",
     "category": "Upgrade",
     "subject": "Deku Stick Upgrade",
     "action": "Got it",
     "location": "Lost Woods",
-    "how": "",
+    "how": "Bought from a Business Scrub near the bridge to Kokiri Forest",
+    "age": "Child"
+  },
+  {
+    "key": "up:LostWood_ScrubForestStage_SkullMaskEventLaunched",
+    "category": "Upgrade",
+    "subject": "Deku Stick Upgrade",
+    "action": "Got it",
+    "location": "Lost Woods",
+    "how": "Wear the Skull Mask on the Forest Stage (the Deku Theater)",
     "age": "Child"
   },
   {
