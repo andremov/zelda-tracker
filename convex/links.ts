@@ -3,6 +3,9 @@
 
 export type StepKey = { category: string; subject: string; action: string };
 
+/** The catalog key of a named thing's step (see convex/catalog.ts). */
+export const stepKey = (category: string, subject: string, action: string) => `${category}|${subject}|${action}`;
+
 /**
  * Kinds there are many of (told apart by place and how), so two entries can look alike and both be real.
  * Every other kind names one specific thing, so there is only ever one entry per thing and step.

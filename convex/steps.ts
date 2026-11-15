@@ -1,16 +1,7 @@
-import { mutation, query, type MutationCtx } from "./_generated/server";
+import { internalMutation, mutation, query, type MutationCtx } from "./_generated/server";
 import type { Doc, Id } from "./_generated/dataModel";
-import { COUNTABLE, impliedBy, impliersOf, STACKING, type StepKey } from "./links";
+import { impliedBy, impliersOf, type StepKey } from "./links";
 import { v } from "convex/values";
-
-const fields = {
-  category: v.string(),
-  subject: v.string(),
-  action: v.string(),
-  location: v.string(),
-  how: v.string(),
-  age: v.string(),
-};
 
 const clean = (s: string) => s.trim().slice(0, 500);
 
@@ -23,115 +14,102 @@ async function findSteps(ctx: MutationCtx, k: StepKey) {
   ).filter((s) => s.action === k.action);
 }
 
-/** Give a player progress on a step, plus whatever that step implies. Only ticks entries that already exist. */
+/** Give a player progress on a step, plus whatever that step implies. True if anything was new. */
 async function giveProgress(ctx: MutationCtx, step: Doc<"steps">, player: string) {
   const targets = [step];
   for (const k of impliedBy(step)) targets.push(...(await findSteps(ctx, k)));
+  let added = false;
   for (const t of targets) {
     const has = await ctx.db
       .query("progress")
       .withIndex("by_step_player", (q) => q.eq("stepId", t._id).eq("player", player))
       .unique();
-    if (!has) await ctx.db.insert("progress", { stepId: t._id, player });
+    if (!has) {
+      await ctx.db.insert("progress", { stepId: t._id, player });
+      added = true;
+    }
   }
+  return added;
 }
 
-/** Remove a player's progress on a step; an entry nobody has done anymore is removed. */
 async function takeProgress(ctx: MutationCtx, stepId: Id<"steps">, player: string) {
   const mine = await ctx.db
     .query("progress")
     .withIndex("by_step_player", (q) => q.eq("stepId", stepId).eq("player", player))
     .unique();
-  if (!mine) return;
-  await ctx.db.delete(mine._id);
-  const left = await ctx.db
-    .query("progress")
-    .withIndex("by_step", (q) => q.eq("stepId", stepId))
-    .first();
-  if (!left) await ctx.db.delete(stepId);
+  if (mine) await ctx.db.delete(mine._id);
 }
 
+/**
+ * The entries someone has ticked, each with who ticked it first and when, plus all the ticks.
+ * Entries nobody has ticked stay on the server, so the site never sees what it hasn't found.
+ */
 export const list = query({
   args: {},
   handler: async (ctx) => {
-    const steps = await ctx.db.query("steps").collect();
-    const progress = await ctx.db.query("progress").collect();
+    const progress = (await ctx.db.query("progress").collect()).sort((a, b) => a._creationTime - b._creationTime);
+    const first = new Map<Id<"steps">, Doc<"progress">>();
+    for (const p of progress) if (!first.has(p.stepId)) first.set(p.stepId, p);
+    const steps = [];
+    for (const [id, p] of first) {
+      const s = await ctx.db.get(id);
+      if (s) steps.push({ ...s, firstBy: p.player, firstAt: p._creationTime });
+    }
     return { steps, progress };
   },
 });
 
-export const add = mutation({
-  args: { player: v.string(), ...fields },
-  handler: async (ctx, { player, ...f }) => {
+/**
+ * Tick catalog entries by key for a player (what a save sync calls). Already-ticked keys are skipped.
+ * Returns what was new for the player ("category | subject | action | place | how") and the keys the catalog doesn't have.
+ */
+export const tick = mutation({
+  args: { player: v.string(), keys: v.array(v.string()) },
+  handler: async (ctx, { player, keys }) => {
     const p = clean(player);
-    if (!p || !clean(f.category) || !clean(f.subject) || !clean(f.action)) {
-      throw new Error("Player, category, subject and step are required");
-    }
-    // Named things have one entry per step: if it's already logged, this just ticks it.
-    if (!COUNTABLE.includes(clean(f.category))) {
-      // Stacking upgrades have one entry per place instead.
-      const [existing] = (await findSteps(ctx, { category: clean(f.category), subject: clean(f.subject), action: clean(f.action) })).filter(
-        (s) => !(clean(f.subject) in STACKING) || s.location.toLowerCase() === clean(f.location).toLowerCase(),
-      );
-      if (existing) {
-        await giveProgress(ctx, existing, p);
-        return existing._id;
+    if (!p) throw new Error("Player is required");
+    const ticked: string[] = [];
+    const unknown: string[] = [];
+    for (const key of new Set(keys)) {
+      const step = await ctx.db
+        .query("steps")
+        .withIndex("by_key", (q) => q.eq("key", key))
+        .first();
+      if (!step) unknown.push(key);
+      else if (await giveProgress(ctx, step, p)) {
+        ticked.push([step.category, step.subject, step.action, step.location, step.how].filter(Boolean).join(" | "));
       }
     }
-    const stepId = await ctx.db.insert("steps", {
-      createdBy: p,
-      category: clean(f.category),
-      subject: clean(f.subject),
-      action: clean(f.action),
-      location: clean(f.location),
-      how: clean(f.how),
-      age: clean(f.age),
-    });
-    const step = (await ctx.db.get(stepId))!;
-    await giveProgress(ctx, step, p);
-    // Anyone who already did something that counts as this step gets it too.
-    for (const k of impliersOf(step)) {
-      for (const source of await findSteps(ctx, k)) {
-        const rows = await ctx.db
-          .query("progress")
-          .withIndex("by_step", (q) => q.eq("stepId", source._id))
-          .collect();
-        for (const r of rows) await giveProgress(ctx, step, r.player);
-      }
-    }
-    return stepId;
+    return { ticked, unknown };
   },
 });
 
-export const update = mutation({
-  args: { id: v.id("steps"), ...fields },
-  handler: async (ctx, { id, ...f }) => {
-    await ctx.db.patch(id, {
-      category: clean(f.category),
-      subject: clean(f.subject),
-      action: clean(f.action),
-      location: clean(f.location),
-      how: clean(f.how),
-      age: clean(f.age),
-    });
-  },
-});
-
+/** Tick or untick an entry from the site. Unticking also unticks what counts as it (Completed for Entered…). */
 export const setDone = mutation({
   args: { stepId: v.id("steps"), player: v.string(), done: v.boolean() },
   handler: async (ctx, { stepId, player, done }) => {
     const p = clean(player);
+    const step = await ctx.db.get(stepId);
+    if (!p || !step) return;
     if (done) {
-      const step = await ctx.db.get(stepId);
-      if (step) await giveProgress(ctx, step, p);
+      await giveProgress(ctx, step, p);
+      return;
     }
-    if (!done) {
-      const step = await ctx.db.get(stepId);
-      if (!step) return;
-      // Undoing a step also undoes whatever counts as it (the fountain for its gift, Completed for Entered).
-      const targets = [step];
-      for (const k of impliersOf(step)) targets.push(...(await findSteps(ctx, k)));
-      for (const t of targets) await takeProgress(ctx, t._id, p);
-    }
+    const targets = [step];
+    for (const k of impliersOf(step)) targets.push(...(await findSteps(ctx, k)));
+    for (const t of targets) await takeProgress(ctx, t._id, p);
+  },
+});
+
+/** Fix an entry's text by hand: `npx convex run steps:update '{"key": "...", "how": "..."}'`. */
+export const update = internalMutation({
+  args: { key: v.string(), location: v.optional(v.string()), how: v.optional(v.string()), age: v.optional(v.string()) },
+  handler: async (ctx, { key, ...f }) => {
+    const step = await ctx.db
+      .query("steps")
+      .withIndex("by_key", (q) => q.eq("key", key))
+      .first();
+    if (!step) throw new Error("No entry with key " + key);
+    await ctx.db.patch(step._id, Object.fromEntries(Object.entries(f).filter(([, x]) => x !== undefined)));
   },
 });

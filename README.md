@@ -2,16 +2,34 @@
 
 A shared progress log for a group playing through Ocarina of Time together.
 
-The site doesn't know anything about the game. It starts empty, and the list only grows from what players log themselves. It is not a guide.
+The server holds a fixed list of everything in the game: every item, song, mask, dungeon step, heart piece and Gold Skulltula, with where it is and how to get it. Nobody adds entries; players only tick them. An entry shows up on the site once at least one player has ticked it, so the site never shows what nobody has found.
 
 ## How it works
 
-- **One entry per step.** A mask is three steps: get it, deliver it, pay for it at the shop. Each is its own entry, and each player checks steps off on their own. Nothing is ever marked done because some other step was done.
-- **Entry fields:** category (Heart Piece, Mask…), what (the thing itself), step (Got it, Delivered, Paid…), where, how, and child or adult.
+- **One entry per step.** A mask is three steps: get it, deliver it, pay for it at the shop. Each is its own entry, and each player ticks steps on their own.
+- **Ticking by hand.** "Mark done" ticks a named thing (a song, an item, a dungeon step). Anything already on the site can be ticked from its card.
+- **Ticking from a save.** Heart pieces, Gold Skulltulas, Big Poes, bottles and bag upgrades only come from a save sync, which ticks them by key (see below).
 - **No spoilers.** Steps you haven't done appear only as "Heart Piece · done by Bea". Click Reveal to see one.
-- **Duplicates.** If you log a step someone already logged, the site offers to check theirs off instead.
-- **Scoreboard.** Counts per player per category. There are no totals, so it never says how many exist.
+- **Scoreboard.** Counts per player per category.
 - **No accounts.** Each device remembers which player is using it. The data is open to anyone with the URL, which is fine for a group of friends.
+
+## The catalog
+
+`convex/catalog.ts` builds the list. Named things come from `src/gamedata.ts`, and countable ones from `convex/catalogData.ts` (generated from the save sync's map data; spoilers). Each entry has a key:
+
+| Key | What |
+| --- | --- |
+| `Song\|Bolero of Fire\|Learned` | a named thing's step: category, subject, action |
+| `gs:<map id>`, `hp:<map id>` | a placed Gold Skulltula or Heart Piece |
+| `hp:<flag>`, `up:<flag>` | a heart piece or bag upgrade given as a reward |
+| `poe:01`…`poe:10` | the Big Poes |
+| `hp:graveyard-grave-chest`, `bottle:cucco-lady`… | things a save can't point at yet |
+
+After changing the catalog, run `npx convex run catalog:seed` (add `--prod` for the live site). It inserts new entries and updates the text of existing ones. Fix one entry's text with `npx convex run steps:update '{"key": "...", "how": "..."}'`.
+
+## Sync API
+
+A save sync calls the public mutation `steps:tick` with `{ "player": "Name", "keys": [...] }`. Keys the player already has are skipped. It returns `{ ticked, unknown }`: what was new, and the keys the catalog doesn't have. `steps:list` returns the ticked entries (each with its `key`) and all ticks.
 
 ## Stack
 
@@ -22,6 +40,7 @@ Vite, React, and [Convex](https://convex.dev) for the database, hosted on Vercel
 ```sh
 npm install
 npx convex dev        # logs in, creates the Convex project, writes .env.local
+npx convex run catalog:seed
 npm run dev           # in a second terminal
 ```
 

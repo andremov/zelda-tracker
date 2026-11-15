@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../convex/_generated/api";
-import type { Doc, Id } from "../convex/_generated/dataModel";
+import type { FunctionReturnType } from "convex/server";
+import type { Doc } from "../convex/_generated/dataModel";
 import { useLocal } from "./storage";
 import { Race } from "./Race";
 import { CATEGORIES, Icon, categoryIcon, categoryInfo } from "./icons";
@@ -25,14 +26,14 @@ import {
   UPGRADES,
   type Group,
 } from "./gamedata";
-import { sameMomentAs, STACKING } from "../convex/links";
+import { sameMomentAs, STACKING, stepKey } from "../convex/links";
 
-type Step = Doc<"steps">;
+/** An entry someone has ticked, with who ticked it first. Entries nobody has ticked never reach the site. */
+type Step = FunctionReturnType<typeof api.steps.list>["steps"][number];
 type Progress = Doc<"progress">;
-type Fields = Pick<Step, "category" | "subject" | "action" | "location" | "how" | "age">;
-type DialogState = { mode: "add"; initial: Fields } | { mode: "edit"; step: Step } | null;
-
-const EMPTY: Fields = { category: "", subject: "", action: "", location: "", how: "", age: "" };
+/** The tick dialog, opened with a kind (and thing) already picked, or neither. */
+type DialogState = { category: string; subject: string } | null;
+const NO_PICK = { category: "", subject: "" };
 const BASE_HEARTS = 3;
 // Start, one container per boss, and every four pieces.
 const MAX_HEARTS = BASE_HEARTS + 8 + HEART_PIECES / 4;
@@ -208,8 +209,8 @@ function Tracker({ player, onSwitch }: { player: string; onSwitch: (name: string
           <span className="brand">Hyrule Log</span>
           <div className="topbar-actions">
             <PlayerSwitch player={player} players={players} onSwitch={onSwitch} />
-            <button className="btn primary hide-mobile" onClick={() => setDialog({ mode: "add", initial: EMPTY })}>
-              <Icon name="quill" size={18} /> Log a step
+            <button className="btn primary hide-mobile" onClick={() => setDialog(NO_PICK)}>
+              <Icon name="check" size={18} /> Mark done
             </button>
           </div>
         </div>
@@ -226,13 +227,13 @@ function Tracker({ player, onSwitch }: { player: string; onSwitch: (name: string
                     <Icon name="search" size={18} />
                     <input type="search" placeholder="Search the journal" value={search} onChange={(e) => setSearch(e.target.value)} />
                   </label>
-                  {/* Picks up the kind you're filtered to, so a Skulltula-only feed logs a Skulltula. */}
+                  {/* Picks up the kind you're filtered to, so a Song-only feed marks a song. */}
                   <button
                     type="button"
                     className="btn primary feed-log"
-                    onClick={() => setDialog({ mode: "add", initial: { ...EMPTY, category: activeKinds.length === 1 ? activeKinds[0] : "" } })}
+                    onClick={() => setDialog({ ...NO_PICK, category: activeKinds.length === 1 ? activeKinds[0] : "" })}
                   >
-                    <Icon name="quill" size={18} /> {activeKinds.length === 1 ? `Log ${activeKinds[0]}` : "Log a step"}
+                    <Icon name="check" size={18} /> Mark done
                   </button>
                 </div>
                 <div className="journal-row">
@@ -261,8 +262,7 @@ function Tracker({ player, onSwitch }: { player: string; onSwitch: (name: string
                 player={player}
                 doneBy={doneBy}
                 searching={filtering}
-                onAdd={(initial) => setDialog({ mode: "add", initial })}
-                onEdit={(step) => setDialog({ mode: "edit", step })}
+                onMark={() => setDialog(NO_PICK)}
               />
           </>
         </main>
@@ -273,21 +273,14 @@ function Tracker({ player, onSwitch }: { player: string; onSwitch: (name: string
         </aside>
       </div>
 
-      <button className="fab" onClick={() => setDialog({ mode: "add", initial: EMPTY })} aria-label="Log a step">
-        <Icon name="quill" size={26} />
+      <button className="fab" onClick={() => setDialog(NO_PICK)} aria-label="Mark done">
+        <Icon name="check" size={26} />
       </button>
 
       {detail && <SaveDetail name={detail} steps={data.steps} doneBy={doneBy} onClose={() => setDetail(null)} />}
 
       {dialog && (
-        <StepDialog
-          state={dialog}
-          player={player}
-          steps={data.steps}
-          isMine={isMine}
-          doneBy={doneBy}
-          onClose={() => setDialog(null)}
-        />
+        <TickDialog initial={dialog} player={player} steps={data.steps} isMine={isMine} onClose={() => setDialog(null)} />
       )}
     </div>
   );
@@ -692,10 +685,9 @@ function Journal(props: {
   player: string;
   doneBy: Map<string, string[]>;
   searching: boolean;
-  onAdd: (f: Fields) => void;
-  onEdit: (s: Step) => void;
+  onMark: () => void;
 }) {
-  const { steps, searching, onAdd } = props;
+  const { steps, searching, onMark } = props;
   if (!steps.length) {
     return (
       <div className="empty frame">
@@ -705,9 +697,9 @@ function Journal(props: {
         ) : (
           <>
             <h3>Your journal is blank</h3>
-            <p>Found something? Write it down, one small step at a time.</p>
-            <button className="btn primary" onClick={() => onAdd(EMPTY)}>
-              <Icon name="quill" size={18} /> Log your first step
+            <p>Things show up here once someone has done them.</p>
+            <button className="btn primary" onClick={onMark}>
+              <Icon name="check" size={18} /> Mark your first step
             </button>
           </>
         )}
@@ -729,8 +721,8 @@ function Journal(props: {
     groups.set(key, [...(groups.get(key) ?? []), s]);
   }
   const cards = [...groups.values()]
-    .map((list) => list.sort((a, b) => a._creationTime - b._creationTime))
-    .sort((a, b) => b[b.length - 1]._creationTime - a[a.length - 1]._creationTime);
+    .map((list) => list.sort((a, b) => a.firstAt - b.firstAt))
+    .sort((a, b) => b[b.length - 1].firstAt - a[a.length - 1].firstAt);
 
   return (
     <div className="cards">
@@ -741,19 +733,8 @@ function Journal(props: {
   );
 }
 
-function SubjectCard({
-  steps,
-  player,
-  doneBy,
-  onAdd,
-  onEdit,
-}: {
-  steps: Step[];
-  player: string;
-  doneBy: Map<string, string[]>;
-  onAdd: (f: Fields) => void;
-  onEdit: (s: Step) => void;
-}) {
+function SubjectCard({ steps, player, doneBy }: { steps: Step[]; player: string; doneBy: Map<string, string[]> }) {
+  const tick = useMutation(api.steps.tick);
   const first = steps[0];
   // A fountain card may hold the gift's entry only (if nobody logged the fountain itself).
   const fountain = first.category === "Great Fairy" ? first : undefined;
@@ -764,14 +745,10 @@ function SubjectCard({
   const info = categoryInfo(cardCategory);
   const gift = isFairyCard ? sameMomentAs({ category: "Great Fairy", subject: cardSubject, action: "Got the gift" })?.subject : undefined;
 
-  // Offer the next step only while this thing has steps nobody has logged yet.
+  // A named thing's steps nobody has done yet can be marked right here. Countable kinds (and stacking bag
+  // upgrades, one entry per place) only come from a save sync.
   const allSteps = info.subjectActions?.[first.subject] ?? info.actions;
-  const missing = isFairyCard ? [] : allSteps.filter((a) => !steps.some((s) => s.action === a));
-  // Countable kinds are logged fresh from "Log a step", so their cards have no add button.
-  // Stacking upgrades: one entry per place, so offer another while some are left.
-  const stack = STACKING[first.subject] ?? 0;
-  const another = stack > 0 && steps.length < stack;
-  const canAdd = !info.fixed && (missing.length > 0 || another);
+  const missing = isFairyCard || info.fixed || first.key?.startsWith("up:") ? [] : allSteps.filter((a) => !steps.some((s) => s.action === a));
 
   return (
     <article className="frame subject-card">
@@ -795,21 +772,19 @@ function SubjectCard({
             title={isFairyCard ? (s.category === "Great Fairy" ? "Visited the fountain" : `Got ${s.subject}`) : s.action}
             player={player}
             who={doneBy.get(s._id) ?? []}
-            onEdit={categoryInfo(s.category).noHow ? undefined : () => onEdit(s)}
           />
         ))}
       </ol>
-      {canAdd && (
+      {missing.map((a) => (
         <button
+          key={a}
           className="add-next"
-          onClick={() =>
-            onAdd({ ...EMPTY, category: first.category, subject: first.subject, action: another ? allSteps[0] : missing.length === 1 ? missing[0] : "" })
-          }
+          title="Nobody has done this step yet"
+          onClick={() => tick({ player, keys: [stepKey(first.category, first.subject, a)] })}
         >
-          <Icon name="plus" size={16} />{" "}
-          {another ? `Log another ${first.subject}` : missing.length === 1 ? `Log ${first.subject} · ${missing[0]}` : `Log a step for ${first.subject}`}
+          <Icon name="plus" size={16} /> Mark {first.subject} · {a}
         </button>
-      )}
+      ))}
     </article>
   );
 }
@@ -820,14 +795,12 @@ function StepRow({
   title: titleOverride,
   player,
   who,
-  onEdit,
 }: {
   step: Step;
   fixed: boolean;
   title?: string;
   player: string;
   who: string[];
-  onEdit?: () => void;
 }) {
   const setDone = useMutation(api.steps.setDone);
   const mine = who.includes(player);
@@ -837,7 +810,7 @@ function StepRow({
       <button
         className="check"
         aria-pressed={mine}
-        title={mine ? "Mark as not done (removed once nobody has it)" : "Mark as done"}
+        title={mine ? "Mark as not done (hidden again once nobody has it)" : "Mark as done"}
         onClick={() => setDone({ stepId: step._id, player, done: !mine })}
       >
         <Icon name="check" size={16} />
@@ -862,15 +835,8 @@ function StepRow({
         {step.how && <p className="step-how">{step.how}</p>}
         <div className="step-foot">
           <span className="muted small">
-            logged by {step.createdBy}, {ago(step._creationTime)}
+            first done by {step.firstBy}, {ago(step.firstAt)}
           </span>
-          {onEdit && (
-            <div className="row-actions">
-              <button className="icon-btn sm" onClick={onEdit} title="Fix a mistake in this entry">
-                <Icon name="edit" size={15} />
-              </button>
-            </div>
-          )}
         </div>
       </div>
     </li>
@@ -878,12 +844,6 @@ function StepRow({
 }
 
 /* ---------------- Form bits ---------------- */
-
-const NEW = "__new__";
-
-const regionOf = (place: string) => REGIONS.find((r) => r.places.includes(place))?.region ?? "";
-
-const PLACE_GROUPS: Group[] = REGIONS.map((r) => ({ label: r.region, items: r.places }));
 
 /**
  * A pick from the game's complete lists. Grouped lists are two dropdowns (group, then the thing);
@@ -959,175 +919,59 @@ function ListField({
   );
 }
 
-/** A dropdown of known values, with a "New…" option that switches to free text. */
-function ComboField({
-  label,
-  value,
-  onChange,
-  options,
-  placeholder,
-  required,
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  options: string[];
-  placeholder: string;
-  required?: boolean;
-}) {
-  const [typing, setTyping] = useState(() => !options.length || (!!value && !options.includes(value)));
-  return (
-    <label className="field">
-      <span>{label}</span>
-      {typing ? (
-        <div className="combo">
-          <input required={required} autoFocus={options.length > 0} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} />
-          {options.length > 0 && (
-            <button
-              type="button"
-              className="text-btn"
-              onClick={() => {
-                setTyping(false);
-                onChange("");
-              }}
-            >
-              pick from list
-            </button>
-          )}
-        </div>
-      ) : (
-        <select
-          required={required}
-          value={value}
-          onChange={(e) => {
-            if (e.target.value === NEW) {
-              setTyping(true);
-              onChange("");
-            } else onChange(e.target.value);
-          }}
-        >
-          <option value="">Choose…</option>
-          {options.map((o) => (
-            <option key={o} value={o}>
-              {o}
-            </option>
-          ))}
-          <option value={NEW}>+ Something new…</option>
-        </select>
-      )}
-    </label>
-  );
-}
-
 /* ---------------- Dialog ---------------- */
 
-function StepDialog({
-  state,
+/**
+ * Mark a named thing's step done (a song, an item, a dungeon step…). Every entry already exists on the server,
+ * so this only ticks it. Countable kinds (heart pieces, skulltulas…) come from a save sync instead,
+ * and once someone has one, it's ticked from its card.
+ */
+function TickDialog({
+  initial,
   player,
   steps,
   isMine,
-  doneBy,
   onClose,
 }: {
-  state: NonNullable<DialogState>;
+  initial: NonNullable<DialogState>;
   player: string;
   steps: Step[];
   isMine: (s: Step) => boolean;
-  doneBy: Map<string, string[]>;
   onClose: () => void;
 }) {
-  const add = useMutation(api.steps.add);
-  const update = useMutation(api.steps.update);
-  const setDone = useMutation(api.steps.setDone);
+  const tick = useMutation(api.steps.tick);
   const ref = useRef<HTMLDialogElement>(null);
-  const init = state.mode === "edit" ? state.step : state.initial;
-  // Opening with only a kind chosen (e.g. from a filtered feed) fills in what picking that kind would.
-  const initInfo = categoryInfo(init.category);
-  const [f, setF] = useState<Fields>({
-    category: init.category,
-    subject: init.subject || (init.category && initInfo.fixed) || "",
-    action: init.action || (init.category && initInfo.actions.length === 1 ? initInfo.actions[0] : ""),
-    location: init.location,
-    how: init.how,
-    age: init.age,
-  });
-  const [customAction, setCustomAction] = useState(false);
+  const named = CATEGORIES.filter((c) => !c.fixed);
+  const [category, setCategory] = useState(named.some((c) => c.name === initial.category) ? initial.category : "");
+  const [subject, setSubject] = useState(initial.subject);
+  const [action, setAction] = useState("");
   const [busy, setBusy] = useState(false);
-  const [dupes, setDupes] = useState<Step[] | null>(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
     ref.current?.showModal();
   }, []);
 
-  const info = categoryInfo(f.category);
-  const set = <K extends keyof Fields>(k: K, v: string) => setF((prev) => ({ ...prev, [k]: v }));
-  const pickCategory = (name: string) => {
-    const next = categoryInfo(name);
-    setCustomAction(false);
-    setF((prev) => ({
-      ...prev,
-      category: name,
-      // Keep what's typed only if it still makes sense for the new kind.
-      subject:
-        next.fixed ??
-        (categoryInfo(prev.category).fixed || (next.options && !next.options.some((g) => g.items.includes(prev.subject))) ? "" : prev.subject),
-      action: next.actions.includes(prev.action) ? prev.action : next.actions.length === 1 ? next.actions[0] : "",
-    }));
+  const info = categoryInfo(category);
+  // Stacking bag upgrades are one entry per place, found by the sync like heart pieces.
+  const options = info.options?.map((g) => ({ ...g, items: g.items.filter((s) => !(s in STACKING)) })).filter((g) => g.items.length);
+  const actions = info.subjectActions?.[subject] ?? info.actions;
+  const chosen = actions.length === 1 ? actions[0] : action;
+  const pickSubject = (s: string) => {
+    setSubject(s);
+    setAction("");
   };
+  const done = steps.some((s) => s.category === category && s.subject === subject && s.action === chosen && isMine(s));
+  const twin = subject && chosen ? sameMomentAs({ category, subject, action: chosen }) : undefined;
 
-  // Dropdown options only come from steps you can already see, so choosing never spoils anything.
-  const subjects = uniq(steps.filter((s) => norm(s.category) === norm(f.category)).map((s) => s.subject));
-  // Steps are a fixed list per kind. Free text only for "Other" and kinds people add themselves.
-  const freeAction = !!info.freeAction;
-  const baseActions = info.subjectActions?.[f.subject] ?? info.actions;
-  const actionOptions =
-    state.mode === "edit" && f.action && !freeAction && !baseActions.includes(f.action) ? [...baseActions, f.action] : baseActions;
-  const showActionInput = freeAction && (customAction || (!!f.action && !actionOptions.includes(f.action)));
-  const askAction = actionOptions.length > 1 || freeAction;
-  // Questions appear in order, each only once the answers above it are in, so nothing shows up and then vanishes.
-  const subjectChosen = !!f.subject.trim();
-  const ready = subjectChosen && (!askAction || !!f.action.trim());
-  const twin = ready ? sameMomentAs(f) : undefined;
-  const canSave = f.category.trim() && f.subject.trim() && f.action.trim();
-  // Some answers are known from the kind and step alone; those questions aren't asked.
-  const subjectKnown = !!info.options?.some((g) => g.items.includes(f.subject));
-  const lockedLocation =
-    info.stepPlaceBySubject?.[f.action]?.[f.subject] ??
-    info.stepLocations?.[f.action] ??
-    info.subjectPlace?.[f.subject] ??
-    info.place ??
-    (info.subjectIsPlace && subjectKnown ? f.subject : undefined);
-  const lockedAge = info.age ?? info.subjectAge?.[f.subject];
-  const final: Fields = { ...f, location: lockedLocation ?? f.location, age: lockedAge ?? f.age };
-
-  const save = async (force = false) => {
-    setError("");
-    if (state.mode === "add" && !force) {
-      // Named things never get a second entry: the backend just ticks the existing one.
-      // Countable kinds (heart pieces…) can repeat, so ask when one in the same place is already logged.
-      const matches = steps.filter(
-        (s) =>
-          !!info.fixed &&
-          !isMine(s) &&
-          norm(s.category) === norm(f.category) &&
-          norm(s.subject) === norm(f.subject) &&
-          norm(s.action) === norm(f.action) &&
-          (!info.fixed || (!info.place && !!final.location.trim() && norm(s.location) === norm(final.location))),
-      );
-      if (matches.length) {
-        setDupes(matches);
-        return;
-      }
-    }
+  const save = async () => {
     setBusy(true);
+    setError("");
     try {
-      if (state.mode === "edit") await update({ id: state.step._id as Id<"steps">, ...final });
-      else await add({ player, ...final });
+      await tick({ player, keys: [stepKey(category, subject, chosen)] });
       onClose();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong");
-    } finally {
       setBusy(false);
     }
   };
@@ -1138,213 +982,73 @@ function StepDialog({
         className="dialog-body"
         onSubmit={(e) => {
           e.preventDefault();
-          if (canSave) save();
+          if (subject && chosen && !done) save();
         }}
       >
         <header className="dialog-head">
-          <h2>{state.mode === "edit" ? "Amend the entry" : "Log a step"}</h2>
+          <h2>Mark done</h2>
           <button type="button" className="icon-btn" onClick={() => ref.current?.close()} aria-label="Close">
             <Icon name="x" size={18} />
           </button>
         </header>
         <Ornament />
 
-        {dupes ? (
-          <div className="dupes">
-            <p>
-              Someone already logged <b>{f.subject}</b> · <b>{f.action}</b>
-              {info.fixed && f.location && (
-                <>
-                  {" "}
-                  at <b>{f.location}</b>
-                </>
-              )}
-              . Is it the same thing you did?
-            </p>
-            {dupes.map((s) => (
-              <div key={s._id} className="dupe">
-                {s.location && (
-                  <p className="step-where">
-                    <Icon name="pin" size={14} /> {s.location}
-                  </p>
-                )}
-                {s.how && <p className="step-how">{s.how}</p>}
-                <span className="muted small">done by {(doneBy.get(s._id) ?? []).join(", ")}</span>
-              </div>
-            ))}
-            <div className="dialog-actions">
-              <button type="button" className="text-btn" onClick={() => setDupes(null)}>
-                Back
-              </button>
-              <button type="button" className="btn" onClick={() => save(true)} disabled={busy}>
-                No, log mine separately
-              </button>
+        <fieldset>
+          <legend>What kind of thing?</legend>
+          <div className="cat-grid">
+            {named.map((c) => (
               <button
                 type="button"
-                className="btn primary"
-                disabled={busy}
-                onClick={async () => {
-                  setBusy(true);
-                  for (const s of dupes) await setDone({ stepId: s._id, player, done: true });
-                  onClose();
+                key={c.name}
+                className={`cat-tile ${category === c.name ? "active" : ""}`}
+                onClick={() => {
+                  setCategory(c.name);
+                  pickSubject("");
                 }}
               >
-                Yes, mark it done
+                <Icon name={c.icon} size={22} />
+                <span>{c.name}</span>
               </button>
-            </div>
+            ))}
           </div>
-        ) : (
-          <>
-            <fieldset>
-              <legend>What kind of thing?</legend>
-              <div className="cat-grid">
-                {CATEGORIES.map((c) => (
-                  <button
-                    type="button"
-                    key={c.name}
-                    className={`cat-tile ${f.category === c.name ? "active" : ""}`}
-                    onClick={() => pickCategory(c.name)}
-                  >
-                    <Icon name={c.icon} size={22} />
-                    <span>{c.name}</span>
-                  </button>
-                ))}
-              </div>
-            </fieldset>
+          <p className="hint mt">Heart pieces, Gold Skulltulas, Big Poes, bottles and bag upgrades come from the save sync.</p>
+        </fieldset>
 
-            {f.category && (
-              <div className="form-rest" key={f.category}>
-                {!info.fixed && info.options && (
-                  <ListField
-                    key={`subj-${f.category}`}
-                    label={info.subjectLabel ?? "What is it?"}
-                    value={f.subject}
-                    onChange={(v) =>
-                      setF((prev) => {
-                        const steps = info.subjectActions?.[v] ?? info.actions;
-                        return { ...prev, subject: v, action: steps.includes(prev.action) ? prev.action : steps.length === 1 ? steps[0] : "" };
-                      })
-                    }
-                    groups={info.options}
-                    groupNoun={info.groupNoun}
-                    required
-                  />
-                )}
-                {!info.fixed && !info.options && (
-                  <ComboField
-                    key={`subj-${f.category}`}
-                    label={info.subjectLabel ?? "What is it?"}
-                    value={f.subject}
-                    onChange={(v) => set("subject", v)}
-                    options={subjects}
-                    placeholder={info.subjectPlaceholder ?? "Name it"}
-                    required
-                  />
-                )}
-
-                {askAction && subjectChosen && (
-                <fieldset>
-                  <legend>Which step?</legend>
-                  <div className="quick">
-                    {actionOptions.map((a) => (
-                      <button
-                        type="button"
-                        key={a}
-                        className={`chip ${!showActionInput && f.action === a ? "active" : ""}`}
-                        onClick={() => {
-                          setCustomAction(false);
-                          set("action", a);
-                        }}
-                      >
-                        {a}
-                      </button>
-                    ))}
-                    {freeAction && (
-                      <button
-                        type="button"
-                        className={`chip ${showActionInput ? "active" : ""}`}
-                        onClick={() => {
-                          setCustomAction(true);
-                          set("action", "");
-                        }}
-                      >
-                        Other…
-                      </button>
-                    )}
-                  </div>
-                  {showActionInput && (
-                    <input className="mt" autoFocus value={f.action} onChange={(e) => set("action", e.target.value)} placeholder="Describe the step" />
-                  )}
-                  {info.note && <p className="hint mt">{info.note}</p>}
-                </fieldset>
-                )}
-
-                {ready ? (
-                  <>
-                    {twin && (
-                      <p className="hint">
-                        Also counts as {twin.category === "Great Fairy" ? <>visiting the {twin.subject}</> : <>getting {twin.subject}</>}.
-                      </p>
-                    )}
-                    {(lockedLocation || lockedAge) && (
-                      <p className="locked">
-                        {lockedLocation && (
-                          <span>
-                            <Icon name="pin" size={15} /> {lockedLocation}
-                            {regionOf(lockedLocation) && <span className="muted"> · {regionOf(lockedLocation)}</span>}
-                          </span>
-                        )}
-                        {lockedAge && (
-                          <span>
-                            <Icon name="user" size={15} /> {lockedAge}
-                          </span>
-                        )}
-                      </p>
-                    )}
-
-                    {!lockedLocation && (
-                      <ListField key={`loc-${f.category}`} label="Where?" value={f.location} onChange={(v) => set("location", v)} groups={PLACE_GROUPS} groupNoun="Region" />
-                    )}
-
-                    {!lockedAge && (
-                      <fieldset>
-                        <legend>As which age?</legend>
-                        <div className="segmented">
-                          {["", "Child", "Adult", "Either"].map((a) => (
-                            <button type="button" key={a || "none"} className={f.age === a ? "active" : ""} onClick={() => set("age", a)}>
-                              {a || "-"}
-                            </button>
-                          ))}
-                        </div>
-                      </fieldset>
-                    )}
-
-                    {!info.noHow && (
-                      <label className="field">
-                        <span>How?</span>
-                        <textarea rows={3} value={f.how} onChange={(e) => set("how", e.target.value)} placeholder={info.howPlaceholder ?? "What you did"} />
-                      </label>
-                    )}
-                  </>
-                ) : (
-                  <p className="hint">{subjectChosen ? "Pick the step to continue." : "Pick which one to continue."}</p>
-                )}
-              </div>
+        {category && options && (
+          <div className="form-rest" key={category}>
+            <ListField label={info.subjectLabel ?? "What is it?"} value={subject} onChange={pickSubject} groups={options} groupNoun={info.groupNoun} required />
+            {subject && actions.length > 1 && (
+              <fieldset>
+                <legend>Which step?</legend>
+                <div className="quick">
+                  {actions.map((a) => (
+                    <button type="button" key={a} className={`chip ${action === a ? "active" : ""}`} onClick={() => setAction(a)}>
+                      {a}
+                    </button>
+                  ))}
+                </div>
+                {info.note && <p className="hint mt">{info.note}</p>}
+              </fieldset>
             )}
-
-            <p className="hint">One step per entry. If something takes three actions, log three steps.</p>
-            {error && <p className="error">{error}</p>}
-
-            <div className="dialog-actions">
-              <button type="button" className="text-btn" onClick={() => ref.current?.close()}>
-                Cancel
-              </button>
-              <button type="submit" className="btn primary" disabled={!canSave || busy}>
-                {state.mode === "edit" ? "Save" : "Write it down"}
-              </button>
-            </div>
-          </>
+            {twin && (
+              <p className="hint">
+                Also counts as {twin.category === "Great Fairy" ? <>visiting the {twin.subject}</> : <>getting {twin.subject}</>}.
+              </p>
+            )}
+            {done && <p className="hint">You've already done this.</p>}
+          </div>
         )}
+
+        {error && <p className="error">{error}</p>}
+
+        <div className="dialog-actions">
+          <button type="button" className="text-btn" onClick={() => ref.current?.close()}>
+            Cancel
+          </button>
+          <button type="submit" className="btn primary" disabled={!subject || !chosen || done || busy}>
+            Mark it done
+          </button>
+        </div>
       </form>
     </dialog>
   );

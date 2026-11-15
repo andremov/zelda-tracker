@@ -8,6 +8,8 @@
  * @module
  */
 
+import type * as catalog from "../catalog.js";
+import type * as catalogData from "../catalogData.js";
 import type * as links from "../links.js";
 import type * as migrations from "../migrations.js";
 import type * as steps from "../steps.js";
@@ -19,6 +21,8 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  catalog: typeof catalog;
+  catalogData: typeof catalogData;
   links: typeof links;
   migrations: typeof migrations;
   steps: typeof steps;

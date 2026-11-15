@@ -1,47 +1,39 @@
 import { internalMutation } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
+import { v } from "convex/values";
 
-const RENAME: Record<string, string> = {
-  "Bullet Bag (40)": "Bullet Bag Upgrade",
-  "Bullet Bag (50)": "Bullet Bag Upgrade",
-  "Quiver (40)": "Quiver Upgrade",
-  "Quiver (50)": "Quiver Upgrade",
-  "Big Bomb Bag (30)": "Bomb Bag Upgrade",
-  "Biggest Bomb Bag (40)": "Bomb Bag Upgrade",
-  "Deku Sticks (20)": "Deku Stick Upgrade",
-  "Deku Sticks (30)": "Deku Stick Upgrade",
-  "Deku Nuts (30)": "Deku Nut Upgrade",
-  "Deku Nuts (40)": "Deku Nut Upgrade",
-};
-
-/** Sized bag upgrades -> stacking "<thing> Upgrade" entries, merging any that land on the same place. */
-export const stackUpgrades = internalMutation({
-  args: {},
-  handler: async (ctx) => {
-    const kept = new Map<string, Id<"steps">>();
+/**
+ * Give logged entries their catalog keys. Entries that turn out to be the same thing are merged:
+ * their ticks move onto the first one and the rest are deleted. Run catalog:seed afterwards.
+ */
+export const toCatalog = internalMutation({
+  args: { pairs: v.array(v.object({ id: v.id("steps"), key: v.string() })) },
+  handler: async (ctx, { pairs }) => {
     const log: string[] = [];
-    for (const step of await ctx.db.query("steps").collect()) {
-      const subject = step.category === "Upgrade" ? RENAME[step.subject] : undefined;
-      if (!subject) continue;
-      const key = `${subject}|${step.action}|${step.location.toLowerCase()}`;
-      const into = kept.get(key);
-      if (!into) {
-        kept.set(key, step._id);
-        await ctx.db.patch(step._id, { subject });
-        log.push(`${step.subject} @ ${step.location} -> ${subject}`);
+    for (const { id, key } of pairs) {
+      const step = await ctx.db.get(id);
+      if (!step) {
+        log.push(`${id} is gone`);
         continue;
       }
-      // Same upgrade at the same place twice: move the ticks onto the first one.
-      for (const r of await ctx.db.query("progress").withIndex("by_step", (q) => q.eq("stepId", step._id)).collect()) {
+      const into = await ctx.db
+        .query("steps")
+        .withIndex("by_key", (q) => q.eq("key", key))
+        .first();
+      if (!into || into._id === id) {
+        await ctx.db.patch(id, { key });
+        continue;
+      }
+      for (const r of await ctx.db.query("progress").withIndex("by_step", (q) => q.eq("stepId", id)).collect()) {
         const has = await ctx.db
           .query("progress")
-          .withIndex("by_step_player", (q) => q.eq("stepId", into).eq("player", r.player))
+          .withIndex("by_step_player", (q) => q.eq("stepId", into._id as Id<"steps">).eq("player", r.player))
           .unique();
-        if (!has) await ctx.db.insert("progress", { stepId: into, player: r.player });
+        if (!has) await ctx.db.insert("progress", { stepId: into._id, player: r.player });
         await ctx.db.delete(r._id);
       }
-      await ctx.db.delete(step._id);
-      log.push(`${step.subject} @ ${step.location} merged into ${subject}`);
+      await ctx.db.delete(id);
+      log.push(`merged ${id} (${step.location} | ${step.how}) into ${key}`);
     }
     return log;
   },
