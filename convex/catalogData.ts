@@ -1040,6 +1040,15 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "age": "Adult"
   },
   {
+    "key": "hp:hyrule-field-rock-arch-chest",
+    "category": "Heart Piece",
+    "subject": "Heart Piece",
+    "action": "Got it",
+    "location": "Hyrule Field",
+    "how": "In the chest under the rock arch in western Hyrule Field, near Gerudo Valley. As an adult it is already open with a note inside; come back as a child to open it",
+    "age": "Child"
+  },
+  {
     "key": "hp:HyruleField_Enemy_Scrub_Business_HeartPiece_01",
     "category": "Heart Piece",
     "subject": "Heart Piece",
