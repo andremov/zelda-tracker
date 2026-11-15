@@ -17,6 +17,8 @@ const LEAVE_MS = 600;
 type Slide = { area: Area; age: Age | "either" };
 type Props = {
   steps: CountedStep[];
+  /** Everyone in the group: each card is wide enough for all their stamps on one row. */
+  players: string[];
   doneBy: Map<string, string[]>;
   placeOf: (location: string) => string;
 };
@@ -37,7 +39,7 @@ const allSlides = (): Slide[] =>
   );
 
 /** A hands-off tour of the maps: one a minute, panned edge to edge, with the area's collectibles popping in and out. */
-export function Showcase({ steps, doneBy, placeOf }: Props) {
+export function Showcase({ steps, players, doneBy, placeOf }: Props) {
   const [deck, setDeck] = useState(() => shuffle(allSlides()));
   const [index, setIndex] = useState(0);
   const slide = deck[index];
@@ -59,12 +61,12 @@ export function Showcase({ steps, doneBy, placeOf }: Props) {
   // Keyed per slide so every animation starts over.
   return (
     <section className="showcase">
-      <ShowcaseSlide key={`${index}-${slide.area.id}-${slide.age}`} slide={slide} steps={steps} doneBy={doneBy} placeOf={placeOf} />
+      <ShowcaseSlide key={`${index}-${slide.area.id}-${slide.age}`} slide={slide} steps={steps} players={players} doneBy={doneBy} placeOf={placeOf} />
     </section>
   );
 }
 
-function ShowcaseSlide({ slide, steps, doneBy, placeOf }: { slide: Slide } & Props) {
+function ShowcaseSlide({ slide, steps, players, doneBy, placeOf }: { slide: Slide } & Props) {
   const { area, age } = slide;
   const image = (age === "either" ? area.child : area[age])!;
   const box = useRef<HTMLDivElement>(null);
@@ -150,17 +152,28 @@ function ShowcaseSlide({ slide, steps, doneBy, placeOf }: { slide: Slide } & Pro
                 <div className="showcase-entry-head">
                   <Icon name={categoryIcon(step.category)} size={20} />
                   <span className="eyebrow">{step.category}</span>
-                  {age === "either" && step.age && <span className={`age age-${step.age.toLowerCase()}`}>{step.age}</span>}
                   {placeOf(step.location) !== area.name && <span className="showcase-place">{step.location}</span>}
                 </div>
-                <p>{step.how || "No description yet"}</p>
-                <div className="stamps">
-                  {who.map((p) => (
-                    <span key={p} className="stamp">
-                      {p}
-                    </span>
-                  ))}
+                <div className="showcase-entry-body">
+                  <p>{step.how || "No description yet"}</p>
+                  <div className="stamps">
+                    {who.map((p) => (
+                      <span key={p} className="stamp">
+                        {p}
+                      </span>
+                    ))}
+                  </div>
+                  {/* Invisible row of every player's stamp: sets the card's width so a full row always fits. */}
+                  <div className="stamps stamps-sizer" aria-hidden="true">
+                    {players.map((p) => (
+                      <span key={p} className="stamp">
+                        {p}
+                      </span>
+                    ))}
+                  </div>
                 </div>
+                {/* The title fades out early, so each card says which age it's about. */}
+                <div className="showcase-entry-foot">{step.age ? step.age : "Either age"}</div>
               </div>
             ))}
       </Scatter>

@@ -233,7 +233,7 @@ function Tracker({ player, onSwitch }: { player: string; onSwitch: (name: string
       </header>
 
       {view === "showcase" ? (
-        <Showcase steps={data.steps} doneBy={doneBy} placeOf={placeOf} />
+        <Showcase steps={data.steps} players={players} doneBy={doneBy} placeOf={placeOf} />
       ) : view === "map" ? (
             <MapView
               steps={data.steps}
