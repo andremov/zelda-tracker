@@ -244,7 +244,7 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "subject": "Gold Skulltula",
     "action": "Got the token",
     "location": "Desert Colossus",
-    "how": "At night: on a tree or a hill (one of two)",
+    "how": "At night: in a web on a cliff face in the middle of the desert, between the Wasteland entrance and the Spirit Temple",
     "age": "Adult"
   },
   {
@@ -253,7 +253,7 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "subject": "Gold Skulltula",
     "action": "Got the token",
     "location": "Desert Colossus",
-    "how": "At night: on a tree or a hill (one of two)",
+    "how": "At night: in a web on a cliff face beside the Spirit Temple, on the side of its left-hand balcony",
     "age": "Adult"
   },
   {
@@ -406,7 +406,7 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "subject": "Gold Skulltula",
     "action": "Got the token",
     "location": "Gerudo Valley",
-    "how": "At night: on a rock pillar (one of two)",
+    "how": "At night: on a rock pillar",
     "age": "Adult"
   },
   {
@@ -415,7 +415,7 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "subject": "Gold Skulltula",
     "action": "Got the token",
     "location": "Gerudo Valley",
-    "how": "At night: near the carpenters' tent (one of two)",
+    "how": "At night: near the carpenters' tent",
     "age": "Adult"
   },
   {
@@ -1063,7 +1063,7 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "subject": "Heart Piece",
     "action": "Got it",
     "location": "Death Mountain Crater",
-    "how": "In an alcove in the crater wall (one of two in the crater)",
+    "how": "In an alcove in the crater wall",
     "age": ""
   },
   {
