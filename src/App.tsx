@@ -205,10 +205,20 @@ function Tracker({ player, onSwitch }: { player: string; onSwitch: (name: string
   );
 
   return (
-    <div className="app">
+    <div className={view === "map" ? "app map-mode" : "app"}>
       <header className="topbar">
         <div className="topbar-inner">
-          <span className="brand">Hyrule Log</span>
+          <div className="topbar-left">
+            <span className="brand">Hyrule Log</span>
+            <nav className="view-tabs" aria-label="View">
+              <button type="button" className={view === "journal" ? "active" : ""} onClick={() => setView("journal")}>
+                Journal
+              </button>
+              <button type="button" className={view === "map" ? "active" : ""} onClick={() => setView("map")}>
+                Map
+              </button>
+            </nav>
+          </div>
           <div className="topbar-actions">
             <PlayerSwitch player={player} players={players} onSwitch={onSwitch} />
             <button className="btn primary hide-mobile" onClick={() => setDialog(NO_PICK)}>
@@ -218,23 +228,10 @@ function Tracker({ player, onSwitch }: { player: string; onSwitch: (name: string
         </div>
       </header>
 
-      <div className="layout">
-        <Race players={players} me={player} steps={data.steps} doneBy={doneBy} />
-        <main className="main">
-          <div className="segmented view-switch">
-            <button type="button" className={view === "journal" ? "active" : ""} onClick={() => setView("journal")}>
-              Journal
-            </button>
-            <button type="button" className={view === "map" ? "active" : ""} onClick={() => setView("map")}>
-              Map
-            </button>
-          </div>
-
-          {view === "map" ? (
+      {view === "map" ? (
             <MapView
               steps={data.steps}
               player={player}
-              players={players}
               doneBy={doneBy}
               placeOf={placeOf}
               onOpen={(category, inPlaces) => {
@@ -244,9 +241,13 @@ function Tracker({ player, onSwitch }: { player: string; onSwitch: (name: string
                 setWho([]);
                 setNotMine(false);
                 setView("journal");
+                window.scrollTo(0, 0);
               }}
             />
-          ) : (
+      ) : (
+      <div className="layout">
+        <Race players={players} me={player} steps={data.steps} doneBy={doneBy} />
+        <main className="main">
           <>
               <div className="journal-tools">
                 <div className="journal-row">
@@ -292,7 +293,6 @@ function Tracker({ player, onSwitch }: { player: string; onSwitch: (name: string
                 onMark={() => setDialog(NO_PICK)}
               />
           </>
-          )}
         </main>
 
         <aside className="side">
@@ -300,10 +300,13 @@ function Tracker({ player, onSwitch }: { player: string; onSwitch: (name: string
           {players.map(saveCard)}
         </aside>
       </div>
+      )}
 
-      <button className="fab" onClick={() => setDialog(NO_PICK)} aria-label="Mark done">
-        <Icon name="check" size={26} />
-      </button>
+      {view !== "map" && (
+        <button className="fab" onClick={() => setDialog(NO_PICK)} aria-label="Mark done">
+          <Icon name="check" size={26} />
+        </button>
+      )}
 
       {detail && <SaveDetail name={detail} steps={data.steps} doneBy={doneBy} onClose={() => setDetail(null)} />}
 

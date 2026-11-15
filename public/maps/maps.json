@@ -4,20 +4,20 @@
   "name": "Kokiri Forest",
   "child": {
    "src": "KokiriForest_child.webp",
-   "w": 1870,
-   "h": 992,
+   "w": 1866,
+   "h": 972,
    "crop": [
-    100,
-    267
+    101,
+    277
    ]
   },
   "adult": {
    "src": "KokiriForest_adult.webp",
-   "w": 1870,
-   "h": 992,
+   "w": 1866,
+   "h": 972,
    "crop": [
-    100,
-    267
+    101,
+    277
    ]
   }
  },
@@ -26,20 +26,20 @@
   "name": "Lost Woods",
   "child": {
    "src": "LostWood_child.webp",
-   "w": 1220,
-   "h": 1238,
+   "w": 1218,
+   "h": 1218,
    "crop": [
-    390,
-    101
+    391,
+    111
    ]
   },
   "adult": {
    "src": "LostWood_child.webp",
-   "w": 1220,
-   "h": 1238,
+   "w": 1218,
+   "h": 1218,
    "crop": [
-    390,
-    101
+    391,
+    111
    ]
   }
  },
@@ -48,20 +48,20 @@
   "name": "Sacred Forest Meadow",
   "child": {
    "src": "SacredForestMeadow_child.webp",
-   "w": 378,
-   "h": 1437,
+   "w": 370,
+   "h": 1418,
    "crop": [
-    852,
-    3
+    857,
+    13
    ]
   },
   "adult": {
    "src": "SacredForestMeadow_child.webp",
-   "w": 378,
-   "h": 1437,
+   "w": 370,
+   "h": 1418,
    "crop": [
-    852,
-    3
+    857,
+    13
    ]
   }
  },
@@ -70,20 +70,20 @@
   "name": "Hyrule Field",
   "child": {
    "src": "HyruleField_child.webp",
-   "w": 1599,
-   "h": 1273,
+   "w": 1593,
+   "h": 1260,
    "crop": [
-    140,
-    107
+    141,
+    117
    ]
   },
   "adult": {
    "src": "HyruleField_adult.webp",
-   "w": 1599,
-   "h": 1273,
+   "w": 1593,
+   "h": 1260,
    "crop": [
-    140,
-    107
+    141,
+    117
    ]
   }
  },
@@ -92,20 +92,20 @@
   "name": "Lon Lon Ranch",
   "child": {
    "src": "LonLonRanch_child.webp",
-   "w": 1190,
-   "h": 1080,
+   "w": 1184,
+   "h": 1068,
    "crop": [
-    390,
-    180
+    393,
+    185
    ]
   },
   "adult": {
    "src": "LonLonRanch_child.webp",
-   "w": 1190,
-   "h": 1080,
+   "w": 1184,
+   "h": 1068,
    "crop": [
-    390,
-    180
+    393,
+    185
    ]
   }
  },
@@ -114,20 +114,20 @@
   "name": "Market",
   "child": {
    "src": "Market_child.webp",
-   "w": 1560,
-   "h": 1293,
+   "w": 1559,
+   "h": 1273,
    "crop": [
     200,
-    101
+    111
    ]
   },
   "adult": {
    "src": "Market_adult.webp",
-   "w": 1000,
-   "h": 1293,
+   "w": 998,
+   "h": 1273,
    "crop": [
-    760,
-    101
+    761,
+    111
    ]
   }
  },
@@ -136,20 +136,20 @@
   "name": "Hyrule Castle",
   "child": {
    "src": "HyruleCastle_child.webp",
-   "w": 949,
-   "h": 1380,
+   "w": 941,
+   "h": 1373,
    "crop": [
-    661,
-    20
+    666,
+    27
    ]
   },
   "adult": {
    "src": "HyruleCastle_adult.webp",
-   "w": 937,
-   "h": 1186,
+   "w": 931,
+   "h": 1167,
    "crop": [
-    583,
-    65
+    588,
+    75
    ]
   }
  },
@@ -158,20 +158,20 @@
   "name": "Kakariko Village",
   "child": {
    "src": "KakarikoVillage_child.webp",
-   "w": 1390,
-   "h": 1360,
+   "w": 1385,
+   "h": 1344,
    "crop": [
     280,
-    60
+    69
    ]
   },
   "adult": {
    "src": "KakarikoVillage_adult.webp",
-   "w": 1390,
-   "h": 1360,
+   "w": 1385,
+   "h": 1344,
    "crop": [
     280,
-    60
+    69
    ]
   }
  },
@@ -180,20 +180,20 @@
   "name": "Kakariko Graveyard",
   "child": {
    "src": "Graveyard_child.webp",
-   "w": 1860,
-   "h": 753,
+   "w": 1852,
+   "h": 742,
    "crop": [
-    130,
-    287
+    134,
+    297
    ]
   },
   "adult": {
    "src": "Graveyard_adult.webp",
-   "w": 1860,
-   "h": 753,
+   "w": 1852,
+   "h": 742,
    "crop": [
-    130,
-    287
+    134,
+    297
    ]
   }
  },
@@ -202,20 +202,20 @@
   "name": "Death Mountain Trail",
   "child": {
    "src": "DeathMountainTrail_child.webp",
-   "w": 576,
-   "h": 1320,
+   "w": 568,
+   "h": 1312,
    "crop": [
-    670,
-    40
+    673,
+    42
    ]
   },
   "adult": {
    "src": "DeathMountainTrail_child.webp",
-   "w": 576,
-   "h": 1320,
+   "w": 568,
+   "h": 1312,
    "crop": [
-    670,
-    40
+    673,
+    42
    ]
   }
  },
@@ -224,20 +224,20 @@
   "name": "Goron City",
   "child": {
    "src": "GoronCity_child.webp",
-   "w": 1318,
-   "h": 1240,
+   "w": 1310,
+   "h": 1232,
    "crop": [
-    350,
-    60
+    353,
+    62
    ]
   },
   "adult": {
    "src": "GoronCity_adult.webp",
-   "w": 1318,
-   "h": 1280,
+   "w": 1310,
+   "h": 1273,
    "crop": [
-    350,
-    20
+    353,
+    21
    ]
   }
  },
@@ -246,20 +246,20 @@
   "name": "Death Mountain Crater",
   "child": {
    "src": "DeathMountainCrater_child.webp",
-   "w": 1170,
-   "h": 1340,
+   "w": 1161,
+   "h": 1330,
    "crop": [
-    480,
-    20
+    485,
+    22
    ]
   },
   "adult": {
    "src": "DeathMountainCrater_adult.webp",
-   "w": 1280,
-   "h": 1340,
+   "w": 1271,
+   "h": 1330,
    "crop": [
-    370,
-    20
+    375,
+    22
    ]
   }
  },
@@ -268,20 +268,20 @@
   "name": "Zora's River",
   "child": {
    "src": "ZoraRiver_child.webp",
-   "w": 1940,
-   "h": 937,
+   "w": 1931,
+   "h": 918,
    "crop": [
-    40,
-    280
+    45,
+    289
    ]
   },
   "adult": {
    "src": "ZoraRiver_child.webp",
-   "w": 1940,
-   "h": 937,
+   "w": 1931,
+   "h": 918,
    "crop": [
-    40,
-    280
+    45,
+    289
    ]
   }
  },
@@ -290,20 +290,20 @@
   "name": "Zora's Domain",
   "child": {
    "src": "ZoraDomain_child.webp",
-   "w": 1806,
-   "h": 1131,
+   "w": 1796,
+   "h": 1115,
    "crop": [
-    102,
-    260
+    107,
+    266
    ]
   },
   "adult": {
    "src": "ZoraDomain_adult.webp",
-   "w": 1806,
-   "h": 1131,
+   "w": 1796,
+   "h": 1115,
    "crop": [
-    102,
-    260
+    107,
+    266
    ]
   }
  },
@@ -312,20 +312,20 @@
   "name": "Zora's Fountain",
   "child": {
    "src": "ZoraFountain_child.webp",
-   "w": 1304,
-   "h": 1271,
+   "w": 1294,
+   "h": 1252,
    "crop": [
-    382,
-    163
+    387,
+    173
    ]
   },
   "adult": {
    "src": "ZoraFountain_adult.webp",
-   "w": 1304,
-   "h": 1354,
+   "w": 1294,
+   "h": 1338,
    "crop": [
-    382,
-    80
+    387,
+    87
    ]
   }
  },
@@ -334,20 +334,20 @@
   "name": "Lake Hylia",
   "child": {
    "src": "LakeHylia_child.webp",
-   "w": 1480,
-   "h": 1175,
+   "w": 1473,
+   "h": 1156,
    "crop": [
-    310,
-    145
+    312,
+    155
    ]
   },
   "adult": {
    "src": "LakeHylia_adult.webp",
-   "w": 1480,
-   "h": 1174,
+   "w": 1473,
+   "h": 1154,
    "crop": [
-    310,
-    145
+    312,
+    155
    ]
   }
  },
@@ -356,7 +356,7 @@
   "name": "Gerudo Valley",
   "child": {
    "src": "GerudoValley_child.webp",
-   "w": 1286,
+   "w": 1281,
    "h": 1420,
    "crop": [
     470,
@@ -365,10 +365,10 @@
   },
   "adult": {
    "src": "GerudoValley_adult.webp",
-   "w": 1386,
+   "w": 1379,
    "h": 1420,
    "crop": [
-    370,
+    372,
     20
    ]
   }
@@ -378,11 +378,11 @@
   "name": "Gerudo's Fortress",
   "adult": {
    "src": "GerudoFortress_adult.webp",
-   "w": 1630,
-   "h": 1374,
+   "w": 1622,
+   "h": 1354,
    "crop": [
-    170,
-    61
+    173,
+    71
    ]
   }
  },
@@ -391,20 +391,20 @@
   "name": "Haunted Wasteland",
   "child": {
    "src": "HauntedWasteland_child.webp",
-   "w": 1226,
-   "h": 1234,
+   "w": 1218,
+   "h": 1218,
    "crop": [
-    387,
-    103
+    391,
+    111
    ]
   },
   "adult": {
    "src": "HauntedWasteland_child.webp",
-   "w": 1226,
-   "h": 1234,
+   "w": 1218,
+   "h": 1218,
    "crop": [
-    387,
-    103
+    391,
+    111
    ]
   }
  },
@@ -413,20 +413,20 @@
   "name": "Desert Colossus",
   "child": {
    "src": "DesertColossus_child.webp",
-   "w": 1468,
-   "h": 1217,
+   "w": 1461,
+   "h": 1198,
    "crop": [
-    202,
-    122
+    207,
+    131
    ]
   },
   "adult": {
    "src": "DesertColossus_child.webp",
-   "w": 1468,
-   "h": 1217,
+   "w": 1461,
+   "h": 1198,
    "crop": [
-    202,
-    122
+    207,
+    131
    ]
   }
  }

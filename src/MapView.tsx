@@ -42,7 +42,6 @@ type CountedStep = { _id: string; category: string; location: string; age: strin
 type Props = {
   steps: CountedStep[];
   player: string;
-  players: string[];
   doneBy: Map<string, string[]>;
   placeOf: (location: string) => string;
   /** Show the journal filtered to one kind in these places. */
@@ -50,7 +49,7 @@ type Props = {
 };
 
 /** The game's own area maps (extracted from its UI textures). Drag to move, wheel or pinch to zoom. */
-export function MapView({ steps, player, players, doneBy, placeOf, onOpen }: Props) {
+export function MapView({ steps, player, doneBy, placeOf, onOpen }: Props) {
   const [areaId, setAreaId] = useLocal<string>("map-area", AREAS[0].id);
   const [age, setAge] = useLocal<Age>("map-age", "child");
   const area = AREAS.find((a) => a.id === areaId) ?? AREAS[0];
@@ -65,8 +64,7 @@ export function MapView({ steps, player, players, doneBy, placeOf, onOpen }: Pro
         (s) => s.category === category && places.includes(placeOf(s.location)) && (!s.age || s.age.toLowerCase() === shownAge),
       );
       const count = (p: string) => found.filter((s) => doneBy.get(s._id)?.includes(p)).length;
-      const others = players.filter((p) => p !== player).map((p) => ({ p, n: count(p) }));
-      return { category, places, found: found.length, mine: count(player), others };
+      return { category, places, found: found.length, mine: count(player) };
     });
   const here = tallies(area);
 
@@ -84,6 +82,10 @@ export function MapView({ steps, player, players, doneBy, placeOf, onOpen }: Pro
     setView({ scale: s, x: (el.clientWidth - image.w * s) / 2, y: (el.clientHeight - image.h * s) / 2 });
   }, [image]);
   useLayoutEffect(fit, [fit]);
+  useEffect(() => {
+    window.addEventListener("resize", fit);
+    return () => window.removeEventListener("resize", fit);
+  }, [fit]);
 
   /** Zoom by `factor`, keeping the point (px, py) of the box still. */
   const zoomAt = useCallback((factor: number, px: number, py: number) => {
@@ -137,44 +139,6 @@ export function MapView({ steps, player, players, doneBy, placeOf, onOpen }: Pro
 
   return (
     <section className="map-view">
-      <div className="journal-row">
-        <select className="map-area" value={area.id} onChange={(e) => setAreaId(e.target.value)} aria-label="Area">
-          {AREAS.map((a) => (
-            <option key={a.id} value={a.id}>
-              {a.name}
-              {tallies(a).some((t) => t.found) ? ` · ${tallies(a).map((t) => `${t.mine}/${t.found}`).join(" · ")}` : ""}
-            </option>
-          ))}
-        </select>
-        <div className="segmented">
-          {(["child", "adult"] as const).map((a) => (
-            <button key={a} type="button" className={shownAge === a ? "active" : ""} disabled={!area[a]} onClick={() => setAge(a)}>
-              {a === "child" ? "Child" : "Adult"}
-            </button>
-          ))}
-        </div>
-      </div>
-      <div className="map-counts">
-        {here.map((t) => (
-          <button
-            key={t.category}
-            type="button"
-            className="map-count"
-            disabled={!t.found}
-            onClick={() => onOpen(t.category, t.places)}
-            title={t.found ? `Show these ${PLURAL[t.category].toLowerCase()} in the journal` : undefined}
-          >
-            <Icon name={categoryIcon(t.category)} size={20} />
-            <span className="map-count-label">{PLURAL[t.category]}</span>
-            <strong>
-              {t.mine}/{t.found}
-            </strong>
-            {t.found > 0 && t.others.length > 0 && (
-              <span className="map-count-others">{t.others.map(({ p, n }) => `${p} ${n}`).join(" · ")}</span>
-            )}
-          </button>
-        ))}
-      </div>
       <div
         ref={box}
         className="map-box"
@@ -196,7 +160,45 @@ export function MapView({ steps, player, players, doneBy, placeOf, onOpen }: Pro
           draggable={false}
           style={{ transform: `translate(${view.x}px, ${view.y}px) scale(${view.scale})` }}
         />
-        <div className="map-zoom">
+        {/* Controls sit on the map; pointer events on them must not pan it. */}
+        <div className="map-panel" onPointerDown={(e) => e.stopPropagation()} onDoubleClick={(e) => e.stopPropagation()}>
+          <div className="journal-row">
+            <select className="map-area" value={area.id} onChange={(e) => setAreaId(e.target.value)} aria-label="Area">
+              {AREAS.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.name}
+                  {tallies(a).some((t) => t.found) ? ` · ${tallies(a).map((t) => `${t.mine}/${t.found}`).join(" · ")}` : ""}
+                </option>
+              ))}
+            </select>
+            <div className="segmented">
+              {(["child", "adult"] as const).map((a) => (
+                <button key={a} type="button" className={shownAge === a ? "active" : ""} disabled={!area[a]} onClick={() => setAge(a)}>
+                  {a === "child" ? "Child" : "Adult"}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="map-counts">
+            {here.map((t) => (
+              <button
+                key={t.category}
+                type="button"
+                className="map-count"
+                disabled={!t.found}
+                onClick={() => onOpen(t.category, t.places)}
+                title={`${PLURAL[t.category]}: ${t.mine} of the ${t.found} found${t.found ? " (show them in the journal)" : ""}`}
+                aria-label={`${PLURAL[t.category]}: ${t.mine} of ${t.found}`}
+              >
+                <Icon name={categoryIcon(t.category)} size={20} />
+                <strong>
+                  {t.mine}/{t.found}
+                </strong>
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="map-zoom" onPointerDown={(e) => e.stopPropagation()} onDoubleClick={(e) => e.stopPropagation()}>
           <button type="button" className="btn" onClick={() => center(1.5)} aria-label="Zoom in">
             +
           </button>
