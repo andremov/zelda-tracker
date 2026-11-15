@@ -1,5 +1,5 @@
 {
- "_readme": "What a save sync looks for. placed: map IDs of Gold Skulltulas (gs) and Heart Pieces (hp) collected in the save. heart_flags/upgrade_flags: save flags set by rewards. The site's catalog keys are these with gs:/hp:/up: in front.",
+ "_readme": "What a save sync looks for. placed: map IDs of Gold Skulltulas (gs) and Heart Pieces (hp) collected in the save. heart_flags/upgrade_flags: save flags set by rewards. chest_flags: catalog key -> the save bool (hex) that turns true once that chest is open. The site's catalog keys are these with gs:/hp:/up: in front.",
  "placed": {
   "10127391959410674946": "gs",
   "10270336409167849808": "gs",
@@ -142,5 +142,11 @@
   "MiniGame_HitTarget_HrlCity_Get_BulletBag",
   "MiniGame_HitTarget_Kakariko_Get_Quiver",
   "MiniGame_HorseBackArchery_Get_Quiver"
- ]
+ ],
+ "chest_flags": {
+  "hp:gerudo-fortress-rooftop-chest": "689cebe8",
+  "hp:gerudo-valley-chasm-ledge-chest": "7001f17c",
+  "hp:graveyard-grave-chest": "9c89c565",
+  "hp:zoras-domain-torches-chest": "a1678ed9"
+ }
 }
