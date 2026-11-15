@@ -32,10 +32,10 @@ Or schedule `python sync.py` every 5 minutes with Task Scheduler. Each run reads
 
 ## What it can't see
 
-The save doesn't point at a few things: some chest heart pieces, bottles, and the Deku stick and nut upgrades. Once anyone has ticked one of those, it's on the site, and you can tick it there by hand.
+The save doesn't point at a few things: bottles, and the Deku stick and nut upgrades. Once anyone has ticked one of those, it's on the site, and you can tick it there by hand.
 
 If it logs "the site has no entry for …", tell Andrés. That's something the site's list is missing.
 
 ## How it works
 
-Every entry on the site has a key. The script reads your save and sends the keys of everything you have to the site's `steps:tick` endpoint. `savekeys.json` lists the map IDs and flags it looks for (no spoilers), and `roomflags.json` is how it tells you've been inside a dungeon.
+Every entry on the site has a key. The script reads your save and sends the keys of everything you have to the site's `steps:tick` endpoint. `savekeys.json` lists the map IDs and flags it looks for, including the save bools of the heart-piece chests (no spoilers), and `roomflags.json` is how it tells you've been inside a dungeon.

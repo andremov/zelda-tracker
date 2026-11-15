@@ -301,11 +301,14 @@ def convex(kind, path, args, url=None):
 def keys(s, named, counts):
     """The site's catalog key for everything the save shows (see convex/catalog.ts in the site's repo):
     "category|subject|action" for named things, gs:/hp:<map id> for placed skulltulas and heart pieces,
-    hp:/up:<flag> for rewards, poe:<nn> for Big Poes."""
+    hp:/up:<flag> for rewards, poe:<nn> for Big Poes, and the chest_flags keys for opened chests."""
     out = {"%s|%s|%s" % (st["category"], st["subject"], st["action"]) for st in named}
     out |= {"%s:%s" % (kind, k) for k, kind in SAVE_KEYS["placed"].items() if int(k) in s.ids}
     out |= {"hp:" + f for f in SAVE_KEYS["heart_flags"] if s.flag(f)}
     out |= {"up:" + f for f in SAVE_KEYS["upgrade_flags"] if s.flag(f)}
+    # Chests aren't in the placement list. The save keeps one bool per chest instead (the IsTreasureBoxOpen struct
+    # in GameDataList maps each chest's map ID to it), which turns true once the chest is open.
+    out |= {k for k, h in SAVE_KEYS["chest_flags"].items() if s.raw.get(int(h, 16)) == 1}
     # Big Poes are told apart only by count: the first n of poe:01..poe:10.
     out |= {"poe:%02d" % i for i in range(1, 1 + counts["Big Poe"])}
     return out
