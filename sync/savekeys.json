@@ -132,7 +132,8 @@
   "Npc_Hylia_001_IsGetHeartPiece",
   "Npc_Hylia_045_HasDived",
   "Npc_SkullKid_Child_IsGetHeartPiece",
-  "SubEvent_FindRichard_GetHeartPiece"
+  "SubEvent_FindRichard_GetHeartPiece",
+  "UnderTheGrave_DampeRace_HeartGeted"
  ],
  "upgrade_flags": [
   "GoronCity_GetBombBag_fromGoron006",

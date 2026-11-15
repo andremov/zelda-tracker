@@ -1130,6 +1130,15 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "age": ""
   },
   {
+    "key": "hp:gerudo-valley-chasm-ledge-chest",
+    "category": "Heart Piece",
+    "subject": "Heart Piece",
+    "action": "Got it",
+    "location": "Gerudo Valley",
+    "how": "In a chest on a ledge in the chasm",
+    "age": "Adult"
+  },
+  {
     "key": "hp:MiniGame_HorsebackArchery_GotaHeart",
     "category": "Heart Piece",
     "subject": "Heart Piece",
@@ -1175,7 +1184,7 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "age": ""
   },
   {
-    "key": "hp:dampe-race-second-win",
+    "key": "hp:UnderTheGrave_DampeRace_HeartGeted",
     "category": "Heart Piece",
     "subject": "Heart Piece",
     "action": "Got it",
