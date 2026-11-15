@@ -712,8 +712,10 @@ function Journal(props: {
   const groups = new Map<string, Step[]>();
   for (const s of steps) {
     const twin = s.category === "Great Fairy" ? undefined : sameMomentAs(s);
-    // Countable kinds (heart pieces, skulltulas…) get one card per entry.
-    const key = categoryInfo(s.category).fixed
+    // Countable kinds (heart pieces, skulltulas…) get one card per entry. Big Poes are all alike: one card counts them.
+    const key = s.category === "Big Poe"
+      ? "big-poe"
+      : categoryInfo(s.category).fixed
       ? s._id
       : twin
         ? `${norm(twin.category)}|${norm(twin.subject)}`
@@ -726,10 +728,53 @@ function Journal(props: {
 
   return (
     <div className="cards">
-      {cards.map((list) => (
-        <SubjectCard key={list[0]._id} {...props} steps={list} />
-      ))}
+      {cards.map((list) =>
+        list[0].category === "Big Poe" ? (
+          <CountCard key="big-poe" steps={list} player={props.player} doneBy={props.doneBy} />
+        ) : (
+          <SubjectCard key={list[0]._id} {...props} steps={list} />
+        ),
+      )}
     </div>
+  );
+}
+
+/** Things that are all alike (Big Poes): one card with how many each player has. Only a save sync ticks them. */
+function CountCard({ steps, player, doneBy }: { steps: Step[]; player: string; doneBy: Map<string, string[]> }) {
+  const first = steps[0];
+  const info = categoryInfo(first.category);
+  const total = TOTALS[first.category];
+  const counts = new Map<string, number>();
+  for (const s of steps) for (const p of doneBy.get(s._id) ?? []) counts.set(p, (counts.get(p) ?? 0) + 1);
+  const rows = [...counts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  return (
+    <article className="frame subject-card">
+      <header>
+        <div className="cat-badge">
+          <Icon name={info.icon} size={22} />
+        </div>
+        <div className="subject-title">
+          <h3>{first.subject}s</h3>
+          <span className="eyebrow">{first.location}</span>
+        </div>
+      </header>
+      <ol className="steps">
+        {rows.map(([p, n]) => (
+          <li key={p} className={`step ${p === player ? "done" : ""}`}>
+            <div className="step-body">
+              <div className="step-head">
+                <span className="step-action">
+                  {n} / {total}
+                </span>
+                <div className="stamps">
+                  <span className={`stamp ${p === player ? "mine" : ""}`}>{p}</span>
+                </div>
+              </div>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </article>
   );
 }
 
