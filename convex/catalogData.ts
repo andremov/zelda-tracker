@@ -153,8 +153,8 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "category": "Gold Skulltula",
     "subject": "Gold Skulltula",
     "action": "Got the token",
-    "location": "A grotto",
-    "how": "Behind a breakable wall in a grotto (Song of Storms grotto)",
+    "location": "Hyrule Castle",
+    "how": "Song of Storms grotto near the castle: behind a bombable wall",
     "age": ""
   },
   {
