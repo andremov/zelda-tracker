@@ -6,6 +6,7 @@ import type { Doc } from "../convex/_generated/dataModel";
 import { useLocal } from "./storage";
 import { Race } from "./Race";
 import { MapView } from "./MapView";
+import { Showcase } from "./Showcase";
 import { CATEGORIES, Icon, categoryIcon, categoryInfo } from "./icons";
 import { REGIONS } from "./locations";
 import {
@@ -126,7 +127,7 @@ function Tracker({ player, onSwitch }: { player: string; onSwitch: (name: string
   const [places, setPlaces] = useLocal<string[]>("filter-places", []);
   const [dialog, setDialog] = useState<DialogState>(null);
   const [detail, setDetail] = useState<string | null>(null);
-  const [view, setView] = useLocal<"journal" | "map">("view", "journal");
+  const [view, setView] = useLocal<"journal" | "map" | "showcase">("view", "journal");
 
   const doneBy = useMemo(() => {
     const m = new Map<string, string[]>();
@@ -205,7 +206,7 @@ function Tracker({ player, onSwitch }: { player: string; onSwitch: (name: string
   );
 
   return (
-    <div className={view === "map" ? "app map-mode" : "app"}>
+    <div className={view === "journal" ? "app" : "app map-mode"}>
       <header className="topbar">
         <div className="topbar-inner">
           <div className="topbar-left">
@@ -216,6 +217,9 @@ function Tracker({ player, onSwitch }: { player: string; onSwitch: (name: string
               </button>
               <button type="button" className={view === "map" ? "active" : ""} onClick={() => setView("map")}>
                 Map
+              </button>
+              <button type="button" className={view === "showcase" ? "active" : ""} onClick={() => setView("showcase")}>
+                Showcase
               </button>
             </nav>
           </div>
@@ -228,7 +232,9 @@ function Tracker({ player, onSwitch }: { player: string; onSwitch: (name: string
         </div>
       </header>
 
-      {view === "map" ? (
+      {view === "showcase" ? (
+        <Showcase steps={data.steps} doneBy={doneBy} placeOf={placeOf} />
+      ) : view === "map" ? (
             <MapView
               steps={data.steps}
               player={player}
@@ -302,7 +308,7 @@ function Tracker({ player, onSwitch }: { player: string; onSwitch: (name: string
       </div>
       )}
 
-      {view !== "map" && (
+      {view === "journal" && (
         <button className="fab" onClick={() => setDialog(NO_PICK)} aria-label="Mark done">
           <Icon name="check" size={26} />
         </button>

@@ -3,16 +3,16 @@ import MAPS from "../public/maps/maps.json";
 import { useLocal } from "./storage";
 import { Icon, categoryIcon } from "./icons";
 
-type Age = "child" | "adult";
-type MapImage = { src: string; w: number; h: number };
-type Area = { id: string; name: string; child?: MapImage; adult?: MapImage };
+export type Age = "child" | "adult";
+export type MapImage = { src: string; w: number; h: number };
+export type Area = { id: string; name: string; child?: MapImage; adult?: MapImage };
 type View = { x: number; y: number; scale: number };
 
-const AREAS = MAPS as Area[];
+export const AREAS = MAPS as Area[];
 const MAX_ZOOM = 6;
 
 /** The places (as the journal names them) each map covers: the area itself and the buildings in it. */
-const AREA_PLACES: Record<string, string[]> = {
+export const AREA_PLACES: Record<string, string[]> = {
   KokiriForest: ["Kokiri Forest", "Link's House", "Mido's House", "Saria's House", "Know-It-All Brothers' House", "House of Twins", "Kokiri Shop", "Kokiri Training Area", "Deku Tree Meadow"],
   LostWood: ["Lost Woods", "Lost Woods Bridge"],
   SacredForestMeadow: ["Sacred Forest Meadow"],
@@ -35,10 +35,10 @@ const AREA_PLACES: Record<string, string[]> = {
   DesertColossus: ["Desert Colossus", "Colossus Great Fairy Fountain"],
 };
 /** What the map counts, in the order shown. */
-const COUNTED = ["Heart Piece", "Gold Skulltula"];
-const PLURAL: Record<string, string> = { "Heart Piece": "Heart Pieces", "Gold Skulltula": "Gold Skulltulas" };
+export const COUNTED = ["Heart Piece", "Gold Skulltula"];
+export const PLURAL: Record<string, string> = { "Heart Piece": "Heart Pieces", "Gold Skulltula": "Gold Skulltulas" };
 
-type CountedStep = { _id: string; category: string; location: string; age: string };
+export type CountedStep = { _id: string; category: string; location: string; age: string; how: string };
 type Props = {
   steps: CountedStep[];
   player: string;
