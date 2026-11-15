@@ -122,6 +122,15 @@ export const COUNTABLE_ENTRIES: Entry[] = [
     "age": "Child"
   },
   {
+    "key": "bottle:poe-collector",
+    "category": "Bottle",
+    "subject": "Bottle",
+    "action": "Got it",
+    "location": "Market Entrance",
+    "how": "Reward from 500 big poe points",
+    "age": "Adult"
+  },
+  {
     "key": "bottle:market-potion-shop",
     "category": "Bottle",
     "subject": "Bottle",
