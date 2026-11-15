@@ -138,7 +138,7 @@ function ShowcaseSlide({ slide, steps, players, doneBy, placeOf }: { slide: Slid
             width={image.w}
             height={image.h}
             draggable={false}
-            style={{ transform: moving ? pan.to : pan.from, transition: moving ? `transform ${SLIDE_MS}ms cubic-bezier(0.45, 0, 0.55, 1)` : "none" }}
+            style={{ transform: moving ? pan.to : pan.from, transition: moving ? `transform ${SLIDE_MS}ms linear` : "none" }}
           />
         )}
       </div>
