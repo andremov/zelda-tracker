@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import MAPS from "../public/maps/maps.json";
 import { useLocal } from "./storage";
+import { Icon, categoryIcon } from "./icons";
 
 type Age = "child" | "adult";
 type MapImage = { src: string; w: number; h: number };
@@ -10,13 +11,64 @@ type View = { x: number; y: number; scale: number };
 const AREAS = MAPS as Area[];
 const MAX_ZOOM = 6;
 
+/** The places (as the journal names them) each map covers: the area itself and the buildings in it. */
+const AREA_PLACES: Record<string, string[]> = {
+  KokiriForest: ["Kokiri Forest", "Link's House", "Mido's House", "Saria's House", "Know-It-All Brothers' House", "House of Twins", "Kokiri Shop", "Kokiri Training Area", "Deku Tree Meadow"],
+  LostWood: ["Lost Woods", "Lost Woods Bridge"],
+  SacredForestMeadow: ["Sacred Forest Meadow"],
+  HyruleField: ["Hyrule Field"],
+  LonLonRanch: ["Lon Lon Ranch", "Lon Lon Ranch House", "Lon Lon Ranch Stables", "Lon Lon Ranch Silo"],
+  Market: ["Market Entrance", "Market", "Back Alley", "Happy Mask Shop", "Market Bazaar", "Market Potion Shop", "Market Shooting Gallery", "Bombchu Shop", "Bombchu Bowling Alley", "Treasure Chest Game", "Dog Lady's House", "Temple of Time"],
+  HyruleCastle: ["Hyrule Castle", "Castle Courtyard", "Hyrule Castle Great Fairy Fountain", "Outside Ganon's Castle", "Ganon's Castle Great Fairy Fountain"],
+  KakarikoVillage: ["Kakariko Village", "Impa's House", "Windmill", "House of Skulltula", "Kakariko Bazaar", "Kakariko Potion Shop", "Kakariko Shooting Gallery", "Granny's Potion Shop"],
+  Graveyard: ["Kakariko Graveyard", "Dampé's Hut"],
+  DeathMountainTrail: ["Death Mountain Trail", "Death Mountain Summit", "Death Mountain Great Fairy Fountain"],
+  GoronCity: ["Goron City", "Goron Shop"],
+  DeathMountainCrater: ["Death Mountain Crater", "Crater Great Fairy Fountain"],
+  ZoraRiver: ["Zora's River"],
+  ZoraDomain: ["Zora's Domain", "Zora Shop"],
+  ZoraFountain: ["Zora's Fountain", "Zora's Fountain Great Fairy Fountain"],
+  LakeHylia: ["Lake Hylia", "Lakeside Laboratory", "Fishing Pond"],
+  GerudoValley: ["Gerudo Valley", "Carpenters' Tent"],
+  GerudoFortress: ["Gerudo's Fortress", "Thieves' Hideout"],
+  HauntedWasteland: ["Haunted Wasteland"],
+  DesertColossus: ["Desert Colossus", "Colossus Great Fairy Fountain"],
+};
+/** What the map counts, in the order shown. */
+const COUNTED = ["Heart Piece", "Gold Skulltula"];
+const PLURAL: Record<string, string> = { "Heart Piece": "Heart Pieces", "Gold Skulltula": "Gold Skulltulas" };
+
+type CountedStep = { _id: string; category: string; location: string; age: string };
+type Props = {
+  steps: CountedStep[];
+  player: string;
+  players: string[];
+  doneBy: Map<string, string[]>;
+  placeOf: (location: string) => string;
+  /** Show the journal filtered to one kind in these places. */
+  onOpen: (category: string, places: string[]) => void;
+};
+
 /** The game's own area maps (extracted from its UI textures). Drag to move, wheel or pinch to zoom. */
-export function MapView() {
+export function MapView({ steps, player, players, doneBy, placeOf, onOpen }: Props) {
   const [areaId, setAreaId] = useLocal<string>("map-area", AREAS[0].id);
   const [age, setAge] = useLocal<Age>("map-age", "child");
   const area = AREAS.find((a) => a.id === areaId) ?? AREAS[0];
   const shownAge: Age = area[age] ? age : age === "child" ? "adult" : "child";
   const image = area[shownAge]!;
+
+  // Found so far (ticked by anyone) in an area at this age; entries with no age count at both.
+  const tallies = (a: Area) =>
+    COUNTED.map((category) => {
+      const places = AREA_PLACES[a.id] ?? [];
+      const found = steps.filter(
+        (s) => s.category === category && places.includes(placeOf(s.location)) && (!s.age || s.age.toLowerCase() === shownAge),
+      );
+      const count = (p: string) => found.filter((s) => doneBy.get(s._id)?.includes(p)).length;
+      const others = players.filter((p) => p !== player).map((p) => ({ p, n: count(p) }));
+      return { category, places, found: found.length, mine: count(player), others };
+    });
+  const here = tallies(area);
 
   const box = useRef<HTMLDivElement>(null);
   const [view, setView] = useState<View>({ x: 0, y: 0, scale: 1 });
@@ -90,6 +142,7 @@ export function MapView() {
           {AREAS.map((a) => (
             <option key={a.id} value={a.id}>
               {a.name}
+              {tallies(a).some((t) => t.found) ? ` · ${tallies(a).map((t) => `${t.mine}/${t.found}`).join(" · ")}` : ""}
             </option>
           ))}
         </select>
@@ -100,6 +153,27 @@ export function MapView() {
             </button>
           ))}
         </div>
+      </div>
+      <div className="map-counts">
+        {here.map((t) => (
+          <button
+            key={t.category}
+            type="button"
+            className="map-count"
+            disabled={!t.found}
+            onClick={() => onOpen(t.category, t.places)}
+            title={t.found ? `Show these ${PLURAL[t.category].toLowerCase()} in the journal` : undefined}
+          >
+            <Icon name={categoryIcon(t.category)} size={20} />
+            <span className="map-count-label">{PLURAL[t.category]}</span>
+            <strong>
+              {t.mine}/{t.found}
+            </strong>
+            {t.found > 0 && t.others.length > 0 && (
+              <span className="map-count-others">{t.others.map(({ p, n }) => `${p} ${n}`).join(" · ")}</span>
+            )}
+          </button>
+        ))}
       </div>
       <div
         ref={box}

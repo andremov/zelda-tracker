@@ -231,7 +231,21 @@ function Tracker({ player, onSwitch }: { player: string; onSwitch: (name: string
           </div>
 
           {view === "map" ? (
-            <MapView />
+            <MapView
+              steps={data.steps}
+              player={player}
+              players={players}
+              doneBy={doneBy}
+              placeOf={placeOf}
+              onOpen={(category, inPlaces) => {
+                setSearch("");
+                setKinds([category]);
+                setPlaces(inPlaces);
+                setWho([]);
+                setNotMine(false);
+                setView("journal");
+              }}
+            />
           ) : (
           <>
               <div className="journal-tools">

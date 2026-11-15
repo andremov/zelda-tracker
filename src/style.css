@@ -534,3 +534,14 @@ legend, .field > span {
 .map-box img { position: absolute; left: 0; top: 0; max-width: none; transform-origin: 0 0; will-change: transform; }
 .map-zoom { position: absolute; right: 10px; bottom: 10px; display: flex; flex-direction: column; gap: 6px; }
 .map-zoom .btn { min-width: 44px; justify-content: center; }
+.map-counts { display: flex; flex-wrap: wrap; gap: 10px; }
+.map-count {
+  display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 8px 14px; border: 1px solid var(--line); border-radius: 3px;
+  background: var(--paper); color: var(--ink); font: inherit; cursor: pointer; box-shadow: var(--shadow);
+}
+.map-count:hover:not(:disabled) { border-color: var(--green-2); background: var(--paper-2); }
+.map-count:disabled { opacity: 0.55; cursor: default; }
+.map-count-label { font-family: var(--font-display); font-size: 0.9rem; }
+.map-count strong { font-size: 1.15rem; }
+.map-count-others { color: var(--muted); font-size: 0.85rem; }
