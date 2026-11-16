@@ -365,7 +365,7 @@ def from_save(s: Save):
         else:
             unlocked = s.num("DefeatedEnemyNum." + actor) > 0
         if unlocked:
-            out.append(step("Monster Statue", subject, "Unlocked", "Hall of Fallen Foes", ""))
+            out.append(step("Monster Statue", subject, "Got it", "Hall of Fallen Foes", ""))
     for subject, flag in GAUNTLETS.items():
         if s.flag(flag):
             out.append(step("Rematch Gauntlet", subject, "Cleared", "Hall of Fallen Foes", ""))
