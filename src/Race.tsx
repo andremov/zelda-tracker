@@ -119,7 +119,7 @@ export function Race({
       <p className="muted small race-note">
         {mode === "story"
           ? "Entering and beating the eight boss dungeons and Ganon's Castle."
-          : "Everything on the save log: dungeons, songs, fairies, masks, items, gear, upgrades, frogs, heart pieces, skulltulas, poes and bottles."}
+          : "Everything on the save log: dungeons, songs, fairies, masks, items, gear, upgrades, frogs, heart pieces, skulltulas, poes, bottles and the Hall of Fallen Foes."}
       </p>
 
       <div className="race-track" ref={trackRef} style={{ height }}>

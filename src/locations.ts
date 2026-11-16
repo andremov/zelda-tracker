@@ -86,6 +86,7 @@ export const REGIONS: { region: string; places: string[] }[] = [
     ],
   },
   { region: "Ganon's Castle", places: ["Ganon's Castle", "Ganon's Tower"] },
+  { region: "Dreams", places: ["Hall of Fallen Foes"] },
   { region: "Anywhere", places: ["A grotto", "Overworld (anywhere)"] },
 ];
 

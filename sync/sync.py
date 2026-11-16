@@ -206,6 +206,10 @@ FAIRIES = {  # cutscene name: (fountain, age)
     "Wisdom": ("Crater Great Fairy Fountain", "Adult"),
     "Courage": ("Ganon's Castle Great Fairy Fountain", "Adult"),
 }
+# The rematch gauntlets: 3 battles (child era), 5 (adult era), all 10.
+FALLEN_FOES = {"Trial of the Spiritual Stones": "Npc_Dream_BossRush_Cleared",
+               "Trial of the Five Sages": "Npc_Dream_BossRush_Cleared_01",
+               "Trial of the Hero of Time": "Npc_Dream_BossRush_Cleared_02"}
 FROGS = {"Zelda's Lullaby": "ZeldaLullaby", "Epona's Song": "EponaSong", "Saria's Song": "SariaSong",
          "Sun's Song": "SunSong", "Song of Time": "TimeSong", "Song of Storms": "StormSong"}
 
@@ -266,6 +270,12 @@ def from_save(s: Save):
             out.append(step("Frogs", subject, "Played it", "Zora's River", "Child"))
     if s.flag("MiniGame_FrogTenors_InsectRepellent_ClearAfter"):
         out.append(step("Frogs", "Frog minigame", "Played it", "Zora's River", "Child"))
+    # Hall of Fallen Foes: statues still locked counts down from 84 (absent from the save until the hall opens).
+    if murmur3("DreamWorld_UnopendEnemyNum") in s.raw and s.num("DreamWorld_UnopendEnemyNum") == 0:
+        out.append(step("Fallen Foes", "All monster statues", "Completed", "Hall of Fallen Foes", ""))
+    for subject, flag in FALLEN_FOES.items():
+        if s.flag(flag):
+            out.append(step("Fallen Foes", subject, "Completed", "Hall of Fallen Foes", ""))
 
     # Heart pieces: max life is in quarter hearts; 3 hearts to start, one container per boss.
     containers = sum(1 for name, (_, _, bosses, _, _) in DUNGEONS.items() if bosses and name != "Ganon's Castle"

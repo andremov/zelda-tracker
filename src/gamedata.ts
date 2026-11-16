@@ -283,6 +283,14 @@ export const FROGS: Group[] = [
   },
 ];
 
+/** The Hall of Fallen Foes (post-game, reached by sleeping in a bed): every monster statue, and its three rematch gauntlets. */
+export const FALLEN_FOES: Group[] = [
+  {
+    label: "Hall of Fallen Foes",
+    items: ["All monster statues", "Trial of the Spiritual Stones", "Trial of the Five Sages", "Trial of the Hero of Time"],
+  },
+];
+
 /** Heart pieces in the game. */
 export const HEART_PIECES = 36;
 

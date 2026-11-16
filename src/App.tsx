@@ -17,6 +17,7 @@ import {
   DUNGEONS,
   MINI_DUNGEONS,
   EQUIPMENT,
+  FALLEN_FOES,
   FROGS,
   GREAT_FAIRIES,
   HEART_PIECES,
@@ -732,6 +733,7 @@ function SaveDetail({ name, steps, doneBy, onClose }: { name: string; steps: Ste
         {section("Equipment", "shield", list("Equipment", EQUIPMENT))}
         {section("Upgrades", "upgrade", list("Upgrade", UPGRADES))}
         {section("Frogs", "frog", list("Frogs", FROGS))}
+        {section("Hall of Fallen Foes", "skull", list("Fallen Foes", FALLEN_FOES))}
       </div>
     </dialog>
   );
