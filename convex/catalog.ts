@@ -79,10 +79,23 @@ export const seed = internalMutation({
         updated++;
       }
     }
-    // Anything left over predates the catalog and needs a key (see migrations:toCatalog).
+    // Entries dropped from the catalog go too, unless someone has ticked them.
+    let removed = 0;
+    for (const s of await ctx.db.query("steps").collect()) {
+      if (!s.key || keys.has(s.key)) continue;
+      const ticked = await ctx.db
+        .query("progress")
+        .withIndex("by_step", (q) => q.eq("stepId", s._id))
+        .first();
+      if (!ticked) {
+        await ctx.db.delete(s._id);
+        removed++;
+      }
+    }
+    // Anything left over predates the catalog or was ticked before being dropped (see migrations:toCatalog).
     const stray = (await ctx.db.query("steps").collect())
       .filter((s) => !s.key || !keys.has(s.key))
       .map((s) => `${s._id} ${s.key ?? "(no key)"} ${s.category} | ${s.subject} | ${s.action} | ${s.location} | ${s.how}`);
-    return { catalog: CATALOG.length, inserted, updated, stray };
+    return { catalog: CATALOG.length, inserted, updated, removed, stray };
   },
 });

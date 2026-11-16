@@ -75,7 +75,7 @@ export const SONGS: Group[] = [
 ];
 
 export const MASKS: Group[] = [
-  { label: "Masks", items: ["Keaton Mask", "Skull Mask", "Spooky Mask", "Bunny Hood", "Mask of Truth", "Goron Mask", "Zora Mask", "Gerudo Mask"] },
+  { label: "Masks", items: ["Keaton Mask", "Skull Mask", "Spooky Mask", "Bunny Hood", "Mask of Truth"] },
 ];
 
 export const DUNGEONS: Group[] = [
@@ -172,9 +172,6 @@ export const MASK_STEPS: Record<string, string[]> = {
   "Spooky Mask": SOLD,
   "Bunny Hood": SOLD,
   "Mask of Truth": ["Got it"],
-  "Goron Mask": ["Got it"],
-  "Zora Mask": ["Got it"],
-  "Gerudo Mask": ["Got it"],
 };
 
 /** Where each mask is delivered. Only shown once you pick the mask and "Delivered". */
