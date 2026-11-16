@@ -6,7 +6,8 @@ import { BOSS_DUNGEONS, DUNGEON_ICON, DUNGEON_STEPS, SET_COLOR } from "./gamedat
 import { POSTGAME } from "../convex/links";
 
 type Step = Doc<"steps">;
-type Mode = "story" | "full" | "postgame";
+export type Mode = "story" | "full" | "postgame";
+const MODE_LABEL: Record<Mode, string> = { story: "Completing the game", full: "100% completion", postgame: "Post-game" };
 
 const key = (category: string, subject: string, action: string) => `${category}|${subject}|${action}`;
 
@@ -64,23 +65,26 @@ export function Race({
   steps,
   doneBy,
   total,
-  postgameTotal,
+  modes = ["story", "full"],
 }: {
   players: string[];
   me: string;
   steps: Step[];
   doneBy: Map<string, string[]>;
+  /** What 100% is: the catalog outside the post-game, or the post-game's own total in the post-game race. */
   total: number;
-  postgameTotal: number;
+  modes?: Mode[];
 }) {
-  const [mode, setMode] = useLocal<Mode>("race-mode", "story");
+  const [picked, setMode] = useLocal<Mode>("race-mode", "story");
+  const mode = modes.includes(picked) ? picked : modes[0];
   const trackRef = useRef<HTMLDivElement>(null);
   const bubbleRefs = useRef(new Map<string, HTMLSpanElement>());
   const [size, setSize] = useState<{ width: number; widths: Map<string, number> }>({ width: 0, widths: new Map() });
 
   const scores = players.map((name) => {
     const done = steps.filter((s) => doneBy.get(s._id)?.includes(name));
-    return { name, frac: progress(mode, done, mode === "postgame" ? postgameTotal : total), champion: isComplete(done, total) };
+    const frac = progress(mode, done, total);
+    return { name, frac, champion: mode === "postgame" ? frac >= 1 : isComplete(done, total) };
   });
   const best = Math.max(0, ...scores.map((s) => s.frac));
   // The leader goes above the line (everyone tied for first, if it's a tie). Nobody leads at the start line.
@@ -114,17 +118,15 @@ export function Race({
     <section className="frame race" aria-label="Race">
       <header className="race-head">
         <h2 className="side-title">The Race</h2>
-        <div className="segmented" role="group" aria-label="Race to">
-          <button type="button" className={mode === "story" ? "active" : ""} onClick={() => setMode("story")}>
-            Completing the game
-          </button>
-          <button type="button" className={mode === "full" ? "active" : ""} onClick={() => setMode("full")}>
-            100% completion
-          </button>
-          <button type="button" className={mode === "postgame" ? "active" : ""} onClick={() => setMode("postgame")}>
-            Post-game
-          </button>
-        </div>
+        {modes.length > 1 && (
+          <div className="segmented" role="group" aria-label="Race to">
+            {modes.map((m) => (
+              <button key={m} type="button" className={mode === m ? "active" : ""} onClick={() => setMode(m)}>
+                {MODE_LABEL[m]}
+              </button>
+            ))}
+          </div>
+        )}
       </header>
       <p className="muted small race-note">
         {mode === "story"

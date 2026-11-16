@@ -8,6 +8,8 @@ import { Race } from "./Race";
 import { MapView } from "./MapView";
 import { Showcase } from "./Showcase";
 import { Fanfare } from "./Fanfare";
+import { PostGame } from "./PostGame";
+import { POSTGAME } from "../convex/links";
 import { CATEGORIES, Icon, categoryIcon, categoryInfo } from "./icons";
 import { REGIONS } from "./locations";
 import {
@@ -18,8 +20,6 @@ import {
   MINI_DUNGEONS,
   EQUIPMENT,
   FROGS,
-  GAUNTLETS,
-  STATUES,
   GREAT_FAIRIES,
   HEART_PIECES,
   ITEMS,
@@ -137,7 +137,7 @@ function Tracker({ player, onSwitch }: { player: string; onSwitch: (name: string
   const [ages, setAges] = useLocal<string[]>("filter-ages", []);
   const [dialog, setDialog] = useState<DialogState>(null);
   const [detail, setDetail] = useState<string | null>(null);
-  const [view, setView] = useLocal<"journal" | "map" | "showcase">("view", "journal");
+  const [view, setView] = useLocal<"journal" | "map" | "showcase" | "postgame">("view", "journal");
 
   const doneBy = useMemo(() => {
     const m = new Map<string, string[]>();
@@ -153,15 +153,18 @@ function Tracker({ player, onSwitch }: { player: string; onSwitch: (name: string
     );
   }
 
+  // The post-game (Hall of Fallen Foes) has its own tab; everything else here leaves it out.
+  const steps = data.steps.filter((s) => !POSTGAME.includes(s.category));
+  const postSteps = data.steps.filter((s) => POSTGAME.includes(s.category));
   const isMine = (s: Step) => doneBy.get(s._id)?.includes(player) ?? false;
   const others = uniq(data.progress.map((p) => p.player)).filter((p) => p !== player);
   const players = [player, ...others];
   // Filters: nothing ticked means everything. Players match entries any of them has done.
-  const allKinds = uniq(data.steps.map((s) => s.category));
+  const allKinds = uniq(steps.map((s) => s.category));
   const activeKinds = kinds.filter((k) => allKinds.includes(k));
   const activeWho = who.filter((p) => players.includes(p));
   // Places that have entries, grouped by region in map order.
-  const allPlaces = new Set(data.steps.map((s) => placeOf(s.location)));
+  const allPlaces = new Set(steps.map((s) => placeOf(s.location)));
   const mapIndex = (p: string) => (MAP_ORDER.includes(p) ? MAP_ORDER.indexOf(p) : MAP_ORDER.length);
   const placeGroups: PlaceGroup[] = [...REGIONS.map((r) => r.region), OTHER_REGION]
     .map((region) => ({
@@ -186,7 +189,7 @@ function Tracker({ player, onSwitch }: { player: string; onSwitch: (name: string
   };
   /** Steps that pass every filter except one: what a dropdown's counts are taken from, so they match what ticking shows. */
   const allBut = (skip: keyof typeof passes) =>
-    data.steps.filter((s) => (Object.keys(passes) as (keyof typeof passes)[]).every((k) => k === skip || passes[k](s)));
+    steps.filter((s) => (Object.keys(passes) as (keyof typeof passes)[]).every((k) => k === skip || passes[k](s)));
   const filtered = allBut("search").filter(passes.search);
   const tally = (steps: Step[], keyOf: (s: Step) => string[]) => {
     const m = new Map<string, number>();
@@ -197,7 +200,7 @@ function Tracker({ player, onSwitch }: { player: string; onSwitch: (name: string
   const placeCounts = tally(allBut("place"), (s) => [placeOf(s.location)]);
   const ageCounts = tally(allBut("age"), (s) => [ageOf(s)]);
   // (the player counts ignore "Anyone but me" too: it belongs to the same dropdown)
-  const playerSteps = data.steps.filter((s) => passes.kind(s) && passes.place(s) && passes.age(s) && passes.search(s));
+  const playerSteps = steps.filter((s) => passes.kind(s) && passes.place(s) && passes.age(s) && passes.search(s));
   const playerCounts = tally(playerSteps, (s) => doneBy.get(s._id) ?? []);
   const filtering = !!q || activeKinds.length > 0 || activePlaces.length > 0 || activeAges.length > 0 || activeWho.length > 0 || notMine;
   const clearFilters = () => {
@@ -214,7 +217,7 @@ function Tracker({ player, onSwitch }: { player: string; onSwitch: (name: string
       key={name}
       name={name}
       isMe={name === player}
-      steps={data.steps}
+      steps={steps}
       doneBy={doneBy}
       onOpen={() => setDetail(name)}
     />
@@ -236,6 +239,9 @@ function Tracker({ player, onSwitch }: { player: string; onSwitch: (name: string
               <button type="button" className={view === "showcase" ? "active" : ""} onClick={() => setView("showcase")}>
                 Showcase
               </button>
+              <button type="button" className={view === "postgame" ? "active" : ""} onClick={() => setView("postgame")}>
+                Post-game
+              </button>
             </nav>
           </div>
           <div className="topbar-actions">
@@ -247,13 +253,15 @@ function Tracker({ player, onSwitch }: { player: string; onSwitch: (name: string
         </div>
       </header>
 
-      <Fanfare players={players} steps={data.steps} progress={data.progress} doneBy={doneBy} total={data.total} />
+      <Fanfare players={players} steps={steps} progress={data.progress} doneBy={doneBy} total={data.total} />
 
-      {view === "showcase" ? (
-        <Showcase steps={data.steps} players={players} doneBy={doneBy} placeOf={placeOf} />
+      {view === "postgame" ? (
+        <PostGame players={players} me={player} steps={postSteps} doneBy={doneBy} total={data.postgameTotal} />
+      ) : view === "showcase" ? (
+        <Showcase steps={steps} players={players} doneBy={doneBy} placeOf={placeOf} />
       ) : view === "map" ? (
             <MapView
-              steps={data.steps}
+              steps={steps}
               player={player}
               doneBy={doneBy}
               placeOf={placeOf}
@@ -270,7 +278,7 @@ function Tracker({ player, onSwitch }: { player: string; onSwitch: (name: string
             />
       ) : (
       <div className="layout">
-        <Race players={players} me={player} steps={data.steps} doneBy={doneBy} total={data.total} postgameTotal={data.postgameTotal} />
+        <Race players={players} me={player} steps={steps} doneBy={doneBy} total={data.total} />
         <main className="main">
           <>
               <div className="journal-tools">
@@ -338,10 +346,10 @@ function Tracker({ player, onSwitch }: { player: string; onSwitch: (name: string
         </button>
       )}
 
-      {detail && <SaveDetail name={detail} steps={data.steps} doneBy={doneBy} onClose={() => setDetail(null)} />}
+      {detail && <SaveDetail name={detail} steps={steps} doneBy={doneBy} onClose={() => setDetail(null)} />}
 
       {dialog && (
-        <TickDialog initial={dialog} player={player} steps={data.steps} isMine={isMine} onClose={() => setDialog(null)} />
+        <TickDialog initial={dialog} player={player} steps={steps} isMine={isMine} onClose={() => setDialog(null)} />
       )}
     </div>
   );
@@ -734,8 +742,6 @@ function SaveDetail({ name, steps, doneBy, onClose }: { name: string; steps: Ste
         {section("Equipment", "shield", list("Equipment", EQUIPMENT))}
         {section("Upgrades", "upgrade", list("Upgrade", UPGRADES))}
         {section("Frogs", "frog", list("Frogs", FROGS))}
-        {section("Rematch Gauntlets", "tower", list("Rematch Gauntlet", GAUNTLETS))}
-        {section("Monster Statues", "skull", list("Monster Statue", STATUES))}
       </div>
     </dialog>
   );
