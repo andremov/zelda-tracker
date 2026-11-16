@@ -196,7 +196,7 @@ DUNGEONS = {  # subject: (DungeonInfo key, room-flag prefixes, boss counters, ag
     "Spirit Temple": ("SpiritTemple", ["spirittemple"], ["Enemy_DungeonBoss_Twinrova"], "Adult", True),
     "Ice Cavern": ("IceCavern", [], [], "Adult", False),
     "Gerudo Training Ground": ("GerudoTrainingGround", ["gerudotrainingground"], [], "Adult", False),
-    "Ganon's Castle": ("InsideGanonCastle", [], ["Enemy_DungeonBoss_Ganondorf", "Enemy_DungeonBoss_Ganon"], "Adult", True),
+    "Ganon's Castle": ("InsideGanonCastle", [], ["Enemy_DungeonBoss_Ganon_SecondHalfBattle"], "Adult", True),  # the final fight; Ganondorf comes before it
 }
 FAIRIES = {  # cutscene name: (fountain, age)
     "Din": ("Hyrule Castle Great Fairy Fountain", "Child"),

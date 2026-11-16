@@ -42,7 +42,8 @@ async function takeProgress(ctx: MutationCtx, stepId: Id<"steps">, player: strin
 
 /**
  * The entries someone has ticked, each with who ticked it first and when, plus all the ticks.
- * Entries nobody has ticked stay on the server, so the site never sees what it hasn't found.
+ * Entries nobody has ticked stay on the server, so the site never sees what it hasn't found;
+ * it only gets how many entries there are in all (`total`), which is what 100% means.
  */
 export const list = query({
   args: {},
@@ -55,7 +56,8 @@ export const list = query({
       const s = await ctx.db.get(id);
       if (s) steps.push({ ...s, firstBy: p.player, firstAt: p._creationTime });
     }
-    return { steps, progress };
+    const total = (await ctx.db.query("steps").collect()).filter((s) => s.key).length;
+    return { steps, progress, total };
   },
 });
 

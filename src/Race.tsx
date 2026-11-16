@@ -2,27 +2,12 @@ import { useLayoutEffect, useRef, useState } from "react";
 import type { Doc } from "../convex/_generated/dataModel";
 import { useLocal } from "./storage";
 import { Icon } from "./icons";
-import {
-  BOSS_DUNGEONS,
-  DUNGEON_ICON,
-  DUNGEON_STEPS,
-  EQUIPMENT,
-  FROGS,
-  GREAT_FAIRIES,
-  ITEMS,
-  MASK_STEPS,
-  SET_COLOR,
-  SONGS,
-  TOTALS,
-  UPGRADES,
-  type Group,
-} from "./gamedata";
+import { BOSS_DUNGEONS, DUNGEON_ICON, DUNGEON_STEPS, SET_COLOR } from "./gamedata";
 
 type Step = Doc<"steps">;
 type Mode = "story" | "full";
 
 const key = (category: string, subject: string, action: string) => `${category}|${subject}|${action}`;
-const flat = (groups: Group[]) => groups.flatMap((g) => g.items);
 
 /** The steps that move the story along: entering and beating every boss dungeon and Ganon's Castle. */
 const STORY: string[] = [...BOSS_DUNGEONS, "Ganon's Castle"].flatMap((d) =>
@@ -32,37 +17,27 @@ const STORY: string[] = [...BOSS_DUNGEONS, "Ganon's Castle"].flatMap((d) =>
 /** Where on the story line each boss dungeon is done, if they're played in order. Ganon's Castle is the finish. */
 const MILESTONES = BOSS_DUNGEONS.map((d) => ({ dungeon: d, at: (STORY.indexOf(key("Dungeon", d, "Completed")) + 1) / STORY.length }));
 
-/** Every named step in the game's lists. Countable kinds are added on top, up to their totals. */
-const EVERYTHING: string[] = [
-  ...Object.entries(DUNGEON_STEPS).flatMap(([d, actions]) => actions.map((a) => key("Dungeon", d, a))),
-  ...Object.entries(MASK_STEPS).flatMap(([m, actions]) => actions.map((a) => key("Mask", m, a))),
-  ...flat(SONGS).map((s) => key("Song", s, "Learned")),
-  ...flat(GREAT_FAIRIES).map((f) => key("Great Fairy", f, "Got the gift")),
-  ...flat(ITEMS).map((x) => key("Item", x, "Got it")),
-  ...flat(EQUIPMENT).map((x) => key("Equipment", x, "Got it")),
-  ...flat(UPGRADES).map((x) => key("Upgrade", x, "Got it")),
-  ...flat(FROGS).map((x) => key("Frogs", x, "Played it")),
-];
-const FULL_TOTAL = EVERYTHING.length + Object.values(TOTALS).reduce((a, b) => a + b, 0);
-
-/** How far along a player is, from 0 to 1. */
-function progress(mode: Mode, done: Step[]) {
-  const have = new Set(done.map((s) => key(s.category, s.subject, s.action)));
-  if (mode === "story") return STORY.filter((k) => have.has(k)).length / STORY.length;
-  const named = EVERYTHING.filter((k) => have.has(k)).length;
-  const counted = Object.entries(TOTALS).reduce((n, [c, total]) => n + Math.min(total, done.filter((s) => s.category === c).length), 0);
-  return (named + counted) / FULL_TOTAL;
+/** How far along a player is, from 0 to 1. 100% is every entry in the catalog (`total`, from the server). */
+function progress(mode: Mode, done: Step[], total: number) {
+  if (mode === "story") {
+    const have = new Set(done.map((s) => key(s.category, s.subject, s.action)));
+    return STORY.filter((k) => have.has(k)).length / STORY.length;
+  }
+  return total ? Math.min(1, done.filter((s) => s.key).length / total) : 0;
 }
+
+/** Has this player ticked every entry in the catalog? */
+export const isComplete = (done: Step[], total: number) => progress("full", done, total) >= 1;
 
 const BUBBLE_H = 30;
 const ROW = 38; // bubble plus the gap to the next row
 const NEAR = 22; // from the line to the first row, clear of the milestones
 const GAP = 8;
 
-type Placed = { name: string; frac: number; x: number; left: number; row: number; above: boolean };
+type Placed = { name: string; frac: number; champion: boolean; x: number; left: number; row: number; above: boolean };
 
 /** Spread bubbles into rows so none overlap. Each bubble sits over its runner, nudged inside the track. */
-function place(runners: { name: string; frac: number; above: boolean }[], width: number, widths: Map<string, number>) {
+function place(runners: { name: string; frac: number; champion: boolean; above: boolean }[], width: number, widths: Map<string, number>) {
   const rowsEnd: Record<string, number[]> = { above: [], below: [] };
   return [...runners]
     .sort((a, b) => a.frac - b.frac)
@@ -78,13 +53,28 @@ function place(runners: { name: string; frac: number; above: boolean }[], width:
     });
 }
 
-export function Race({ players, me, steps, doneBy }: { players: string[]; me: string; steps: Step[]; doneBy: Map<string, string[]> }) {
+export function Race({
+  players,
+  me,
+  steps,
+  doneBy,
+  total,
+}: {
+  players: string[];
+  me: string;
+  steps: Step[];
+  doneBy: Map<string, string[]>;
+  total: number;
+}) {
   const [mode, setMode] = useLocal<Mode>("race-mode", "story");
   const trackRef = useRef<HTMLDivElement>(null);
   const bubbleRefs = useRef(new Map<string, HTMLSpanElement>());
   const [size, setSize] = useState<{ width: number; widths: Map<string, number> }>({ width: 0, widths: new Map() });
 
-  const scores = players.map((name) => ({ name, frac: progress(mode, steps.filter((s) => doneBy.get(s._id)?.includes(name))) }));
+  const scores = players.map((name) => {
+    const done = steps.filter((s) => doneBy.get(s._id)?.includes(name));
+    return { name, frac: progress(mode, done, total), champion: isComplete(done, total) };
+  });
   const best = Math.max(0, ...scores.map((s) => s.frac));
   // The leader goes above the line (everyone tied for first, if it's a tie). Nobody leads at the start line.
   const runners = scores.map((s) => ({ ...s, above: best > 0 && s.frac === best }));
@@ -156,7 +146,7 @@ export function Race({ players, me, steps, doneBy }: { players: string[]; me: st
           const stemTop = p.above ? top + BUBBLE_H : lineY;
           const stemBottom = p.above ? lineY : top;
           return (
-            <div key={p.name} className={`runner ${p.above ? "leader" : ""} ${p.name === me ? "is-me" : ""}`}>
+            <div key={p.name} className={`runner ${p.above ? "leader" : ""} ${p.name === me ? "is-me" : ""} ${p.champion ? "champion" : ""}`}>
               <span className="race-stem" style={{ left: p.x, top: stemTop, height: stemBottom - stemTop }} />
               <span className="race-dot" style={{ left: p.x, top: lineY }} />
               <span
@@ -166,8 +156,13 @@ export function Race({ players, me, steps, doneBy }: { players: string[]; me: st
                 }}
                 className={`bubble ${p.above ? "up" : "down"}`}
                 style={{ left: p.left, top, ["--tail" as string]: `${p.x - p.left}px` }}
-                title={`${p.name}: ${Math.round(p.frac * 100)}%`}
+                title={p.champion ? `${p.name}: 100% complete` : `${p.name}: ${Math.round(p.frac * 100)}%`}
               >
+                {p.champion && (
+                  <svg className="champion-mark" viewBox="0 0 24 21" aria-label="100% complete">
+                    <path d="M12 1 17.5 10.5H6.5zM6.5 10.5 12 20H1zM17.5 10.5 23 20H12z" />
+                  </svg>
+                )}
                 {p.name}
               </span>
             </div>

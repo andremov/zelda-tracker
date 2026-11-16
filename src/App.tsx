@@ -7,6 +7,7 @@ import { useLocal } from "./storage";
 import { Race } from "./Race";
 import { MapView } from "./MapView";
 import { Showcase } from "./Showcase";
+import { Fanfare } from "./Fanfare";
 import { CATEGORIES, Icon, categoryIcon, categoryInfo } from "./icons";
 import { REGIONS } from "./locations";
 import {
@@ -244,6 +245,8 @@ function Tracker({ player, onSwitch }: { player: string; onSwitch: (name: string
         </div>
       </header>
 
+      <Fanfare players={players} steps={data.steps} progress={data.progress} doneBy={doneBy} total={data.total} />
+
       {view === "showcase" ? (
         <Showcase steps={data.steps} players={players} doneBy={doneBy} placeOf={placeOf} />
       ) : view === "map" ? (
@@ -265,7 +268,7 @@ function Tracker({ player, onSwitch }: { player: string; onSwitch: (name: string
             />
       ) : (
       <div className="layout">
-        <Race players={players} me={player} steps={data.steps} doneBy={doneBy} />
+        <Race players={players} me={player} steps={data.steps} doneBy={doneBy} total={data.total} />
         <main className="main">
           <>
               <div className="journal-tools">
