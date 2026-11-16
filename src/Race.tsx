@@ -3,9 +3,10 @@ import type { Doc } from "../convex/_generated/dataModel";
 import { useLocal } from "./storage";
 import { Icon } from "./icons";
 import { BOSS_DUNGEONS, DUNGEON_ICON, DUNGEON_STEPS, SET_COLOR } from "./gamedata";
+import { POSTGAME } from "../convex/links";
 
 type Step = Doc<"steps">;
-type Mode = "story" | "full";
+type Mode = "story" | "full" | "postgame";
 
 const key = (category: string, subject: string, action: string) => `${category}|${subject}|${action}`;
 
@@ -17,16 +18,20 @@ const STORY: string[] = [...BOSS_DUNGEONS, "Ganon's Castle"].flatMap((d) =>
 /** Where on the story line each boss dungeon is done, if they're played in order. Ganon's Castle is the finish. */
 const MILESTONES = BOSS_DUNGEONS.map((d) => ({ dungeon: d, at: (STORY.indexOf(key("Dungeon", d, "Completed")) + 1) / STORY.length }));
 
-/** How far along a player is, from 0 to 1. 100% is every entry in the catalog (`total`, from the server). */
+/**
+ * How far along a player is, from 0 to 1. 100% is every catalog entry outside the post-game (`total`, from the server);
+ * the post-game race is the Hall of Fallen Foes entries (`total` is then `postgameTotal`).
+ */
 function progress(mode: Mode, done: Step[], total: number) {
   if (mode === "story") {
     const have = new Set(done.map((s) => key(s.category, s.subject, s.action)));
     return STORY.filter((k) => have.has(k)).length / STORY.length;
   }
-  return total ? Math.min(1, done.filter((s) => s.key).length / total) : 0;
+  const post = mode === "postgame";
+  return total ? Math.min(1, done.filter((s) => s.key && POSTGAME.includes(s.category) === post).length / total) : 0;
 }
 
-/** Has this player ticked every entry in the catalog? */
+/** Has this player ticked every entry in the catalog (the post-game aside)? */
 export const isComplete = (done: Step[], total: number) => progress("full", done, total) >= 1;
 
 const BUBBLE_H = 30;
@@ -59,12 +64,14 @@ export function Race({
   steps,
   doneBy,
   total,
+  postgameTotal,
 }: {
   players: string[];
   me: string;
   steps: Step[];
   doneBy: Map<string, string[]>;
   total: number;
+  postgameTotal: number;
 }) {
   const [mode, setMode] = useLocal<Mode>("race-mode", "story");
   const trackRef = useRef<HTMLDivElement>(null);
@@ -73,7 +80,7 @@ export function Race({
 
   const scores = players.map((name) => {
     const done = steps.filter((s) => doneBy.get(s._id)?.includes(name));
-    return { name, frac: progress(mode, done, total), champion: isComplete(done, total) };
+    return { name, frac: progress(mode, done, mode === "postgame" ? postgameTotal : total), champion: isComplete(done, total) };
   });
   const best = Math.max(0, ...scores.map((s) => s.frac));
   // The leader goes above the line (everyone tied for first, if it's a tie). Nobody leads at the start line.
@@ -114,17 +121,22 @@ export function Race({
           <button type="button" className={mode === "full" ? "active" : ""} onClick={() => setMode("full")}>
             100% completion
           </button>
+          <button type="button" className={mode === "postgame" ? "active" : ""} onClick={() => setMode("postgame")}>
+            Post-game
+          </button>
         </div>
       </header>
       <p className="muted small race-note">
         {mode === "story"
           ? "Entering and beating the eight boss dungeons and Ganon's Castle."
-          : "Everything on the save log: dungeons, songs, fairies, masks, items, gear, upgrades, frogs, heart pieces, skulltulas, poes, bottles and the Hall of Fallen Foes."}
+          : mode === "full"
+            ? "Everything on the save log: dungeons, songs, fairies, masks, items, gear, upgrades, frogs, heart pieces, skulltulas, poes and bottles."
+            : "The Hall of Fallen Foes: every monster statue and the three rematch gauntlets."}
       </p>
 
       <div className="race-track" ref={trackRef} style={{ height }}>
         <div className="race-line" style={{ top: lineY }}>
-          {mode === "full" &&
+          {mode !== "story" &&
             [0.25, 0.5, 0.75].map((t) => <span key={t} className="race-tick" style={{ left: `${t * 100}%` }} />)}
         </div>
         {mode === "story" &&

@@ -17,8 +17,9 @@ import {
   DUNGEONS,
   MINI_DUNGEONS,
   EQUIPMENT,
-  FALLEN_FOES,
   FROGS,
+  GAUNTLETS,
+  STATUES,
   GREAT_FAIRIES,
   HEART_PIECES,
   ITEMS,
@@ -269,7 +270,7 @@ function Tracker({ player, onSwitch }: { player: string; onSwitch: (name: string
             />
       ) : (
       <div className="layout">
-        <Race players={players} me={player} steps={data.steps} doneBy={doneBy} total={data.total} />
+        <Race players={players} me={player} steps={data.steps} doneBy={doneBy} total={data.total} postgameTotal={data.postgameTotal} />
         <main className="main">
           <>
               <div className="journal-tools">
@@ -733,7 +734,8 @@ function SaveDetail({ name, steps, doneBy, onClose }: { name: string; steps: Ste
         {section("Equipment", "shield", list("Equipment", EQUIPMENT))}
         {section("Upgrades", "upgrade", list("Upgrade", UPGRADES))}
         {section("Frogs", "frog", list("Frogs", FROGS))}
-        {section("Hall of Fallen Foes", "skull", list("Fallen Foes", FALLEN_FOES))}
+        {section("Rematch Gauntlets", "tower", list("Rematch Gauntlet", GAUNTLETS))}
+        {section("Monster Statues", "skull", list("Monster Statue", STATUES))}
       </div>
     </dialog>
   );

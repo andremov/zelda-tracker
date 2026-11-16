@@ -7,8 +7,8 @@ import {
   DUNGEON_AGE,
   DUNGEON_STEPS,
   EQUIPMENT,
-  FALLEN_FOES,
   FROGS,
+  GAUNTLETS,
   GREAT_FAIRIES,
   GREAT_FAIRY_AGE,
   ITEMS,
@@ -17,6 +17,7 @@ import {
   SONG_AGE,
   SONG_PLACE,
   SONGS,
+  STATUES,
   UPGRADES,
   type Group,
 } from "../src/gamedata";
@@ -46,7 +47,8 @@ function named(): Entry[] {
   for (const [dungeon, steps] of Object.entries(DUNGEON_STEPS)) for (const a of steps) add("Dungeon", dungeon, a, dungeon, DUNGEON_AGE[dungeon]);
   for (const f of all(GREAT_FAIRIES)) add("Great Fairy", f, "Got the gift", f, GREAT_FAIRY_AGE[f]);
   for (const s of all(FROGS)) add("Frogs", s, "Played it", "Zora's River", "Child");
-  for (const s of all(FALLEN_FOES)) add("Fallen Foes", s, "Completed", "Hall of Fallen Foes");
+  for (const s of all(STATUES)) add("Monster Statue", s, "Unlocked", "Hall of Fallen Foes");
+  for (const s of all(GAUNTLETS)) add("Rematch Gauntlet", s, "Cleared", "Hall of Fallen Foes");
   return out;
 }
 

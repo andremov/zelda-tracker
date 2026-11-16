@@ -283,12 +283,17 @@ export const FROGS: Group[] = [
   },
 ];
 
-/** The Hall of Fallen Foes (post-game, reached by sleeping in a bed): every monster statue, and its three rematch gauntlets. */
-export const FALLEN_FOES: Group[] = [
-  {
-    label: "Hall of Fallen Foes",
-    items: ["All monster statues", "Trial of the Spiritual Stones", "Trial of the Five Sages", "Trial of the Hero of Time"],
-  },
+/**
+ * The Hall of Fallen Foes (post-game, reached by sleeping in a bed). A monster's statue appears once you've defeated
+ * one anywhere, and three rematch gauntlets are fought from it. Both are the post-game race, not part of 100%.
+ */
+export const STATUES: Group[] = [
+  { label: "Bosses", items: ["Barinade", "Bongo Bongo", "Ganon", "Ganondorf", "Gohma", "King Dodongo", "Morpha", "Phantom Ganon", "Twinrova", "Volvagia"] },
+  { label: "Mini-bosses", items: ["Big Octo", "Dark Link", "Flare Dancer", "Gerudo Thief", "Iron Knuckle (Nabooru)", "Lizalfos", "Meg, Firstborn"] },
+  { label: "Monsters", items: ["Amy, Fourth Born", "Anubis", "Armos", "Baby Dodongo", "Bari", "Beamos", "Beth, Third Born", "Big Poe", "Biri", "Blue Bubble", "Blue Tektite", "Business Scrub", "Dead Hand", "Deku Baba", "Deku Scrub", "Dinolfos", "Dodongo", "False Door", "False Door (Spirit Temple)", "Fire Keese", "Flat the Younger", "Floormaster", "Flying Pot", "Flying Tile", "Freezard", "Giant Green Bubble", "Gibdo", "Gohma Larva", "Gold Skulltula", "Great Moblin", "Green Bubble", "Guay", "Ice Keese", "Iron Knuckle (black)", "Iron Knuckle (silver)", "Iron Knuckle (white)", "Jo, Second Born", "Keese", "Leever", "Leever Leader", "Like Like", "Mad Scrub", "Moblin", "Octorok", "Peahat", "Peahat Larva", "Poe", "Poe (Hyrule Field)", "ReDead", "Red Bubble", "Red Tektite", "Shabom", "Sharp the Elder", "Shell Blade", "Skull Kid", "Skulltula", "Skullwalltula", "Spike", "Stalchild", "Stalfos", "Stinger", "Tailpasaran", "Torch Slug", "Wallmaster", "Weak Stalfos", "White Bubble", "White Wolfos", "Wolfos"] },
+];
+export const GAUNTLETS: Group[] = [
+  { label: "Rematch gauntlets", items: ["Trial of the Spiritual Stones", "Trial of the Five Sages", "Trial of the Hero of Time"] },
 ];
 
 /** Heart pieces in the game. */

@@ -1,6 +1,6 @@
 import { internalMutation, mutation, query, type MutationCtx } from "./_generated/server";
 import type { Doc, Id } from "./_generated/dataModel";
-import { impliedBy, impliersOf, type StepKey } from "./links";
+import { impliedBy, impliersOf, POSTGAME, type StepKey } from "./links";
 import { v } from "convex/values";
 
 const clean = (s: string) => s.trim().slice(0, 500);
@@ -43,7 +43,7 @@ async function takeProgress(ctx: MutationCtx, stepId: Id<"steps">, player: strin
 /**
  * The entries someone has ticked, each with who ticked it first and when, plus all the ticks.
  * Entries nobody has ticked stay on the server, so the site never sees what it hasn't found;
- * it only gets how many entries there are in all (`total`), which is what 100% means.
+ * it only gets how many entries there are: `total` for 100%, `postgameTotal` for the Hall of Fallen Foes.
  */
 export const list = query({
   args: {},
@@ -56,8 +56,9 @@ export const list = query({
       const s = await ctx.db.get(id);
       if (s) steps.push({ ...s, firstBy: p.player, firstAt: p._creationTime });
     }
-    const total = (await ctx.db.query("steps").collect()).filter((s) => s.key).length;
-    return { steps, progress, total };
+    const keyed = (await ctx.db.query("steps").collect()).filter((s) => s.key);
+    const postgameTotal = keyed.filter((s) => POSTGAME.includes(s.category)).length;
+    return { steps, progress, total: keyed.length - postgameTotal, postgameTotal };
   },
 });
 

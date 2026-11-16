@@ -196,7 +196,7 @@ DUNGEONS = {  # subject: (DungeonInfo key, room-flag prefixes, boss counters, ag
     "Spirit Temple": ("SpiritTemple", ["spirittemple"], ["Enemy_DungeonBoss_Twinrova"], "Adult", True),
     "Ice Cavern": ("IceCavern", [], [], "Adult", False),
     "Gerudo Training Ground": ("GerudoTrainingGround", ["gerudotrainingground"], [], "Adult", False),
-    "Ganon's Castle": ("InsideGanonCastle", [], ["Enemy_DungeonBoss_Ganon_SecondHalfBattle"], "Adult", True),  # the final fight; Ganondorf comes before it
+    "Ganon's Castle": ("InsideGanonCastle", [], ["Enemy_DungeonBoss_Ganon"], "Adult", True),  # the final fight; Ganondorf comes before it
 }
 FAIRIES = {  # cutscene name: (fountain, age)
     "Din": ("Hyrule Castle Great Fairy Fountain", "Child"),
@@ -206,8 +206,96 @@ FAIRIES = {  # cutscene name: (fountain, age)
     "Wisdom": ("Crater Great Fairy Fountain", "Adult"),
     "Courage": ("Ganon's Castle Great Fairy Fountain", "Adult"),
 }
+# Hall of Fallen Foes statues: name -> the monster whose defeat count unlocks it (the hall's own rule).
+STATUES = {
+    "Barinade": "Enemy_DungeonBoss_Barinade",
+    "Bongo Bongo": "Enemy_DungeonBoss_BongoBongo",
+    "Ganon": "Enemy_DungeonBoss_Ganon",
+    "Ganondorf": "Enemy_DungeonBoss_Ganondorf",
+    "Gohma": "Enemy_DungeonBoss_Gohma",
+    "King Dodongo": "Enemy_DungeonBoss_Dodongo",
+    "Morpha": "Enemy_DungeonBoss_Morpha",
+    "Phantom Ganon": "Enemy_DungeonBoss_PhantomGanon",
+    "Twinrova": "Enemy_DungeonBoss_Twinrova",
+    "Volvagia": "Enemy_DungeonBoss_Volvagia",
+    "Big Octo": "Enemy_MiddleBoss_BigOcto",
+    "Dark Link": "Enemy_MiddleBoss_DarkLink",
+    "Flare Dancer": "Enemy_MiddleBoss_FlareDancer",
+    "Gerudo Thief": "Enemy_MiddleBoss_GerudoThief",
+    "Iron Knuckle (Nabooru)": "Enemy_MiddleBoss_IronKnuckle_Nabooru",
+    "Lizalfos": "Enemy_MiddleBoss_Lizalfos",
+    "Meg, Firstborn": "Enemy_MiddleBoss_Poe_Meg",
+    "Amy, Fourth Born": "Enemy_Poe_Amy",
+    "Anubis": "Enemy_Anubis",
+    "Armos": "Enemy_Amos",
+    "Baby Dodongo": "Enemy_BabyDodongo",
+    "Bari": "Enemy_Bari",
+    "Beamos": "Enemy_Beamos",
+    "Beth, Third Born": "Enemy_Poe_Beth",
+    "Big Poe": "Enemy_Poe_Big",
+    "Biri": "Enemy_Biri",
+    "Blue Bubble": "Enemy_Bubble_Blue",
+    "Blue Tektite": "Enemy_Tektite_Blue",
+    "Business Scrub": "Enemy_Scrub_Business",
+    "Dead Hand": "Enemy_DeadHand",
+    "Deku Baba": "Enemy_Dekubaba",
+    "Deku Scrub": "Enemy_Scrub_Deku",
+    "Dinolfos": "Enemy_Dinolfos",
+    "Dodongo": "Enemy_Dodongo",
+    "False Door": "Enemy_TrickyDoor",
+    "False Door (Spirit Temple)": "Enemy_TrickyDoor_SpiritTemple",
+    "Fire Keese": "Enemy_Keese_Fire",
+    "Flat the Younger": "Enemy_Poe_Flat",
+    "Floormaster": "Enemy_Floormaster",
+    "Flying Pot": "Enemy_FlyingPot",
+    "Flying Tile": "Enemy_CrazyFloorTile",
+    "Freezard": "Enemy_Freezard",
+    "Giant Green Bubble": "Enemy_Bubble_Green_Big",
+    "Gibdo": "Enemy_Gibdo",
+    "Gohma Larva": "Enemy_Gohma_Larva",
+    "Gold Skulltula": "Enemy_Skulltula_Gold",
+    "Great Moblin": "Enemy_Moblin_Club",
+    "Green Bubble": "Enemy_Bubble_Green",
+    "Guay": "Enemy_Guay",
+    "Ice Keese": "Enemy_Keese_Ice",
+    "Iron Knuckle (black)": "Enemy_IronKnuckle_Black",
+    "Iron Knuckle (silver)": "Enemy_IronKnuckle_Silver",
+    "Iron Knuckle (white)": "Enemy_IronKnuckle_White",
+    "Jo, Second Born": "Enemy_Poe_Joelle",
+    "Keese": "Enemy_Keese",
+    "Leever": "Enemy_Leever",
+    "Leever Leader": "Enemy_Leever_Big",
+    "Like Like": "Enemy_LikeLike",
+    "Mad Scrub": "Enemy_Scrub_Mad",
+    "Moblin": "Enemy_Moblin",
+    "Octorok": "Enemy_Octorok",
+    "Peahat": "Enemy_Peahat",
+    "Peahat Larva": "Enemy_Peahat_Larva",
+    "Poe": "Enemy_Poe",
+    "Poe (Hyrule Field)": "Enemy_Poe_Hyrule",
+    "ReDead": "Enemy_ReDead",
+    "Red Bubble": "Enemy_Bubble_Red",
+    "Red Tektite": "Enemy_Tektite_Red",
+    "Shabom": "Enemy_Shabom",
+    "Sharp the Elder": "Enemy_Poe_Sharp",
+    "Shell Blade": "Enemy_ShellBlade",
+    "Skull Kid": "Enemy_SkullKid",
+    "Skulltula": "Enemy_Skulltula",
+    "Skullwalltula": "Enemy_Skullwalltula",
+    "Spike": "Enemy_Spike",
+    "Stalchild": "Enemy_Stalchild",
+    "Stalfos": "Enemy_Stalfos_ShadowTemple",
+    "Stinger": "Enemy_Stinger",
+    "Tailpasaran": "Enemy_Tailpasaran",
+    "Torch Slug": "Enemy_TorchSlug",
+    "Wallmaster": "Enemy_Wallmaster",
+    "Weak Stalfos": "Enemy_Stalfos_Weak",
+    "White Bubble": "Enemy_Bubble_White",
+    "White Wolfos": "Enemy_Wolfos_White",
+    "Wolfos": "Enemy_Wolfos",
+}
 # The rematch gauntlets: 3 battles (child era), 5 (adult era), all 10.
-FALLEN_FOES = {"Trial of the Spiritual Stones": "Npc_Dream_BossRush_Cleared",
+GAUNTLETS = {"Trial of the Spiritual Stones": "Npc_Dream_BossRush_Cleared",
                "Trial of the Five Sages": "Npc_Dream_BossRush_Cleared_01",
                "Trial of the Hero of Time": "Npc_Dream_BossRush_Cleared_02"}
 FROGS = {"Zelda's Lullaby": "ZeldaLullaby", "Epona's Song": "EponaSong", "Saria's Song": "SariaSong",
@@ -270,12 +358,17 @@ def from_save(s: Save):
             out.append(step("Frogs", subject, "Played it", "Zora's River", "Child"))
     if s.flag("MiniGame_FrogTenors_InsectRepellent_ClearAfter"):
         out.append(step("Frogs", "Frog minigame", "Played it", "Zora's River", "Child"))
-    # Hall of Fallen Foes: statues still locked counts down from 84 (absent from the save until the hall opens).
-    if murmur3("DreamWorld_UnopendEnemyNum") in s.raw and s.num("DreamWorld_UnopendEnemyNum") == 0:
-        out.append(step("Fallen Foes", "All monster statues", "Completed", "Hall of Fallen Foes", ""))
-    for subject, flag in FALLEN_FOES.items():
+    # Hall of Fallen Foes. The Shadow Temple Stalfos statue also needs the hall's own Stalfos fight.
+    for subject, actor in STATUES.items():
+        if actor == "Enemy_Stalfos_ShadowTemple":
+            unlocked = s.flag("DreamWorld_DefeatStalfos") and s.num("DefeatedEnemyNum.Enemy_Stalfos") > 0
+        else:
+            unlocked = s.num("DefeatedEnemyNum." + actor) > 0
+        if unlocked:
+            out.append(step("Monster Statue", subject, "Unlocked", "Hall of Fallen Foes", ""))
+    for subject, flag in GAUNTLETS.items():
         if s.flag(flag):
-            out.append(step("Fallen Foes", subject, "Completed", "Hall of Fallen Foes", ""))
+            out.append(step("Rematch Gauntlet", subject, "Cleared", "Hall of Fallen Foes", ""))
 
     # Heart pieces: max life is in quarter hearts; 3 hearts to start, one container per boss.
     containers = sum(1 for name, (_, _, bosses, _, _) in DUNGEONS.items() if bosses and name != "Ganon's Castle"

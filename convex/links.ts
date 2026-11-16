@@ -12,6 +12,9 @@ export const stepKey = (category: string, subject: string, action: string) => `$
  */
 export const COUNTABLE = ["Heart Piece", "Gold Skulltula", "Big Poe", "Bottle"];
 
+/** The Hall of Fallen Foes: its own race, kept out of 100%. */
+export const POSTGAME = ["Monster Statue", "Rematch Gauntlet"];
+
 /**
  * Capacity upgrades that stack: each place gives the next size, whichever you visit first.
  * Logged as "<thing> Upgrade" with the place; one entry per place, and the count is the bag size.
